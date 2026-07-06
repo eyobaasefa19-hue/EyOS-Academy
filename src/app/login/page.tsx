@@ -2,8 +2,10 @@
 
 import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,8 +23,13 @@ export default function LoginPage() {
       else setMessage('Check your email for the confirmation link! 🚀');
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setMessage(`Error: ${error.message}`);
-      else setMessage('Logged in successfully! 🎉');
+      if (error) {
+        setMessage(`Error: ${error.message}`);
+      } else {
+        setMessage('Logged in successfully! 🎉');
+        // በተሳካ ሁኔታ ሲገባ በቀጥታ ወደ ዳሽቦርድ ይወስደዋል
+        router.push('/dashboard');
+      }
     }
     setLoading(false);
   };
