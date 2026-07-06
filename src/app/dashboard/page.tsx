@@ -35,29 +35,27 @@ export default function DashboardPage() {
     setInput('');
     setSending(true);
 
-    // 1. የተማሪውን መልእክት ስክሪን ላይ አሳይ
     const userMsg = { id: Date.now(), text: userText, isAi: false };
     setMessages((prev) => [...prev, userMsg]);
 
     try {
-      // 2. እውነተኛውን የጌሚኒ API Route ጥራ
+      // እዚህ ላይ 'application/json' ተስተካክሏል
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/center' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userText }),
       });
       
       const data = await res.json();
       
-      // 3. የ AI መምህሩን እውነተኛ ምላሽ ስክሪን ላይ አሳይ
       const aiMsg = {
         id: Date.now() + 1,
-        text: data.reply || data.error || "መምህሩ ምላሽ አልሰጠም።",
+        text: data.reply || data.error || "ይቅርታ፣ መምህሩ ምላሽ ለመስጠት አልቻለም።",
         isAi: true
       };
       setMessages((prev) => [...prev, aiMsg]);
     } catch (err) {
-      setMessages((prev) => [...prev, { id: Date.now() + 1, text: "ግንኙነት ተቋርጧል።", isAi: true }]);
+      setMessages((prev) => [...prev, { id: Date.now() + 1, text: "ከመስመር ውጭ ነህ ወይም የኔትወርክ ችግር አለ።", isAi: true }]);
     } finally {
       setSending(false);
     }
