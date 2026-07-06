@@ -1,4 +1,4 @@
-import { getAiResponse } from "@/lib/gemini";
+import { getAiResponse } from "../../../lib/gemini";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
