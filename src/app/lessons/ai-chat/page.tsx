@@ -5,28 +5,71 @@ import Link from "next/link";
 
 export default function AIChatLesson() {
   const [messages, setMessages] = useState([
-    { id: 1, sender: "ai", text: "Hello! I am your AI English Tutor. How can I help you practice your English today?" }
+    { id: 1, sender: "ai", text: "Hello! I am your AI English Tutor. Let's practice English. Tell me about yourself or ask me anything!" }
   ]);
   const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || isTyping) return;
 
-    // የተማሪውን መልዕክት መጋበዝ
-    const userMessage = { id: messages.length + 1, sender: "user", text: input };
+    const userText = input;
+    const userMessage = { id: messages.length + 1, sender: "user", text: userText };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setIsTyping(true);
 
-    // የ AI አውቶማቲክ ምላሽ (ለጊዜው Mock-up)
-    setTimeout(() => {
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      
+      // የ API Key መኖሩን ማረጋገጫ
+      if (!apiKey) {
+        throw new Error("API Key is missing. Please set NEXT_PUBLIC_GEMINI_API_KEY in Vercel.");
+      }
+
+      // ወደ Gemini API ቀጥታ ጥሪ ማድረግ
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: "user",
+                parts: [
+                  {
+                    text: `You are a friendly and helpful English Language Tutor for an Ethiopian student. 
+                           Your job is to chat with them in simple English, correct their grammar gently if they make mistakes, 
+                           and explain things in Amharic only when necessary. 
+                           User message: ${userText}`
+                  }
+                ]
+              }
+            ]
+          })
+        }
+      );
+
+      const data = await response.json();
+      const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "I am sorry, I couldn't understand that. Let's try again!";
+
       const aiMessage = {
         id: messages.length + 2,
         sender: "ai",
-        text: `Great sentence! " ${input} " is a good way to start. Let's keep practicing! Can you tell me more about your day?`
+        text: aiText
       };
       setMessages((prev) => [...prev, aiMessage]);
-    }, 1000);
+    } catch (error: any) {
+      console.error(error);
+      setMessages((prev) => [
+        ...prev,
+        { id: messages.length + 2, sender: "ai", text: "Error: Could not connect to the AI. Check your API Key connection." }
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   return (
@@ -40,7 +83,7 @@ export default function AIChatLesson() {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-indigo-400 bg-clip-text text-transparent mb-1">
             Lesson 03: AI Chat Tutor
           </h1>
-          <p className="text-sm text-gray-400 mb-6">ከአርቴፊሻል ኢንተለጀንስ አስተማሪዎ ጋር በቀጥታ በጽሑፍ ይለማመዱ።</p>
+          <p className="text-sm text-gray-400 mb-6">ከእውነተኛ አርቴፊሻል ኢንተለጀንስ አስተማሪዎ ጋር በቀጥታ ይለማመዱ።</p>
         </div>
 
         {/* Chat Interface Box */}
@@ -54,7 +97,7 @@ export default function AIChatLesson() {
                 className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${
+                  className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap ${
                     msg.sender === "user"
                       ? "bg-indigo-600 text-white rounded-tr-none"
                       : "bg-[#161B26] border border-gray-800 text-gray-200 rounded-tl-none"
@@ -64,6 +107,13 @@ export default function AIChatLesson() {
                 </div>
               </div>
             ))}
+            {isTyping && (
+              <div className="flex justify-start">
+                <div className="bg-[#161B26] border border-gray-800 text-gray-400 text-xs rounded-2xl rounded-tl-none px-4 py-2 animate-pulse">
+                  AI አስተማሪዎ እየጻፈ ነው...
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Chat Input Form */}
@@ -72,12 +122,14 @@ export default function AIChatLesson() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message in English..."
-              className="flex-1 bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors"
+              disabled={isTyping}
+              placeholder={isTyping ? "Waiting for response..." : "Type your message in English..."}
+              className="flex-1 bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors disabled:opacity-50"
             />
             <button
               type="submit"
-              className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 font-medium rounded-xl text-sm transition-all"
+              disabled={isTyping}
+              className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 font-medium rounded-xl text-sm transition-all disabled:opacity-50"
             >
               Send
             </button>
