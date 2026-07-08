@@ -1,121 +1,104 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
+import { useRouter } from "next/navigation";
 
-export default function DashboardPage() {
-  const router = useRouter();
+export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [messages, setMessages] = useState([
-    { id: 1, text: "ሰላም! እኔ EyOS AI አስተማሪህ ነኝ። ዛሬ ምን መለማመድ ትፈልጋለህ? ሰዋስው (Grammar) ወይስ የዕለት ተዕለት ውይይት (Speaking)?", isAi: true }
-  ]);
-  const [input, setInput] = useState('');
-  const [sending, setSending] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/login');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // ተማሪው ካልገባ ቀጥታ ወደ ሎጊን ገጽ ይመለሳል
+        router.push("/login");
       } else {
-        setUser(user);
+        setUser(session.user);
       }
       setLoading(false);
     };
+
     checkUser();
   }, [router]);
 
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || sending) return;
-
-    const userText = input;
-    setInput('');
-    setSending(true);
-
-    const userMsg = { id: Date.now(), text: userText, isAi: false };
-    setMessages((prev) => [...prev, userMsg]);
-
-    try {
-      // እዚህ ላይ 'application/json' ተስተካክሏል
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userText }),
-      });
-      
-      const data = await res.json();
-      
-      const aiMsg = {
-        id: Date.now() + 1,
-        text: data.reply || data.error || "ይቅርታ፣ መምህሩ ምላሽ ለመስጠት አልቻለም።",
-        isAi: true
-      };
-      setMessages((prev) => [...prev, aiMsg]);
-    } catch (err) {
-      setMessages((prev) => [...prev, { id: Date.now() + 1, text: "ከመስመር ውጭ ነህ ወይም የኔትወርክ ችግር አለ።", isAi: true }]);
-    } finally {
-      setSending(false);
-    }
-  };
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/login');
+    router.push("/login");
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050b14] flex items-center justify-center text-gray-400">
-        Loading Academy...
+      <div className="min-h-screen flex items-center justify-center bg-[#0B0F19]">
+        <div className="text-xl font-medium text-white animate-pulse">ማንነትዎን በማረጋገጥ ላይ...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#050b14] text-white flex flex-col max-w-lg mx-auto border-x border-gray-900 shadow-2xl relative">
-      <header className="p-4 border-b border-gray-900 bg-[#0f172a]/40 backdrop-blur-md flex justify-between items-center sticky top-0 z-10">
-        <div>
-          <h1 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">EyOS AI Tutor</h1>
-          <p className="text-[10px] text-gray-500">{user?.email}</p>
+    <div className="min-h-screen bg-[#0B0F19] text-white">
+      {/* የላይኛው ማውጫ (Navbar) */}
+      <nav className="border-b border-gray-800 bg-[#161B26]/40 backdrop-blur-md px-6 py-4 flex justify-between items-center">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+          EyOS Academy
+        </h1>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-400 hidden sm:inline">{user?.email}</span>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 text-red-400 text-sm font-medium rounded-xl transition-all"
+          >
+            ውጣ (Logout)
+          </button>
         </div>
-        <button onClick={handleLogout} className="text-xs bg-red-950/40 hover:bg-red-900/40 text-red-400 px-3 py-1.5 rounded-xl border border-red-900/50 transition">
-          ውጣ (Logout)
-        </button>
-      </header>
+      </nav>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[65vh]">
-        {messages.map((msg) => (
-          <div key={msg.id} className={`flex ${msg.isAi ? 'justify-start' : 'justify-end'}`}>
-            <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${msg.isAi ? 'bg-[#0f172a] text-gray-200 border border-gray-800/60 rounded-tl-none' : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-tr-none shadow-md'}`}>
-              {msg.text}
-            </div>
-          </div>
-        ))}
-        {sending && (
-          <div className="flex justify-start">
-            <div className="bg-[#0f172a] text-gray-400 text-xs rounded-2xl px-4 py-2 italic animate-pulse">
-              AI መምህሩ እያሰበ ነው...
-            </div>
-          </div>
-        )}
-      </div>
+      {/* ዋናው የዳሽቦርድ ይዘት */}
+      <main className="max-w-6xl mx-auto px-6 py-10">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold mb-2">እንኳን ደህና መጡ 👋</h2>
+          <p className="text-gray-400">የእንግሊዝኛ ቋንቋ ትምህርቶን ከዚህ መከታተል ይችላሉ።</p>
+        </div>
 
-      <form onSubmit={handleSend} className="p-4 bg-[#050b14] border-t border-gray-900 sticky bottom-0 flex gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={sending ? "Responding..." : "Type in English or Amharic..."}
-          disabled={sending}
-          className="flex-1 bg-[#0f172a] border border-gray-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 placeholder-gray-600 transition"
-        />
-        <button type="submit" disabled={sending} className="bg-blue-600 hover:bg-blue-500 text-white px-5 rounded-xl font-medium text-sm transition disabled:opacity-50">
-          {sending ? "..." : "ላክ"}
-        </button>
-      </form>
+        {/* የክፍል ካርዶች (Course Cards Grid) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="bg-[#161B26]/60 backdrop-blur-md border border-gray-800 p-6 rounded-2xl hover:border-indigo-500/50 transition-all group">
+            <div className="w-12 h-12 rounded-xl bg-indigo-600/20 flex items-center justify-center text-indigo-400 font-bold mb-4 text-xl">
+              01
+            </div>
+            <h3 className="text-xl font-semibold mb-2 group-hover:text-indigo-400 transition-colors">Grammar & Speaking</h3>
+            <p className="text-gray-400 text-sm mb-4">መሠረታዊ የእንግሊዝኛ ሰዋስው እና የዕለት ተዕለት የንግግር ልምምዶች።</p>
+            <button className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 font-medium rounded-xl transition-all">
+              ትምህርቱን ጀምር
+            </button>
+          </div>
+
+          <div className="bg-[#161B26]/60 backdrop-blur-md border border-gray-800 p-6 rounded-2xl hover:border-purple-500/50 transition-all group">
+            <div className="w-12 h-12 rounded-xl bg-purple-600/20 flex items-center justify-center text-purple-400 font-bold mb-4 text-xl">
+              02
+            </div>
+            <h3 className="text-xl font-semibold mb-2 group-hover:text-purple-400 transition-colors">Vocabulary Builder</h3>
+            <p className="text-gray-400 text-sm mb-4">ቃላትን በፍጥነት የሚያጠኑበት እና አጠቃቀማቸውን የሚለማመዱበት ክፍል።</p>
+            <button className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 font-medium rounded-xl transition-all">
+              ትምህርቱን ጀምር
+            </button>
+          </div>
+
+          <div className="bg-[#161B26]/60 backdrop-blur-md border border-gray-800 p-6 rounded-2xl hover:border-emerald-500/50 transition-all group">
+            <div className="w-12 h-12 rounded-xl bg-emerald-600/20 flex items-center justify-center text-emerald-400 font-bold mb-4 text-xl">
+              03
+            </div>
+            <h3 className="text-xl font-semibold mb-2 group-hover:text-emerald-400 transition-colors">AI Chat Tutor</h3>
+            <p className="text-gray-400 text-sm mb-4">ከአርቴፊሻል ኢንተለጀንስ አስተማሪዎ ጋር በቀጥታ በድምፅ እና በጽሑፍ ይለማመዱ።</p>
+            <button className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 font-medium rounded-xl transition-all">
+              ትምህርቱን ጀምር
+            </button>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
