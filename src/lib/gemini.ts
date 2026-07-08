@@ -6,13 +6,13 @@ if (!apiKey) {
   console.error("Missing GEMINI_API_KEY environment variable");
 }
 
-// እዚህ ጋር ሙሉ ስሙን 'GoogleGenerativeAI' በመጠቀም እንቀሰቅሰዋለን
+// በቪርሴል ኤጅ ላይ በደህንነት ቁልፉን ማንበቢያ መዋቅር
 const genAI = new GoogleGenerativeAI(apiKey || "");
 
 export async function getAiResponse(userMessage: string): Promise<string> {
   try {
-    // በቪርሴል ኤጅ ላይ በፍጥነት የሚሰራው ሞዴል
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // እዚህ ጋር ሞዴሉን ወደ ወቅታዊው 'gemini-2.5-flash' ቀይረነዋል
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     
     const result = await model.generateContent(userMessage);
     const response = await result.response;
