@@ -23,27 +23,22 @@ export default function AIChatLesson() {
     try {
       const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
       
-      // የ API Key መኖሩን ማረጋገጫ
       if (!apiKey) {
-        throw new Error("API Key is missing. Please set NEXT_PUBLIC_GEMINI_API_KEY in Vercel.");
+        throw new Error("API Key is missing.");
       }
 
-      // ወደ Gemini API ቀጥታ ጥሪ ማድረግ
+      // v1beta ወደ v1 በመቀየር አስተማማኝ የጥሪ መስመር መጠቀም
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contents: [
               {
-                role: "user",
                 parts: [
                   {
-                    text: `You are a friendly and helpful English Language Tutor for an Ethiopian student. 
-                           Your job is to chat with them in simple English, correct their grammar gently if they make mistakes, 
-                           and explain things in Amharic only when necessary. 
-                           User message: ${userText}`
+                    text: `You are a friendly and helpful English Language Tutor for an Ethiopian student. Chat with them in simple English, correct their grammar gently if they make mistakes, and explain things in Amharic only when necessary. User message: ${userText}`
                   }
                 ]
               }
@@ -51,6 +46,10 @@ export default function AIChatLesson() {
           })
         }
       );
+
+      if (!response.ok) {
+        throw new Error("API response was not OK");
+      }
 
       const data = await response.json();
       const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "I am sorry, I couldn't understand that. Let's try again!";
@@ -61,11 +60,11 @@ export default function AIChatLesson() {
         text: aiText
       };
       setMessages((prev) => [...prev, aiMessage]);
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
       setMessages((prev) => [
         ...prev,
-        { id: messages.length + 2, sender: "ai", text: "Error: Could not connect to the AI. Check your API Key connection." }
+        { id: messages.length + 2, sender: "ai", text: "Something went wrong. Please check your network or API settings." }
       ]);
     } finally {
       setIsTyping(false);
