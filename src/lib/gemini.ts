@@ -1,24 +1,20 @@
-import { GoogleGenAI } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// ለደህንነት ሲባል ቁልፉ መኖሩን እናረጋግጣለን
 const apiKey = process.env.GEMINI_API_KEY;
 
 if (!apiKey) {
   console.error("Missing GEMINI_API_KEY environment variable");
 }
 
-// በጣም ቀላሉ እና ትክክለኛው የጌሚኒ አነሳስ መዋቅር
-const ai = new GoogleGenAI({ apiKey: apiKey || "" });
+// እዚህ ጋር ሙሉ ስሙን 'GoogleGenerativeAI' በመጠቀም እንቀሰቅሰዋለን
+const genAI = new GoogleGenerativeAI(apiKey || "");
 
 export async function getAiResponse(userMessage: string): Promise<string> {
   try {
-    // ቪርሴል ኤጅ ላይ በፈጣን ፍጥነት የሚሰራው ሞዴል
-    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // በቪርሴል ኤጅ ላይ በፍጥነት የሚሰራው ሞዴል
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: userMessage }] }]
-    });
-    
+    const result = await model.generateContent(userMessage);
     const response = await result.response;
     return response.text();
   } catch (error) {
