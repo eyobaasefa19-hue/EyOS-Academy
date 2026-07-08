@@ -21,8 +21,7 @@ export default function AIChatLesson() {
     setIsTyping(true);
 
     try {
-      // ወደ ፈጠርነው የውስጥ API Route መጥራት
-      const response = await fetch("/api/chat", {
+      const response = await fetch("/api/chat/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userText }),
@@ -62,7 +61,7 @@ export default function AIChatLesson() {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-indigo-400 bg-clip-text text-transparent mb-1">
             Lesson 03: AI Chat Tutor
           </h1>
-          <p className="text-sm text-gray-400 mb-6">ከእውነተኛ አርቴፊሻል ኢንተለጀንስ አስተማሪዎ ጋር በቀጥታ ይለማመዱ。</p>
+          <p className="text-sm text-gray-400 mb-6">ከእውነተኛ አርቴፊሻል ኢንተለጀንስ አስተማሪዎ ጋር በቀጥታ ይለማመዱ።</p>
         </div>
 
         <div className="flex-1 bg-[#161B26]/40 backdrop-blur-md border border-gray-800 rounded-2xl flex flex-col h-[500px] overflow-hidden">
