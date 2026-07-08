@@ -102,9 +102,12 @@ export default function Dashboard() {
             </div>
             <h3 className="text-xl font-semibold mb-2 group-hover:text-emerald-400 transition-colors">AI Chat Tutor</h3>
             <p className="text-gray-400 text-sm mb-4">ከአርቴፊሻል ኢንተለጀንስ አስተማሪዎ ጋር በቀጥታ በድምፅ እና በጽሑፍ ይለማመዱ።</p>
-            <button className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 font-medium rounded-xl transition-all opacity-60 cursor-not-allowed">
-              በቅርቡ የሚለቀቅ
-            </button>
+            <Link 
+              href="/lessons/ai-chat" 
+              className="block w-full text-center py-2.5 bg-emerald-600 hover:bg-emerald-700 font-medium rounded-xl transition-all"
+            >
+              ትምህርቱን ጀምር
+            </Link>
           </div>
         </div>
       </main>
