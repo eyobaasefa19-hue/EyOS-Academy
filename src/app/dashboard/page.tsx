@@ -65,7 +65,7 @@ export default function Dashboard() {
 
         {/* Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Card 1 - Grammar with Link */}
+          {/* Card 1 - Grammar */}
           <div className="bg-[#161B26]/60 backdrop-blur-md border border-gray-800 p-6 rounded-2xl hover:border-indigo-500/50 transition-all group">
             <div className="w-12 h-12 rounded-xl bg-indigo-600/20 flex items-center justify-center text-indigo-400 font-bold mb-4 text-xl">
               01
@@ -80,19 +80,22 @@ export default function Dashboard() {
             </Link>
           </div>
 
-          {/* Card 2 */}
+          {/* Card 2 - Vocabulary */}
           <div className="bg-[#161B26]/60 backdrop-blur-md border border-gray-800 p-6 rounded-2xl hover:border-purple-500/50 transition-all group">
             <div className="w-12 h-12 rounded-xl bg-purple-600/20 flex items-center justify-center text-purple-400 font-bold mb-4 text-xl">
               02
             </div>
             <h3 className="text-xl font-semibold mb-2 group-hover:text-purple-400 transition-colors">Vocabulary Builder</h3>
             <p className="text-gray-400 text-sm mb-4">ቃላትን በፍጥነት የሚያጠኑበት እና አጠቃቀማቸውን የሚለማመዱበት ክፍል።</p>
-            <button className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 font-medium rounded-xl transition-all opacity-60 cursor-not-allowed">
-              በቅርቡ የሚለቀቅ
-            </button>
+            <Link 
+              href="/lessons/vocabulary" 
+              className="block w-full text-center py-2.5 bg-purple-600 hover:bg-purple-700 font-medium rounded-xl transition-all"
+            >
+              ትምህርቱን ጀምር
+            </Link>
           </div>
 
-          {/* Card 3 */}
+          {/* Card 3 - AI Chat Tutor */}
           <div className="bg-[#161B26]/60 backdrop-blur-md border border-gray-800 p-6 rounded-2xl hover:border-emerald-500/50 transition-all group">
             <div className="w-12 h-12 rounded-xl bg-emerald-600/20 flex items-center justify-center text-emerald-400 font-bold mb-4 text-xl">
               03
