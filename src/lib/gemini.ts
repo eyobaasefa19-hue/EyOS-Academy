@@ -1,21 +1,24 @@
 import { GoogleGenAI } from "@google/generative-ai";
 
-// ቁልፉን በቀጥታ ከኢንቫይሮንመንት ተለዋዋጭ ያነባል
+// ለደህንነት ሲባል ቁልፉ መኖሩን እናረጋግጣለን
 const apiKey = process.env.GEMINI_API_KEY;
 
 if (!apiKey) {
   console.error("Missing GEMINI_API_KEY environment variable");
 }
 
-// አዲሱን የጌሚኒ መዋቅር እዚህ ላይ እንቀሰቅሰዋለን
-const ai = new GoogleGenAI({ apiKey });
+// በጣም ቀላሉ እና ትክክለኛው የጌሚኒ አነሳስ መዋቅር
+const ai = new GoogleGenAI({ apiKey: apiKey || "" });
 
 export async function getAiResponse(userMessage: string): Promise<string> {
   try {
-    // እዚህ ጋር ሞዴሉን 'gemini-1.5-flash' ወይም የያዝከውን ስም ማረጋገጥ ትችላለህ
+    // ቪርሴል ኤጅ ላይ በፈጣን ፍጥነት የሚሰራው ሞዴል
     const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
     
-    const result = await model.generateContent(userMessage);
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: userMessage }] }]
+    });
+    
     const response = await result.response;
     return response.text();
   } catch (error) {
