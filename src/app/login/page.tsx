@@ -1,99 +1,89 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { supabase } from '../../lib/supabase';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { supabase } from "../../lib/supabase";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-export default function LoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [message, setMessage] = useState("");
+  const router = useRouter();
 
-  const handleAuth = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage('');
+    setMessage("");
 
-    if (isSignUp) {
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error) setMessage(`Error: ${error.message}`);
-      else setMessage('Check your email for the confirmation link! 🚀');
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setMessage(`❌ ስህተት፦ ${error.message}`);
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        setMessage(`Error: ${error.message}`);
-      } else {
-        setMessage('Logged in successfully! 🎉');
-        // በተሳካ ሁኔታ ሲገባ በቀጥታ ወደ ዳሽቦርድ ይወስደዋል
-        router.push('/dashboard');
-      }
+      setMessage("✅ በተሳካ ሁኔታ ገብተዋል! ወደ ዳሽቦርድ በመጓዝ ላይ...");
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 1500);
     }
     setLoading(false);
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-[#0f172a]/60 border border-gray-800 rounded-3xl p-8 backdrop-blur-xl shadow-2xl">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-            {isSignUp ? 'Create Account' : 'Welcome Back'}
-          </h2>
-          <p className="text-sm text-gray-400 mt-2">
-            {isSignUp ? 'Join EyOS Academy today' : 'Log in to continue learning'}
-          </p>
-        </div>
-
-        <form onSubmit={handleAuth} className="space-y-6">
+    <div className="min-h-screen flex items-center justify-center bg-[#0B0F19] px-4">
+      <div className="w-full max-w-md bg-[#161B26]/60 backdrop-blur-md border border-gray-800 p-8 rounded-2xl shadow-xl">
+        <h2 className="text-3xl font-bold text-center text-white mb-2">EyOS Academy</h2>
+        <p className="text-center text-gray-400 text-sm mb-6">እንኳን ደህና መጡ! ኢሜይልና የይለፍ ቃልዎን ያስገቡ</p>
+        
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Email Address</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">ኢሜይል (Email)</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="example@gmail.com"
+              className="w-full px-4 py-3 bg-[#0B0F19] border border-gray-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 transition-colors"
               required
-              className="w-full bg-[#050b14] border border-gray-800 rounded-xl px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-all text-sm"
-              placeholder="you@example.com"
             />
           </div>
-
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Password</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">የይለፍ ቃል (Password)</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full bg-[#050b14] border border-gray-800 rounded-xl px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-all text-sm"
               placeholder="••••••••"
+              className="w-full px-4 py-3 bg-[#0B0F19] border border-gray-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 transition-colors"
+              required
             />
           </div>
-
+          
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 text-sm"
+            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-indigo-600/30 disabled:opacity-50"
           >
-            {loading ? 'Processing...' : isSignUp ? 'Sign Up 🚀' : 'Sign In 🔑'}
+            {loading ? "በማረጋገጥ ላይ..." : "ይግቡ (Login)"}
           </button>
         </form>
 
         {message && (
-          <div className={`mt-6 p-4 rounded-xl text-center text-sm border ${message.startsWith('Error') ? 'bg-red-950/30 border-red-900 text-red-400' : 'bg-emerald-950/30 border-emerald-900 text-emerald-400'}`}>
+          <p className="mt-4 text-center text-sm font-medium text-gray-200 bg-gray-800/50 p-2 rounded-lg">
             {message}
-          </div>
+          </p>
         )}
 
-        <div className="text-center mt-8 pt-6 border-t border-gray-800/60">
-          <button
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-xs font-medium text-blue-400 hover:text-blue-300 transition"
-          >
-            {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
-          </button>
-        </div>
+        <p className="mt-6 text-center text-sm text-gray-400">
+          አካውንት የለዎትም?{" "}
+          <Link href="/signup" className="text-indigo-400 hover:underline">
+            ይመዝገቡ (Sign Up)
+          </Link>
+        </p>
       </div>
     </div>
   );
