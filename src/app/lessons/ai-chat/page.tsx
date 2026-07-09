@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
 
 export default function AIChatLesson() {
   const [messages, setMessages] = useState([
@@ -10,7 +11,6 @@ export default function AIChatLesson() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   
-  // በራሱ ወደ ታች እንዲወርድ (Auto-scroll) ማድረጊያ
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -28,15 +28,12 @@ export default function AIChatLesson() {
     const userText = input;
     const userMessage = { id: messages.length + 1, sender: "user", text: userText };
     
-    // መጀመሪያ የተጠቃሚውን መልዕክት በስክሪኑ ላይ እናሳያለን
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     setInput("");
     setIsTyping(true);
 
     try {
-      // የጌሚኒ API የሚፈልገውን የድርድር (Array) ፎርማት ማዘጋጀት
-      // የመጀመሪያውን የሰላምታ መልዕክት ጨምሮ ታሪኩን በሙሉ እንልካለን
       const apiMessages = updatedMessages.map((msg) => ({
         role: msg.sender === "user" ? "user" : "model",
         content: msg.text,
@@ -45,7 +42,6 @@ export default function AIChatLesson() {
       const response = await fetch("/api/chat/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // እዚህ ጋር 'messages' በሚል ስም ሙሉ ታሪኩን እንልካለን
         body: JSON.stringify({ messages: apiMessages }),
       });
 
@@ -90,10 +86,13 @@ export default function AIChatLesson() {
           <div className="flex-1 p-4 overflow-y-auto space-y-4">
             {messages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap ${
+                <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${
                   msg.sender === "user" ? "bg-indigo-600 text-white rounded-tr-none" : "bg-[#161B26] border border-gray-800 text-gray-200 rounded-tl-none"
                 }`}>
-                  {msg.text}
+                  {/* እዚህ ጋር በዕንቁላል ጽሑፍ ፋንታ ReactMarkdown ተክተናል */}
+                  <ReactMarkdown className="prose prose-invert max-w-none text-sm space-y-1 block-markdown">
+                    {msg.text}
+                  </ReactMarkdown>
                 </div>
               </div>
             ))}
@@ -104,7 +103,6 @@ export default function AIChatLesson() {
                 </div>
               </div>
             )}
-            {/* ሁልጊዜ ወደ ታች እንዲያወርደን መድረሻ ምልክት */}
             <div ref={messagesEndRef} />
           </div>
 
