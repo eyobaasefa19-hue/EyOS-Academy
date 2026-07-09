@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import { BookOpen, CheckCircle, ArrowRight, Award, Edit3, RefreshCw } from 'lucide-react';
+// የነበረውን `@/lib/supabase` ወደ ቀጥተኛ መንገድ `../../lib/supabase` ቀይረነዋል
+import { supabase } from '../../lib/supabase';
 
 interface Lesson {
   id: string;
@@ -72,16 +72,22 @@ export default function EnglishLearningDashboard() {
 
   useEffect(() => {
     async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      if (user) {
-        fetchUserProgress(user.id);
+      if (!supabase || !supabase.auth) return;
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+        if (user) {
+          fetchUserProgress(user.id);
+        }
+      } catch (e) {
+        console.error(e);
       }
     }
     getUser();
   }, []);
 
   async function fetchUserProgress(userId: string) {
+    if (!supabase) return;
     try {
       const { data, error } = await supabase
         .from('user_progress')
@@ -97,7 +103,6 @@ export default function EnglishLearningDashboard() {
         });
         setProgress(progressMap);
 
-        // Current lesson initial state
         const currentLessonProgress = progressMap[activeLesson.id];
         if (currentLessonProgress) {
           setWritingInput(currentLessonProgress.user_writing || '');
@@ -206,8 +211,8 @@ export default function EnglishLearningDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-blue-400" /> Syllabus Modules
+            <h2 className="text-lg font-semibold text-slate-200">
+              Syllabus Modules
             </h2>
             <div className="space-y-2">
               {lessons.map((lesson) => {
@@ -227,7 +232,7 @@ export default function EnglishLearningDashboard() {
                       <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-800 text-blue-400 border border-slate-700/50">
                         {lesson.level}
                       </span>
-                      {isCompleted && <CheckCircle className="w-4 h-4 text-emerald-400" />}
+                      {isCompleted && <span className="text-emerald-400 text-xs">✓ Done</span>}
                     </div>
                     <h3 className="font-medium text-sm text-slate-100">{lesson.title}</h3>
                     <p className="text-xs text-slate-400 mt-1">{lesson.category}</p>
@@ -239,7 +244,7 @@ export default function EnglishLearningDashboard() {
 
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
-              <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-800 pb-3">
+              <h2 className="text-xl font-bold text-white mb-4 border-b border-slate-800 pb-3">
                 {activeLesson.title}
               </h2>
               <div className="text-slate-300 text-sm leading-relaxed whitespace-pre-line bg-slate-900/40 p-4 rounded-xl border border-slate-800/60">
@@ -247,9 +252,9 @@ export default function EnglishLearningDashboard() {
               </div>
             </div>
 
-            <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 shadow-xl workspace-card">
-              <h3 className="text-md font-semibold text-slate-200 mb-4 flex items-center gap-2">
-                <Award className="w-4 h-4 text-amber-400" /> Module Knowledge Check
+            <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 shadow-xl">
+              <h3 className="text-md font-semibold text-slate-200 mb-4">
+                Module Knowledge Check
               </h3>
               <p className="text-sm text-slate-300 mb-4 font-medium">{activeLesson.quiz.question}</p>
               
@@ -283,9 +288,9 @@ export default function EnglishLearningDashboard() {
                 <button
                   disabled={selectedOption === null}
                   onClick={handleQuizSubmit}
-                  className="mt-4 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white font-medium text-xs flex items-center gap-2 transition-all shadow-md shadow-blue-900/20"
+                  className="mt-4 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white font-medium text-xs transition-all shadow-md shadow-blue-900/20"
                 >
-                  Verify Answer <ArrowRight className="w-3.5 h-3.5" />
+                  Verify Answer →
                 </button>
               ) : (
                 <div className="mt-4 p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-400 leading-normal">
@@ -296,8 +301,8 @@ export default function EnglishLearningDashboard() {
             </div>
 
             <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 shadow-xl">
-              <h3 className="text-md font-semibold text-slate-200 mb-3 flex items-center gap-2">
-                <Edit3 className="w-4 h-4 text-purple-400" /> Active Composition Exercise
+              <h3 className="text-md font-semibold text-slate-200 mb-3">
+                Active Composition Exercise
               </h3>
               <p className="text-xs text-slate-400 mb-3 leading-normal">{activeLesson.writingPrompt}</p>
               <textarea
@@ -322,15 +327,9 @@ export default function EnglishLearningDashboard() {
                 <button
                   disabled={saving}
                   onClick={handleSaveProgress}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-semibold text-xs flex items-center gap-2 transition-all shadow-lg shadow-indigo-950/40"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-semibold text-xs transition-all shadow-lg shadow-indigo-950/40"
                 >
-                  {saving ? (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Syncing Progress...
-                    </>
-                  ) : (
-                    'Commit Progress to Cloud'
-                  )}
+                  {saving ? 'Syncing Progress...' : 'Commit Progress to Cloud'}
                 </button>
               </div>
             </div>
