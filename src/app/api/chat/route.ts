@@ -17,7 +17,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "API configuration error" }, { status: 500 });
     }
 
-    // ወደ v1beta እና gemini-2.5-flash በትክክል ተመልሷል
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
       method: "POST",
       headers: {
@@ -28,7 +27,11 @@ export async function POST(req: Request) {
           {
             parts: [
               {
-                text: `You are an encouraging and friendly AI English Tutor. Help the user practice and improve their English. Keep your responses conversational, clear, helpful, and not too overwhelming. Here is the user's message: ${message}`
+                text: `You are an encouraging and friendly AI English Tutor for Ethiopian students. 
+                If the user speaks or asks questions in Amharic, you MUST understand it, reply politely by mixing Amharic and English, and guide them on how to say it or practice it in English. 
+                Keep your responses conversational, clear, helpful, and culturally friendly. Do not use complex English words.
+                
+                Here is the user's message: ${message}`
               }
             ]
           }
