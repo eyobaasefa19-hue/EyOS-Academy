@@ -148,11 +148,9 @@ export default function EnglishLearningDashboard() {
     const score = isCorrect ? 100 : 0;
 
     try {
-      // Check if progress already exists for this lesson
       const existingProgress = progress[activeLesson.id];
 
       if (existingProgress?.id) {
-        // Update existing record using its unique id
         const { error } = await supabase
           .from('user_progress')
           .update({
@@ -164,7 +162,6 @@ export default function EnglishLearningDashboard() {
 
         if (error) throw error;
       } else {
-        // Insert new record
         const { error } = await supabase
           .from('user_progress')
           .insert([
@@ -193,7 +190,6 @@ export default function EnglishLearningDashboard() {
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 p-4 md:p-8 font-sans">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <header className="mb-8 border-b border-slate-800 pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-white bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
@@ -209,7 +205,6 @@ export default function EnglishLearningDashboard() {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Sidebar - Lesson Navigator */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-blue-400" /> Syllabus Modules
@@ -242,9 +237,7 @@ export default function EnglishLearningDashboard() {
             </div>
           </div>
 
-          {/* Main Panel - Interactive Learning Workspace */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Study Materials */}
             <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
               <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-800 pb-3">
                 {activeLesson.title}
@@ -254,7 +247,6 @@ export default function EnglishLearningDashboard() {
               </div>
             </div>
 
-            {/* Comprehension Quiz */}
             <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 shadow-xl workspace-card">
               <h3 className="text-md font-semibold text-slate-200 mb-4 flex items-center gap-2">
                 <Award className="w-4 h-4 text-amber-400" /> Module Knowledge Check
@@ -303,7 +295,6 @@ export default function EnglishLearningDashboard() {
               )}
             </div>
 
-            {/* Active Composition Exercise */}
             <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 shadow-xl">
               <h3 className="text-md font-semibold text-slate-200 mb-3 flex items-center gap-2">
                 <Edit3 className="w-4 h-4 text-purple-400" /> Active Composition Exercise
@@ -317,7 +308,6 @@ export default function EnglishLearningDashboard() {
                 className="w-full bg-slate-900/80 border border-slate-800 rounded-xl p-4 text-slate-200 text-sm focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-slate-600"
               />
 
-              {/* Messaging & Actions Panel */}
               {message && (
                 <div className={`mt-4 p-3 rounded-xl text-xs border ${
                   message.type === 'success' 
@@ -336,7 +326,7 @@ export default function EnglishLearningDashboard() {
                 >
                   {saving ? (
                     <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Syncing Syncing...
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Syncing Progress...
                     </>
                   ) : (
                     'Commit Progress to Cloud'
