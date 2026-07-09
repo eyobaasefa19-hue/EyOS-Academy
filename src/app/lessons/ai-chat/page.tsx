@@ -89,8 +89,16 @@ export default function AIChatLesson() {
                 <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${
                   msg.sender === "user" ? "bg-indigo-600 text-white rounded-tr-none" : "bg-[#161B26] border border-gray-800 text-gray-200 rounded-tl-none"
                 }`}>
-                  {/* እዚህ ጋር በዕንቁላል ጽሑፍ ፋንታ ReactMarkdown ተክተናል */}
-                  <ReactMarkdown className="prose prose-invert max-w-none text-sm space-y-1 block-markdown">
+                  <ReactMarkdown 
+                    className="text-sm space-y-2 text-gray-200 break-words"
+                    components={{
+                      strong: ({node, ...props}) => <strong className="font-bold text-emerald-400 inline" {...props} />,
+                      ul: ({node, ...props}) => <ul className="list-disc pl-5 space-y-1 my-2 block" {...props} />,
+                      ol: ({node, ...props}) => <ol className="list-decimal pl-5 space-y-1 my-2 block" {...props} />,
+                      li: ({node, ...props}) => <li className="list-item" {...props} />,
+                      p: ({node, ...props}) => <p className="mb-1 leading-relaxed" {...props} />
+                    }}
+                  >
                     {msg.text}
                   </ReactMarkdown>
                 </div>
