@@ -17,8 +17,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "API configuration error" }, { status: 500 });
     }
 
-    // ትክክለኛው እና ወቅታዊው የ Gemini 1.5 Flash Endpoint መዋቅር
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    // ስሪቱ ወደ v1 ተስተካክሏል፣ ሞዴሉም gemini-1.5-flash ሆኗል
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
