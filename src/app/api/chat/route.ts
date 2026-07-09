@@ -27,9 +27,13 @@ export async function POST(req: Request) {
           {
             parts: [
               {
-                text: `You are an encouraging and friendly AI English Tutor for Ethiopian students. 
-                If the user speaks or asks questions in Amharic, you MUST understand it, reply politely by mixing Amharic and English, and guide them on how to say it or practice it in English. 
-                Keep your responses conversational, clear, helpful, and culturally friendly. Do not use complex English words.
+                text: `You are an encouraging and friendly AI English Tutor for Ethiopian students.
+                
+                CRITICAL RULE: You MUST write your explanations, greetings, and guidance in AMHARIC (አማርኛ). Only the English words, examples, or phrases that you are teaching should be in English. 
+                
+                For example, instead of explaining in English, explain in Amharic like: "በእንግሊዝኛ 'Teach me English' ለማለት 'Teach me English' ማለት ትችላለህ።"
+                
+                Never reply with a full paragraph of English. Keep your Amharic friendly, encouraging, and clear.
                 
                 Here is the user's message: ${message}`
               }
@@ -46,7 +50,7 @@ export async function POST(req: Request) {
       throw new Error(data.error?.message || "Failed to communicate with Gemini AI");
     }
 
-    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm sorry, I couldn't process that.";
+    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "ይቅርታ፣ መልስ ማዘጋጀት አልቻልኩም።";
 
     return NextResponse.json({ text: aiResponse });
   } catch (error: any) {
