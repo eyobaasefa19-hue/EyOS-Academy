@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
 export default function AIChatLesson() {
@@ -9,6 +9,17 @@ export default function AIChatLesson() {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  
+  // በራሱ ወደ ታች እንዲወርድ (Auto-scroll) ማድረጊያ
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isTyping]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,15 +27,26 @@ export default function AIChatLesson() {
 
     const userText = input;
     const userMessage = { id: messages.length + 1, sender: "user", text: userText };
-    setMessages((prev) => [...prev, userMessage]);
+    
+    // መጀመሪያ የተጠቃሚውን መልዕክት በስክሪኑ ላይ እናሳያለን
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setInput("");
     setIsTyping(true);
 
     try {
+      // የጌሚኒ API የሚፈልገውን የድርድር (Array) ፎርማት ማዘጋጀት
+      // የመጀመሪያውን የሰላምታ መልዕክት ጨምሮ ታሪኩን በሙሉ እንልካለን
+      const apiMessages = updatedMessages.map((msg) => ({
+        role: msg.sender === "user" ? "user" : "model",
+        content: msg.text,
+      }));
+
       const response = await fetch("/api/chat/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userText }),
+        // እዚህ ጋር 'messages' በሚል ስም ሙሉ ታሪኩን እንልካለን
+        body: JSON.stringify({ messages: apiMessages }),
       });
 
       const data = await response.json();
@@ -34,7 +56,7 @@ export default function AIChatLesson() {
       }
 
       const aiMessage = {
-        id: messages.length + 2,
+        id: updatedMessages.length + 1,
         sender: "ai",
         text: data.text
       };
@@ -43,7 +65,7 @@ export default function AIChatLesson() {
       console.error(error);
       setMessages((prev) => [
         ...prev,
-        { id: messages.length + 2, sender: "ai", text: "Something went wrong. Please check your network or API settings." }
+        { id: prev.length + 1, sender: "ai", text: "Something went wrong. Please check your network or API settings." }
       ]);
     } finally {
       setIsTyping(false);
@@ -82,6 +104,8 @@ export default function AIChatLesson() {
                 </div>
               </div>
             )}
+            {/* ሁልጊዜ ወደ ታች እንዲያወርደን መድረሻ ምልክት */}
+            <div ref={messagesEndRef} />
           </div>
 
           <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-800 flex gap-2 bg-[#161B26]/60">
@@ -90,7 +114,7 @@ export default function AIChatLesson() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={isTyping}
-              placeholder={isTyping ? "Waiting..." : "Type your message in English..."}
+              placeholder={isTyping ? "Waiting..." : "እዚህ ጋር ይጻፉ..."}
               className="flex-1 bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors disabled:opacity-50"
             />
             <button type="submit" disabled={isTyping} className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 font-medium rounded-xl text-sm transition-all disabled:opacity-50">
