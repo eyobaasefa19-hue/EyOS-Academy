@@ -10,8 +10,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
 
-    // የ Gemini API ጥሪ ማዘጋጃ
-    // ማሳሰቢያ፦ የ GEMINI_API_KEY ቫሪያብልህ በ Vercel Environment Variables ላይ መኖሩን አረጋግጥ
     const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
     if (!apiKey) {
@@ -19,7 +17,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "API configuration error" }, { status: 500 });
     }
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    // እዚህ ጋር የ API ስሪቱን ወደ v1 እና ሞዴሉን ወደ gemini-pro ቀይረነዋል
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -45,7 +44,6 @@ export async function POST(req: Request) {
       throw new Error(data.error?.message || "Failed to communicate with Gemini AI");
     }
 
-    // ከ Gemini የመጣውን መልስ ማውጣት
     const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm sorry, I couldn't process that.";
 
     return NextResponse.json({ text: aiResponse });
