@@ -17,8 +17,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "API configuration error" }, { status: 500 });
     }
 
-    // እዚህ ጋር የ API ስሪቱን ወደ v1 እና ሞዴሉን ወደ gemini-pro ቀይረነዋል
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`, {
+    // ትክክለኛው እና ወቅታዊው የ Gemini 1.5 Flash Endpoint መዋቅር
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -26,7 +26,6 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         contents: [
           {
-            role: "user",
             parts: [
               {
                 text: `You are an encouraging and friendly AI English Tutor. Help the user practice and improve their English. Keep your responses conversational, clear, helpful, and not too overwhelming. Here is the user's message: ${message}`
