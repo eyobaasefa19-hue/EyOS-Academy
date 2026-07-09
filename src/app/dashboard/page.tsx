@@ -109,6 +109,21 @@ export default function Dashboard() {
               ትምህርቱን ጀምር
             </Link>
           </div>
+
+          {/* Card 4 - Practical Hub */}
+          <div className="bg-[#161B26]/60 backdrop-blur-md border border-gray-800 p-6 rounded-2xl hover:border-blue-500/50 transition-all group">
+            <div className="w-12 h-12 rounded-xl bg-blue-600/20 flex items-center justify-center text-blue-400 font-bold mb-4 text-xl">
+              04
+            </div>
+            <h3 className="text-xl font-semibold mb-2 group-hover:text-blue-400 transition-colors">Practical English Hub</h3>
+            <p className="text-gray-400 text-sm mb-4">ማንበብ፣ የዕለት ተዕለት ውይይቶችን መለማመድ እና የጽሑፍ ብቃትዎን በአንድ ቦታ ያሳድጉ።</p>
+            <Link 
+              href="/lessons/practical-hub" 
+              className="block w-full text-center py-2.5 bg-blue-600 hover:bg-blue-700 font-medium rounded-xl transition-all"
+            >
+              ትምህርቱን ጀምር
+            </Link>
+          </div>
         </div>
       </main>
     </div>
