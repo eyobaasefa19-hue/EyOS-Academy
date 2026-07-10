@@ -1,13 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenAI } from "@google/generative-ai";
+import { NextRequest, NextResponse } from 'next/server';
+import { GoogleGenAI } from '@google/genai';
 
-// 1. የ Gemini API Key በVercel ላይ መኖሩን ማረጋገጥ
 const apiKey = process.env.GEMINI_API_KEY;
 
 export async function POST(req: NextRequest) {
   if (!apiKey) {
     return NextResponse.json(
-      { error: 'GEMINI_API_KEY is not configured in environment variables.' },
+      { error: 'GEMINI_API_KEY is not configured.' },
       { status: 500 }
     );
   }
@@ -19,8 +18,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    // 2. በድሮው SDK አማካኝነት Gemini 2.5 Flashን መጥራት
-    const ai = new GoogleGenAI({ apiKey: apiKey });
+    const ai = new GoogleGenAI({ apiKey });
     
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -30,7 +28,6 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    // 3. የተገኘውን ፅሁፍ ለ Client መላክ
     const reply = response.text;
     return NextResponse.json({ reply });
 
