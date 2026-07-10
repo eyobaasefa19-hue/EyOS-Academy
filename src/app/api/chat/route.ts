@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import { NextRequest, NextResponse } from "next/server";
+import { GoogleGenAI } from "@google/generative-ai";
 
-// 1. የ Gemini API Key መኖሩን እናረጋግጣለን
+// 1. የ Gemini API Key በVercel ላይ መኖሩን ማረጋገጥ
 const apiKey = process.env.GEMINI_API_KEY;
 
 export async function POST(req: NextRequest) {
   if (!apiKey) {
     return NextResponse.json(
       { error: 'GEMINI_API_KEY is not configured in environment variables.' },
-      { status: 505 }
+      { status: 500 }
     );
   }
 
@@ -19,19 +19,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    // 2. አዲሱን የ SDK አወቃቀር በመጠቀም Gemini 2.5 Flashን እንጠራዋለን
-    const ai = new GoogleGenAI({ apiKey });
+    // 2. በድሮው SDK አማካኝነት Gemini 2.5 Flashን መጥራት
+    const ai = new GoogleGenAI({ apiKey: apiKey });
     
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: message,
-      // እዚህ ላይ ለቱተሩ ባህሪ መስጠት ትችላለህ
       config: {
-        systemInstruction: "You are a friendly and encouraging AI English Tutor. Help the user practice and correct their grammar gently if they make mistakes.",
+        systemInstruction: "You are a friendly and encouraging AI English Tutor. Help the user practice and correct their English."
       }
     });
 
-    // 3. የተመለሰውን ፅሁፍ ለ Client እንልካለን
+    // 3. የተገኘውን ፅሁፍ ለ Client መላክ
     const reply = response.text;
     return NextResponse.json({ reply });
 
