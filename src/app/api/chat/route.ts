@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -18,17 +18,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    const ai = new GoogleGenAI({ apiKey });
+    // 1. አዲሱን GoogleGenerativeAI ክላስ እንጠቀማለን
+    const ai = new GoogleGenerativeAI(apiKey);
     
-    const response = await ai.models.generateContent({
+    // 2. ሞዴሉን እና ሲስተም ፕሮምፕቱን በትክክለኛው መንገድ እዚህ እንጠራዋለን
+    const model = ai.getGenerativeModel({ 
       model: 'gemini-2.5-flash',
-      contents: message,
-      config: {
-        systemInstruction: "You are a friendly and encouraging AI English Tutor. Help the user practice and correct their English."
-      }
+      systemInstruction: "You are a friendly and encouraging AI English Tutor. Help the user practice and correct their English."
     });
 
-    const reply = response.text;
+    // 3. ይዘቱን ጀነሬት እናደርጋለን
+    const response = await model.generateContent({
+      contents: [{ text: message }]
+    });
+
+    // 4. ምላሹን በትክክል እናወጣዋለን
+    const reply = response.response.text();
     return NextResponse.json({ reply });
 
   } catch (error: any) {
