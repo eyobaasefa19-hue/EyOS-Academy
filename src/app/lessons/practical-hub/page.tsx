@@ -75,7 +75,7 @@ const dialogueScenarios = [
   {
     id: 7,
     title: "Airport Logistics: Smart Guide App",
-    contextAmh: "በአውሮፕላን ማረፊያ ውስጥ ስለሚጠቅም አዲስ መተግበሪያ የሚደረግ ውይይት።",
+    contextAmh: "በአውሮንላን ማረፊያ ውስጥ ስለሚጠቅም አዲስ መተግበሪያ የሚደረግ ውይይት።",
     dialogues: [
       { speaker: "Person A", textEng: "Travelers often get confused about where to find ground support equipment.", textAmh: "ተጓዦች የምድር ላይ ድጋፍ መስጫ መሳሪያዎችን የት እንደሚያገኙ ብዙ ጊዜ ይምታታባቸዋል።" },
       { speaker: "Person B", textEng: "That is why the Addis Airport Smart Guide bot is very useful.", textAmh: "የአዲስ ኤርፖርት ስማርት ጋይድ (Smart Guide) ቦት በጣም ጠቃሚ የሆነው ለዚህ ነው።" },
@@ -110,7 +110,7 @@ const dialogueScenarios = [
     title: "Travel: Asking for Directions",
     contextAmh: "በአዲስ ቦታ አቅጣጫን ለመጠየቅ የሚደረግ ውይይት።",
     dialogues: [
-      { speaker: "Person A", textEng: "Excuse me, I am a bit lost. Can you tell me how to get to the main terminal?", textAmh: "ይቅርታ፣ ትንሽ ጠፍቶብኛል። ወደ ዋናው ተርሚናል እንዴት እንደምሄድ ሊነግሩኝ ይችላሉ?" },
+      { speaker: "Person A", textEng: "Excuse me, I am a bit lost. Can you tell me how to get to the main terminal?", textAmh: "ይቅርታ偏 ትንሽ ጠፍቶብኛል። ወደ ዋናው ተርሚናል እንዴት እንደምሄድ ሊነግሩኝ ይችላሉ?" },
       { speaker: "Person B", textEng: "Of course. Go straight down this hallway, and turn left at the security check.", textAmh: "በእርግጥ። በዚህ መተላለፊያ ቀጥታ ይሂዱ፣ እና በፍተሻ ጣቢያው ጋር ወደ ግራ ይታጠፉ።" },
       { speaker: "Person A", textEng: "Is it far from here? Should I take the shuttle?", textAmh: "ከዚህ ይርቃል? የውስጥ ትራንስፖርት (Shuttle) መውሰድ አለብኝ?" },
       { speaker: "Person B", textEng: "No, it's just a five-minute walk. You don't need a shuttle.", textAmh: "አይ፣ የአምስት ደቂቃ የእግር መንገድ ነው። ትራንስፖርት አያስፈልግዎትም።" }
@@ -122,7 +122,7 @@ const dialogueScenarios = [
     contextAmh: "በህክምና ማዕከል ለቀጠሮ የሚደረግ ውይይት።",
     dialogues: [
       { speaker: "Person A", textEng: "Good morning. I have an appointment with Dr. Sarah at 10:00 AM.", textAmh: "እንደምን አደሩ። ከዶክተር ሳራ ጋር በ 4:00 ሰዓት ቀጠሮ ነበረኝ።" },
-      { speaker: "Person B", textEng: "Let me check the system. Yes, your name is on the list. Please have a seat.", textAmh: "ሲስተሙን ልየው። അዎ፣ ስምዎ በዝርዝሩ ውስጥ አለ። እባክዎትን ይቀመጡ።" },
+      { speaker: "Person B", textEng: "Let me check the system. Yes, your name is on the list. Please have a seat.", textAmh: "ሲስተሙን ልየው። አዎ፣ ስምዎ በዝርዝሩ ውስጥ አለ። እባክዎትን ይቀመጡ።" },
       { speaker: "Person A", textEng: "Thank you. Do I need to fill out any medical forms?", textAmh: "አመሰግናለሁ። ምንም አይነት የህክምና ፎርም መሙላት ያስፈልገኛል?" },
       { speaker: "Person B", textEng: "No, your records are already updated. The doctor will call you soon.", textAmh: "አይ፣ መረጃዎችዎ አስቀድመው ተስተካክለዋል። ዶክተሯ በቅርቡ ትጠራዎታለች።" }
     ]
@@ -166,7 +166,7 @@ const dialogueScenarios = [
     contextAmh: "ሆቴል ውስጥ ክፍል ለመያዝ (Check-in) የሚደረግ ውይይት።",
     dialogues: [
       { speaker: "Person A", textEng: "Welcome to the Grand Hotel. How can I help you today?", textAmh: "ወደ ግራንድ ሆቴል እንኳን ደህና መጡ። ዛሬ በምን ልረዳዎ እችላለሁ?" },
-      { speaker: "Person B", textEng: "Hi, I have a reservation under the name Eyob. It is for two nights.", textAmh: "ሰላም偏 በእዮብ ስም የተያዘ ቦታ (Reservation) አለኝ። ለሁለት ምሽቶች ነው።" },
+      { speaker: "Person B", textEng: "Hi, I have a reservation under the name Eyob. It is for two nights.", textAmh: "ሰላም፣ በእዮብ ስም የተያዘ ቦታ (Reservation) አለኝ። ለሁለት ምሽቶች ነው።" },
       { speaker: "Person A", textEng: "Let me find your booking. Ah, yes. A single room with a city view.", textAmh: "እስኪ ምዝገባዎን ልፈልገው። አሃ፣ አዎ። ባለአንድ አልጋ ክፍል ከከተማ እይታ ጋር።" },
       { speaker: "Person B", textEng: "Perfect. What time is breakfast served in the morning?", textAmh: "አሪፍ። ጠዋት ቁርስ ስንት ሰዓት ነው የሚቀርበው?" },
       { speaker: "Person A", textEng: "Breakfast is served from 6:30 AM to 10:00 AM in the main hall.", textAmh: "ቁርስ ከጠዋቱ 12:30 እስከ 4:00 ሰዓት በዋናው አዳራሽ ይቀርባል።" }
@@ -210,7 +210,7 @@ const dialogueScenarios = [
     title: "Grocery Shopping: Finding Items",
     contextAmh: "ሱፐርማርኬት ውስጥ ዕቃዎችን ለመፈለግ የሚደረግ ውይይት።",
     dialogues: [
-      { speaker: "Person A", textEng: "Excuse me, where can I find the fresh vegetables and fruits?", textAmh: "ይቅርታ偏 ትኩስ አትክልቶች እና ፍራፍሬዎችን የት ላገኛቸው እችላለሁ?" },
+      { speaker: "Person A", textEng: "Excuse me, where can I find the fresh vegetables and fruits?", textAmh: "ይቅርታ፣ ትኩስ አትክልቶች እና ፍራፍሬዎችን የት ላገኛቸው እችላለሁ?" },
       { speaker: "Person B", textEng: "They are in aisle 4, right next to the dairy products.", textAmh: "መተላለፊያ 4 ውስጥ፣ ከወተት ተዋፅኦዎቹ አጠገብ ይገኛሉ።" },
       { speaker: "Person A", textEng: "Thank you. Do you also sell organic coffee beans?", textAmh: "አመሰግናለሁ። ኦርጋኒክ የቡና ፍሬዎችስ ትሸጣላችሁ?" },
       { speaker: "Person B", textEng: "Yes, we do. The coffee section is just behind you on the bottom shelf.", textAmh: "አዎ እንሸጣለን። የቡናው ክፍል ከጀርባዎ በታችኛው መደርደሪያ ላይ ነው።" }
@@ -225,10 +225,16 @@ const dialogueScenarios = [
       { speaker: "Person B", textEng: "I think so. I finish my cargo shift at 5:00 PM.", textAmh: "የምመች ይመስለኛል። የካርጎ ስራ ፈረቃዬን 11:00 ሰዓት ላይ እጨርሳለሁ።" },
       { speaker: "Person A", textEng: "Awesome! We will play some music and eat dinner around 7:00 PM.", textAmh: "አሪፍ! 1:00 ሰዓት አካባቢ ሙዚቃ ከፍተን እራት እንበላለን።" },
       { speaker: "Person B", textEng: "Count me in. Should I bring anything to drink?", textAmh: "እኔንም አስቡኝ። የምጠጣው ነገር ይዤ ልምጣ?" },
-      { speaker: "Person A", textEng: "No need, we have plenty of drinks. Just bring yourself!", textAmh: "አያስፈልግም፣ በቂ መጠጥ አለን። ራስህን ብቻ ይዘህ ና!" }
+      { speaker: "Person A", textEng: "No need, we have plenty of drinks. Just bring yourself!", textAmh: "አያስፈልግም偏 በቂ መጠጥ አለን። ራስህን ብቻ ይዘህ ና!" }
     ]
   }
 ];
+
+// ለ AI Feedback የተዋቀረ ታይፕ (Type Definition)
+interface FeedbackType {
+  intro: string;
+  points: { label: string; text: string }[];
+}
 
 export default function PracticalHubLesson() {
   const [activeTab, setActiveTab] = useState<"reading" | "dialogue" | "writing">("reading");
@@ -239,7 +245,7 @@ export default function PracticalHubLesson() {
 
   // Writing Section States
   const [userText, setUserText] = useState("");
-  const [aiFeedback, setAiFeedback] = useState("");
+  const [aiFeedback, setAiFeedback] = useState<FeedbackType | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
 
   // Quiz Validation
@@ -248,7 +254,7 @@ export default function PracticalHubLesson() {
     setShowReadingResult(true);
   };
 
-  // AI Writing Review Simulation
+  // AI Writing Review Simulation (የተስተካከለ የተዋቀረ ዳታ)
   const handleWritingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userText.trim()) return;
@@ -256,12 +262,14 @@ export default function PracticalHubLesson() {
 
     try {
       setTimeout(() => {
-        setAiFeedback(
-          `**Great job on practicing your writing!** Here is a quick review of your text:\n\n` +
-          `*   **Grammar Check:** Your sentence structure is good. Ensure proper capitalization.\n` +
-          `*   **Vocabulary:** Try using words like *excellent* or *splendid* next time.\n` +
-          `*   **Correction:** Always remember to end your sentences with a full stop (.).`
-        );
+        setAiFeedback({
+          intro: "Great job on practicing your writing! Here is a quick review of your text:",
+          points: [
+            { label: "Grammar Check", text: "Your sentence structure is good. Ensure proper capitalization." },
+            { label: "Vocabulary", text: "Try using words like 'excellent' or 'splendid' next time to enrich your text." },
+            { label: "Correction", text: "Always remember to end your sentences with a full stop (.)." }
+          ]
+        });
         setIsReviewing(false);
       }, 1500);
     } catch (error) {
@@ -369,7 +377,7 @@ export default function PracticalHubLesson() {
             </div>
           )}
 
-          {/* TAB 2: DIALOGUE (ዳይናሚክ ሉፕ እዚህ ተተክቷል) */}
+          {/* TAB 2: DIALOGUE */}
           {activeTab === "dialogue" && (
             <div className="space-y-8 max-h-[70vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-800">
               {dialogueScenarios.map((scenario) => (
@@ -404,7 +412,7 @@ export default function PracticalHubLesson() {
             </div>
           )}
 
-          {/* TAB 3: WRITING */}
+          {/* TAB 3: WRITING (የተስተካከለ ንጹህ UI ሬንደሪንግ) */}
           {activeTab === "writing" && (
             <div className="space-y-5">
               <div className="border-l-4 border-emerald-500 pl-3">
@@ -414,7 +422,7 @@ export default function PracticalHubLesson() {
               <form onSubmit={handleWritingSubmit} className="space-y-3 pt-2">
                 <textarea
                   value={userText}
-                  onChange={(e) => setUserText(e.target.value)}
+                  onChange={(e) => setUserText(e.value)}
                   disabled={isReviewing}
                   rows={4}
                   placeholder="Example: My name is Eyob. I live in Addis Ababa. I work at Ethiopian Airlines..."
@@ -430,9 +438,16 @@ export default function PracticalHubLesson() {
               </form>
 
               {aiFeedback && (
-                <div className="p-4 bg-[#161B26] border border-gray-800 rounded-xl text-sm text-gray-200 space-y-2 mt-4 leading-relaxed">
-                  <p className="font-semibold text-emerald-400">✨ AI Feedback:</p>
-                  <p className="whitespace-pre-line text-xs sm:text-sm">{aiFeedback}</p>
+                <div className="p-4 bg-[#161B26] border border-gray-800 rounded-xl text-sm text-gray-200 space-y-3 mt-4 leading-relaxed">
+                  <p className="font-semibold text-emerald-400 flex items-center gap-1.5">✨ AI Feedback</p>
+                  <p className="text-gray-300 font-medium text-xs sm:text-sm">{aiFeedback.intro}</p>
+                  <ul className="space-y-2 text-xs sm:text-sm pl-1">
+                    {aiFeedback.points.map((pt, idx) => (
+                      <li key={idx} className="text-gray-400">
+                        <strong className="text-gray-200 font-semibold">🔹 {pt.label}:</strong> {pt.text}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>
