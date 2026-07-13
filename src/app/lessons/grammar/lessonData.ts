@@ -1,4 +1,7 @@
-// lessonData.ts ፋይልህ ውስጥ
+export const readingStories = [
+  { id: 1, title: "Professional Operations Hub", content: "The team operates efficiently every single shift. An airport ground support specialist tracks modern cargo manifests carefully. Meanwhile, a dedicated software engineer designs advanced database schemas using Supabase." }
+];
+
 export const lessonModules = [
   {
     id: 1,
