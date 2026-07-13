@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const apiKey = process.env.GEMINI_API_KEY;
+// ቁൽፉን በቀጥታ እዚህ ጋ አስቀምጠነዋል
+const apiKey = "AQ.Ab8RN6KaBcIbJizLiuYh5Y-0vXdiisLwCrCUy_3_6urXnOpUdA";
 
 export async function POST(req: NextRequest) {
   if (!apiKey) {
     return NextResponse.json(
-      { error: 'GEMINI_API_KEY is not configured.' },
+      { error: 'API Key is missing.' },
       { status: 500 }
     );
   }
@@ -19,13 +20,8 @@ export async function POST(req: NextRequest) {
     }
 
     const ai = new GoogleGenerativeAI(apiKey);
-    
-    // እዚህ ጋ ምንም አይነት ሲስተም ኢንስትራክሽን እንዳይጋጭ ሞዴሉን ብቻ እንጠራዋለን
-    const model = ai.getGenerativeModel({ 
-      model: 'gemini-2.5-flash'
-    });
+    const model = ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-    // ህጉን (System Instruction) እና የተጠቃሚውን መልዕክት አንድ ላይ አቀናጅተን እንልካለን
     const response = await model.generateContent({
       contents: [
         {
