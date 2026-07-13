@@ -3,13 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 
-// 1. በዛ ያለ የተሟላ የትምህርት ዳታ (Massive Content Data - 5 Stories & 10 Quiz Questions)
 const currentLessonData = {
   id: "l1",
   title: "Lesson 01: Master The Present Simple",
   cefrLevel: "A1",
   category: "Grammar & Practical",
-  xpReward: 150, // ይበልጥ አበረታች እንዲሆን XP ጨምረነዋል
+  xpReward: 150, 
   amharicOverview: "የአሁኑን ጊዜ (Present Simple) ዘወትር ለምናደርጋቸው ድርጊቶች፣ ልማዶች፣ የዕለት ተዕለት ውሎዎች እና ሁልጊዜም እውነት ለሆኑ እውነታዎች ለመግለፅ እንጠቀምበታለን።",
   englishOverview: "We use the Present Simple to talk about habits, permanent situations, daily routines, and general facts.",
   
@@ -32,7 +31,6 @@ const currentLessonData = {
     { word: "Deploy", type: "Verb", amharic: "የተሰራን ሶፍትዌር ለተጠቃሚ ክፍት ማድረግ", pronunciation: "/dɪˈplɔɪ/", example: "We deploy the application using Vercel." }
   ],
 
-  // 📚 5 የተለያዩ እና ሰፋ ያሉ የንባብ ታሪኮች
   readingStories: [
     {
       title: "Story 1: The New Airport Operations Hub",
@@ -56,7 +54,6 @@ const currentLessonData = {
     }
   ],
 
-  // 🎯 10 ዝርዝር የመለማመጃ ጥያቄዎች (Comprehensive 10-Question Bank)
   quizQuestions: [
     {
       id: 1,
@@ -131,7 +128,6 @@ export default function AdvancedLessonDashboard() {
   const [streak, setStreak] = useState(5); 
   const [userXp, setUserXp] = useState(320); 
 
-  // የኩዊዝ ስቴቶች ማስተካከያ
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedQuizOption, setSelectedQuizOption] = useState<number | null>(null);
   const [quizSubmitted, setQuizSubmitted] = useState(false);
@@ -141,7 +137,7 @@ export default function AdvancedLessonDashboard() {
   const handleQuizAnswer = () => {
     if (selectedQuizOption === currentLessonData.quizQuestions[currentQuestionIndex].correctAnswer) {
       setScore((prev) => prev + 1);
-      setUserXp((prev) => prev + 10); // ለእያንዳንዱ ትክክለኛ መልስ ተጨማሪ XP
+      setUserXp((prev) => prev + 10); 
     }
     setQuizSubmitted(true);
   };
@@ -288,10 +284,10 @@ export default function AdvancedLessonDashboard() {
             </div>
           )}
 
-          {/* TAB 4: READING (Expanded - 5 Comprehensive Stories) */}
+          {/* TAB 4: READING */}
           {activeTab === "reading" && (
             <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 space-y-6">
-              <h3 className="text-base font-bold text-purple-400">📚 Practice Library (በዛ ያሉ የንባብ ልምምዶች)</h3>
+              <h3 className="text-base font-bold text-purple-400">📚 Practice Library (የንባብ ልምምዶች)</h3>
               
               <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1 scrollbar-thin">
                 {currentLessonData.readingStories.map((story, idx) => (
@@ -336,7 +332,7 @@ export default function AdvancedLessonDashboard() {
             </div>
           )}
 
-          {/* TAB 6: QUIZ (Expanded - Full 10-Question Bank UI) */}
+          {/* TAB 6: QUIZ (ቁልፎች እንዳይደራረቡ የተስተካከለበት ቦታ) */}
           {activeTab === "quiz" && (
             <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800 pb-2">
@@ -348,7 +344,6 @@ export default function AdvancedLessonDashboard() {
 
               {!quizFinished ? (
                 <>
-                  {/* Progress Line */}
                   <div className="w-full bg-slate-900 h-1 rounded-full overflow-hidden">
                     <div 
                       className="bg-purple-500 h-full transition-all duration-300"
@@ -384,18 +379,19 @@ export default function AdvancedLessonDashboard() {
                     ))}
                   </div>
 
+                  {/* 🛠️ እዚህ ጋር ነው ለውጡ ያለው፦ ቁልፎቹ በአንድ ቦታ ተተካክተዋል */}
                   {!quizSubmitted ? (
                     <button
                       disabled={selectedQuizOption === null}
                       onClick={handleQuizAnswer}
-                      className="w-full mt-2 py-3 bg-purple-600 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed font-bold text-xs rounded-xl text-white transition hover:bg-purple-700"
+                      className="w-full mt-2 py-3 bg-purple-600 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed font-bold text-xs rounded-xl text-white transition hover:bg-purple-700 shadow-md"
                     >
                       መልስህን አስረክብ (Submit Answer)
                     </button>
                   ) : (
                     <button
                       onClick={handleNextQuestion}
-                      className="w-full mt-2 py-3 bg-emerald-600 font-bold text-xs rounded-xl text-white transition hover:bg-emerald-700"
+                      className="w-full mt-2 py-3 bg-emerald-600 hover:bg-emerald-500 font-bold text-xs rounded-xl text-white transition shadow-md"
                     >
                       {currentQuestionIndex < currentLessonData.quizQuestions.length - 1 ? "ቀጣይ ጥያቄ ▶" : "የመጨረሻ ውጤትህን እይ ▶"}
                     </button>
@@ -404,13 +400,10 @@ export default function AdvancedLessonDashboard() {
               ) : (
                 <div className="p-5 bg-slate-900/80 rounded-xl border border-slate-800 text-center space-y-4">
                   <h4 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-200">🎉 ሙሉ ማጠቃለያውን አጠናቀሃል!</h4>
-                  <p className="text-xs text-slate-300 max-w-xs mx-auto">
-                    በዚህ ከባድና ሰፊ የ 10 ጥያቄዎች ፈተና ላይ በትክክል የመለስከው ውጤት፦
-                  </p>
                   <div className="text-3xl font-black text-emerald-400 bg-emerald-500/10 py-3 rounded-xl border border-emerald-500/20 max-w-[150px] mx-auto">
                     {score} / {currentLessonData.quizQuestions.length}
                   </div>
-                  <p className="text-[11px] text-slate-500">+{currentLessonData.xpReward} Completion XP ወደ አካውንትህ ተጨምሯል።</p>
+                  <p className="text-[11px] text-slate-500">+{currentLessonData.xpReward} Completion XP ተሰጥቶሃል።</p>
                   
                   <div className="flex flex-col sm:flex-row gap-2 justify-center pt-2">
                     <button 
@@ -431,22 +424,22 @@ export default function AdvancedLessonDashboard() {
         </div>
       </main>
 
-      {/* --- FLOATING CONTROLS FOOTER --- */}
+      {/* --- FLOATING CONTROLS FOOTER (ጽዱ እና ከብልሽት የጸዳ) --- */}
       <footer className="fixed bottom-0 left-0 right-0 bg-[#0b101d]/90 backdrop-blur-md border-t border-slate-800/60 px-4 py-3 z-40">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-          
-          <Link href="/" className="px-3 py-2 border border-slate-800 text-slate-400 rounded-xl text-xs font-bold hover:bg-slate-800 text-center">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <Link href="/" className="px-4 py-2 border border-slate-800 text-slate-400 rounded-xl text-xs font-bold hover:bg-slate-800 transition">
             ◀ ወደ ማውጫ ተመለስ
           </Link>
           
-          <button 
-            onClick={() => {
-              if(activeTab !== "quiz") setActiveTab("quiz");
-            }}
-            className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition shadow-md"
-          >
-            ቀጣይ ምዕራፍ (Next) ▶
-          </button>
+          {/* ተማሪው ከኩዊዝ ውጪ ባሉ ታቦች ላይ እያለ በቀጥታ ወደ ኩዊዝ እንዲሄድ የሚረዳ ቀጭን ቁልፍ */}
+          {activeTab !== "quiz" && (
+            <button 
+              onClick={() => setActiveTab("quiz")}
+              className="px-4 py-2 bg-purple-600/20 text-purple-300 border border-purple-500/30 font-bold text-xs rounded-xl transition hover:bg-purple-600 hover:text-white"
+            >
+              ወደ ኩዊዝ ሂድ 🎯
+            </button>
+          )}
         </div>
       </footer>
 
