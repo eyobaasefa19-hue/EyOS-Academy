@@ -99,7 +99,7 @@ const dialogueScenarios = [
     title: "At the Restaurant: Ordering Food",
     contextAmh: "በምግብ ቤት ውስጥ ምግብ ለማዘዝ የሚደረግ ውይይት።",
     dialogues: [
-      { speaker: "Person A", textEng: "Excuse me, could we see the menu, please?", textAmh: "ይቅርታ፣ ማውጫውን (Menu) ማየት እንችላለን?" },
+      { speaker: "Person A", textEng: "Excuse me, could we see the menu, please?", textAmh: "ይቅርታ偏 ትንሽ ጠፍቶብኛል። ወደ ዋናው ተርሚናል እንዴት እንደምሄድ ሊነግሩኝ ይችላሉ?" },
       { speaker: "Person B", textEng: "Certainly! Here is the menu. Today's special is roasted chicken with vegetables.", textAmh: "በእርግጥ! ማውጫው ይኸው። የዛሬው ልዩ ምግብ የተጠበሰ ዶሮ ከአትክልት ጋር ነው።" },
       { speaker: "Person A", textEng: "That sounds delicious. I will have that, and a glass of fresh juice.", textAmh: "የሚያጣፍጥ ይመስላል። እሱን አምጣልኝ፣ እና አንድ ብርጭቆ ትኩስ ጁስ።" },
       { speaker: "Person B", textEng: "Right away. Your order will be ready in fifteen minutes.", textAmh: "እሺ አሁን። ትዕዛዝዎ በአስራ አምስት ደቂቃ ውስጥ ይደርሳል።" }
@@ -110,7 +110,7 @@ const dialogueScenarios = [
     title: "Travel: Asking for Directions",
     contextAmh: "በአዲስ ቦታ አቅጣጫን ለመጠየቅ የሚደረግ ውይይት።",
     dialogues: [
-      { speaker: "Person A", textEng: "Excuse me, I am a bit lost. Can you tell me how to get to the main terminal?", textAmh: "ይቅርታ偏 ትንሽ ጠፍቶብኛል። ወደ ዋናው ተርሚናል እንዴት እንደምሄድ ሊነግሩኝ ይችላሉ?" },
+      { speaker: "Person A", textEng: "Excuse me, I am a bit lost. Can you tell me how to get to the main terminal?", textAmh: "ይቅርታ፣ ማውጫውን (Menu) ማየት እንችላለን?" },
       { speaker: "Person B", textEng: "Of course. Go straight down this hallway, and turn left at the security check.", textAmh: "በእርግጥ። በዚህ መተላለፊያ ቀጥታ ይሂዱ፣ እና በፍተሻ ጣቢያው ጋር ወደ ግራ ይታጠፉ።" },
       { speaker: "Person A", textEng: "Is it far from here? Should I take the shuttle?", textAmh: "ከዚህ ይርቃል? የውስጥ ትራንስፖርት (Shuttle) መውሰድ አለብኝ?" },
       { speaker: "Person B", textEng: "No, it's just a five-minute walk. You don't need a shuttle.", textAmh: "አይ፣ የአምስት ደቂቃ የእግር መንገድ ነው። ትራንስፖርት አያስፈልግዎትም።" }
@@ -135,7 +135,7 @@ const dialogueScenarios = [
       { speaker: "Person A", textEng: "I really like this jacket. Do you have it in a medium size?", textAmh: "ይሄ ጃኬት በጣም ወድጄዋለሁ። መካከለኛ (Medium) መጠን አላችሁ?" },
       { speaker: "Person B", textEng: "Let me check the stockroom for you. Yes, we have one left in medium.", textAmh: "እስኪ መጋዘኑን ልይሎት። አዎ፣ በመካከለኛ መጠን አንድ ቀርቶናል።" },
       { speaker: "Person A", textEng: "Great! Can I try it on before I buy it?", textAmh: "አሪፍ! ከመግዛቴ በፊት ለብሼ ልሞክረው እችላለሁ?" },
-      { speaker: "Person B", textEng: "Absolutely. The fitting rooms are right there, behind the mirror.", textAmh: "በእርግጥ። ልብስ መሞከሪያ ክፍሎቹ እዛ ጋር፣ ከመስተዋቱ ጀርባ ናቸው።" }
+      { speaker: "Person B", textEng: "Absolutely. The fitting rooms are right there, behind the mirror.", textAmh: "በእርግጥ። ልብስ መሞከሪያ ክፍሎቹ እዛ ጋር偏 ከመስተዋቱ ጀርባ ናቸው።" }
     ]
   },
   {
@@ -143,7 +143,7 @@ const dialogueScenarios = [
     title: "Job Interview: Strengths and Weaknesses",
     contextAmh: "በስራ ቅጥር ቃለ መጠይቅ ወቅት የሚደረግ ውይይት።",
     dialogues: [
-      { speaker: "Person A", textEng: "Can you tell me about your biggest strength as a developer?", textAmh: "እንደ ዴቨሎፐር ትልቁ ጥንካሬህ ምን እንደሆነ ልትነግረኝ ትችላለህ?" },
+      { speaker: "Person A", textEng: "Can you tell me about your biggest strength as a developer?", textAmh: "እንደ ዴቨሎፐር ትልቁ ጥንካሬህ ምን እንደሆነ ልትነግረኝ ትችလဲህ?" },
       { speaker: "Person B", textEng: "My biggest strength is my ability to build modular architectures quickly.", textAmh: "ትልቁ ጥንካሬዬ ሞዱላር የሆኑ አሰራሮችን በፍጥነት የመገንባት ችሎታዬ ነው።" },
       { speaker: "Person A", textEng: "That is excellent. And what would you consider your weakness?", textAmh: "ያ በጣም ግሩም ነው። እና ደግሞ ድክመትህ ብለህ የምታስበው ምንድነው?" },
       { speaker: "Person B", textEng: "Sometimes I focus too much on small details, but I am learning to manage my time better.", textAmh: "አንዳንዴ በትንንሽ ዝርዝሮች ላይ በጣም አተኩራለሁ፣ ነገር ግን ጊዜዬን በአግባቡ መጠቀምን እየተማርኩ ነው።" }
@@ -225,7 +225,7 @@ const dialogueScenarios = [
       { speaker: "Person B", textEng: "I think so. I finish my cargo shift at 5:00 PM.", textAmh: "የምመች ይመስለኛል። የካርጎ ስራ ፈረቃዬን 11:00 ሰዓት ላይ እጨርሳለሁ።" },
       { speaker: "Person A", textEng: "Awesome! We will play some music and eat dinner around 7:00 PM.", textAmh: "አሪፍ! 1:00 ሰዓት አካባቢ ሙዚቃ ከፍተን እራት እንበላለን።" },
       { speaker: "Person B", textEng: "Count me in. Should I bring anything to drink?", textAmh: "እኔንም አስቡኝ። የምጠጣው ነገር ይዤ ልምጣ?" },
-      { speaker: "Person A", textEng: "No need, we have plenty of drinks. Just bring yourself!", textAmh: "አያስፈልግም偏 በቂ መጠጥ አለን። ራስህን ብቻ ይዘህ ና!" }
+      { speaker: "Person A", textEng: "No need, we have plenty of drinks. Just bring yourself!", textAmh: "አያስፈልግም፣ በቂ መጠጥ አለን። ራስህን ብቻ ይዘህ ና!" }
     ]
   }
 ];
@@ -336,7 +336,8 @@ export default function PracticalHubLesson() {
                 to grow his career. Everyone welcomed him warmly on his first day.
               </p>
               <div className="pt-2 space-y-3">
-                <p className="text-sm font-medium text-gray-300">Question: What is Abebe's future career plan?</p>
+                {/* ESLint Fix: Wrapped text in expression block to escape single quotes */}
+                <p className="text-sm font-medium text-gray-300">{"Question: What is Abebe's future career plan?"}</p>
                 <div className="space-y-2">
                   {[
                     { key: "A", text: "To become a pilot" },
@@ -412,7 +413,7 @@ export default function PracticalHubLesson() {
             </div>
           )}
 
-          {/* TAB 3: WRITING (የተስተካከለ ንጹህ UI ሬንደሪንግ) */}
+          {/* TAB 3: WRITING */}
           {activeTab === "writing" && (
             <div className="space-y-5">
               <div className="border-l-4 border-emerald-500 pl-3">
@@ -422,7 +423,8 @@ export default function PracticalHubLesson() {
               <form onSubmit={handleWritingSubmit} className="space-y-3 pt-2">
                 <textarea
                   value={userText}
-                  onChange={(e) => setUserText(e.value)}
+                  // React Fix: Changed e.value to e.target.value
+                  onChange={(e) => setUserText(e.target.value)}
                   disabled={isReviewing}
                   rows={4}
                   placeholder="Example: My name is Eyob. I live in Addis Ababa. I work at Ethiopian Airlines..."
