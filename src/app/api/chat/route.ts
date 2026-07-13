@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function POST(req: NextRequest) {
-  // ከ Vercel Environment Variables ላይ ቁልፉን ያነባል
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
@@ -14,8 +13,6 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-
-    // ከተለያዩ የፓloading ፎርማቶች የተላከውን መልዕክት ይፈልጋል
     const userMessage = body.message || body.text || body.prompt;
 
     if (!userMessage) {
@@ -25,11 +22,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 💡 ማስተካከያ፡ SDK-ው ቁልፉን እንደ OAuth Token ሳይሆን እንደ API Key እንዲቆጥረው በኦብጀክት መልክ { apiKey } ብለን እናሳልፋለን
+    // ቁልፉን በኦብጀክት መልክ በትክክል ማስተላለፍ
     const ai = new GoogleGenerativeAI({ apiKey: apiKey });
     const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    const response = await model.generateContent({
+    const result = await model.generateContent({
       contents: [
         {
           role: "user",
@@ -41,13 +38,14 @@ export async function POST(req: NextRequest) {
       ]
     });
 
-    const reply = response.response.text();
+    // 💡 ማስተካከያ፡ እዚህ ጋር የነበረው response.response.text() ስህተት ስለነበር ወደ ትክክለኛው ተቀይሯል
+    const reply = result.response.text();
     return NextResponse.json({ reply });
 
   } catch (error: any) {
     console.error("Gemini API Error:", error);
     return NextResponse.json(
-      { error: "Failed to communicate with AI Tutor", details: error.message },
+      { error: "Failed to communicate with AI Tutor", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
