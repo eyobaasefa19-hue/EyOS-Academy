@@ -20,9 +20,10 @@ export async function POST(req: NextRequest) {
 
     const ai = new GoogleGenerativeAI(apiKey);
     
+    // እዚህ ጋ systemInstructions በሚለው (ከመጨረሻው 's' በመጨመር) አስተካክለነዋል
     const model = ai.getGenerativeModel({ 
       model: 'gemini-2.5-flash',
-      systemInstruction: "You are a friendly and encouraging AI English Tutor. Help the user practice and correct their English."
+      systemInstructions: "You are a friendly and encouraging AI English Tutor. Help the user practice and correct their English."
     });
 
     const response = await model.generateContent({
