@@ -22,7 +22,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ቁልፉን በኦብጀክት መልክ በትክክል ማስተላለፍ
     const ai = new GoogleGenerativeAI({ apiKey: apiKey });
     const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
 
@@ -38,14 +37,15 @@ export async function POST(req: NextRequest) {
       ]
     });
 
-    // 💡 ማስተካከያ፡ እዚህ ጋር የነበረው response.response.text() ስህተት ስለነበር ወደ ትክክለኛው ተቀይሯል
     const reply = result.response.text();
     return NextResponse.json({ reply });
 
   } catch (error: any) {
     console.error("Gemini API Error:", error);
+    
+    // 💡 ማስተካከያ፡ የ TypeScript ኤረርን ለማስቀረት በጣም ቀላል በሆነ መንገድ ተጽፏል
     return NextResponse.json(
-      { error: "Failed to communicate with AI Tutor", details: error instanceof Error ? error.message : String(error) },
+      { error: "Failed to communicate with AI Tutor", details: String(error?.message || error) },
       { status: 500 }
     );
   }
