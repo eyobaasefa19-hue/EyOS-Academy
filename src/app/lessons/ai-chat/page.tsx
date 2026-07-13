@@ -28,21 +28,16 @@ export default function AIChatLesson() {
     const userText = input;
     const userMessage = { id: messages.length + 1, sender: "user", text: userText };
     
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsTyping(true);
 
     try {
-      const apiMessages = updatedMessages.map((msg) => ({
-        role: msg.sender === "user" ? "user" : "model",
-        content: msg.text,
-      }));
-
-      const response = await fetch("/api/chat/", {
+      // ለሰርቨሩ 'message' በሚል ቁልፍ ተጠቃሚው የጻፈውን ነጠላ ፅሑፍ ብቻ እንልካለን
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages }),
+        body: JSON.stringify({ message: userText }),
       });
 
       const data = await response.json();
@@ -51,17 +46,18 @@ export default function AIChatLesson() {
         throw new Error(data.error || "Failed to fetch");
       }
 
+      // ሰርቨሩ የመለሰልንን 'reply' እዚህ ጋር እናስቀምጣለን
       const aiMessage = {
-        id: updatedMessages.length + 1,
+        id: Date.now(),
         sender: "ai",
-        text: data.text
+        text: data.reply
       };
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error(error);
       setMessages((prev) => [
         ...prev,
-        { id: prev.length + 1, sender: "ai", text: "Something went wrong. Please check your network or API settings." }
+        { id: Date.now(), sender: "ai", text: "Something went wrong. Please check your network or API settings." }
       ]);
     } finally {
       setIsTyping(false);
