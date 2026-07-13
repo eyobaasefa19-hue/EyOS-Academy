@@ -2,8 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import Link from "next/link";
-// አዲሱን lessonModules እና የድሮውን readingStories አስገባን
-import { readingStories, lessonModules } from "./lessonData";
+import { readingStories, quizQuestions } from "./lessonData";
 
 const staticLessonData = {
   id: "l1",
@@ -13,7 +12,6 @@ const staticLessonData = {
   xpReward: 150, 
   amharicOverview: "የአሁኑን ጊዜ (Present Simple) ዘወትር ለምናደርጋቸው ድርጊቶች፣ ልማዶች፣ የዕለት ተዕለት ውሎዎች እና ሁልጊዜም እውነት ለሆኑ እውነታዎች ለመግለፅ እንጠቀምበታለን።",
   englishOverview: "We use the Present Simple to talk about habits, permanent situations, daily routines, and general facts.",
-  
   grammar: {
     title: "Verb 'To Be' & Sentence Structure",
     rules: [
@@ -23,28 +21,18 @@ const staticLessonData = {
     ],
     commonMistake: "❌ Don't say: 'He am working at the terminal.' \n✅ Say: 'He is working at the terminal.'\n\n❌ Don't say: 'They works everyday.'\n✅ Say: 'They work everyday.'"
   },
-
   vocabulary: [
-    { word: "Explore", type: "Verb", amharic: "አዲስ ነገርን ማወቅ/መረመር", pronunciation: "/ɪkˈsplɔːr/", example: "I explore new frameworks on my phone." },
-    { word: "Essential", type: "Adjective", amharic: "በጣም አስፈላጊ/ግዴታ የሆነ", pronunciation: "/ɪˈsen.ʃəl/", example: "English is essential for aviation logistics." },
-    { word: "Aviation", type: "Noun", amharic: "የአቪዬሽን/የበረራ ሳይንስ እና ኢንዱስትሪ", pronunciation: "/ˌeɪ.viˈeɪ.ʃən/", example: "He studies aviation operations." },
-    { word: "Cargo", type: "Noun", amharic: "በአውሮፕላን የሚጓጓዝ ጭነት/ዕቃ", pronunciation: "/ˈkɑːr.ɡoʊ/", example: "The team updates the cargo manifest." },
-    { word: "Manifest", type: "Noun", amharic: "የጭነት ዕቃዎች ዝርዝር ሰነድ", pronunciation: "/ˈmæn.ɪ.fest/", example: "Check the weight on the cargo manifest." },
-    { word: "Deploy", type: "Verb", amharic: "የተሰራን ሶፍትዌር ለተጠቃሚ ክፍት ማድረግ", pronunciation: "/dɪˈplɔɪ/", example: "We deploy the application using Vercel." }
+    { word: "Explore", type: "Verb", amharic: "መረመር", pronunciation: "/ɪkˈsplɔːr/", example: "I explore new frameworks." },
+    { word: "Essential", type: "Adjective", amharic: "አስፈላጊ", pronunciation: "/ɪˈsen.ʃəl/", example: "English is essential." }
   ],
-
   conversations: [
-    { role: "Airport Agent", text: "Good morning! Can I see your passport and ticket, please?", translation: "እንደምን አደሩ! እባክዎን ፓስፖርትዎን እና ቲኬትዎን ላይም እችላለሁ?" },
-    { role: "Passenger (You)", text: "Sure, here they are. I am flying to Washington, D.C.", translation: "እንዴታ፣ ይኸውልዎት። ወደ ዋሽንግተን ዲሲ እየበረርኩ ነው።" }
+    { role: "Agent", text: "Good morning! Passport please?", translation: "እንደምን አደሩ! ፓስፖርት እባክዎን?" }
   ]
 };
 
 export default function AdvancedLessonDashboard() {
   const [activeTab, setActiveTab] = useState<"overview" | "grammar" | "vocabulary" | "reading" | "speaking" | "quiz">("overview");
   const [userXp, setUserXp] = useState(330); 
-  
-  // የኩዊዝ ሎጂክን ከ lessonModules[0] (Lesson 1) ጋር አገናኘነው
-  const activeModule = lessonModules[0]; 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedQuizOption, setSelectedQuizOption] = useState<number | null>(null);
   const [quizSubmitted, setQuizSubmitted] = useState(false);
@@ -55,7 +43,7 @@ export default function AdvancedLessonDashboard() {
 
   const handleQuizAnswer = () => {
     triggerHaptic(60); 
-    if (selectedQuizOption === activeModule.questions[currentQuestionIndex].correctAnswer) {
+    if (selectedQuizOption === quizQuestions[currentQuestionIndex].correctAnswer) {
       setScore((prev) => prev + 1);
       setUserXp((prev) => prev + 10); 
     }
@@ -66,7 +54,7 @@ export default function AdvancedLessonDashboard() {
     triggerHaptic(40);
     setSelectedQuizOption(null);
     setQuizSubmitted(false);
-    if (currentQuestionIndex < activeModule.questions.length - 1) {
+    if (currentQuestionIndex < quizQuestions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
       setQuizFinished(true);
@@ -75,10 +63,48 @@ export default function AdvancedLessonDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b101d] text-slate-100 flex flex-col font-sans select-none">
-      {/* ... NAVBAR እና የተቀረው ዲዛይን እንደነበረው ነው (ከዚህ በላይ ያሉትን ክፍሎች እንዳለ ተጠቀም) ... */}
-      {/* (የኮድህን የቀረው ክፍል እዚህ አምጣው - ዲዛይኑ እንዳይቀየር በጥንቃቄ) */}
-      {/* ... Quiz Tab ውስጥ மட்டும் activeModule.questions ተጠቀም ... */}
+    <div className="min-h-screen bg-[#0b101d] text-slate-100 p-4">
+      <h1 className="text-xl font-bold mb-4">{staticLessonData.title}</h1>
+      
+      {/* Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-4">
+        {(["overview", "grammar", "vocabulary", "reading", "quiz"] as const).map((tab) => (
+          <button 
+            key={tab} 
+            onClick={() => setActiveTab(tab)} 
+            className={`px-4 py-2 rounded-xl text-xs font-bold ${activeTab === tab ? "bg-purple-600" : "bg-slate-800"}`}
+          >
+            {tab.toUpperCase()}
+          </button>
+        ))}
+      </div>
+
+      {/* Quiz Tab */}
+      {activeTab === "quiz" && (
+        <div className="bg-[#121b2e] p-6 rounded-2xl border border-slate-800">
+          {!quizFinished ? (
+            <>
+              <p className="mb-4 text-sm">{quizQuestions[currentQuestionIndex].question}</p>
+              {quizQuestions[currentQuestionIndex].options.map((opt, i) => (
+                <button 
+                  key={i} 
+                  onClick={() => setSelectedQuizOption(i)} 
+                  className={`block w-full p-3 mb-2 rounded-xl text-left ${selectedQuizOption === i ? "bg-purple-900 border border-purple-500" : "bg-slate-700"}`}
+                >
+                  {opt}
+                </button>
+              ))}
+              {!quizSubmitted ? (
+                <button onClick={handleQuizAnswer} className="w-full bg-blue-600 p-3 mt-4 rounded-xl font-bold">Submit</button>
+              ) : (
+                <button onClick={handleNextQuestion} className="w-full bg-green-600 p-3 mt-4 rounded-xl font-bold">Next</button>
+              )}
+            </>
+          ) : (
+            <p className="font-bold text-center">Score: {score} / {quizQuestions.length}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
