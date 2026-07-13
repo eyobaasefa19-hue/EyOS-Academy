@@ -20,14 +20,22 @@ export async function POST(req: NextRequest) {
 
     const ai = new GoogleGenerativeAI(apiKey);
     
-    // እዚህ ጋ systemInstructions በሚለው (ከመጨረሻው 's' በመጨመር) አስተካክለነዋል
+    // እዚህ ጋ ምንም አይነት ሲስተም ኢንስትራክሽን እንዳይጋጭ ሞዴሉን ብቻ እንጠራዋለን
     const model = ai.getGenerativeModel({ 
-      model: 'gemini-2.5-flash',
-      systemInstructions: "You are a friendly and encouraging AI English Tutor. Help the user practice and correct their English."
+      model: 'gemini-2.5-flash'
     });
 
+    // ህጉን (System Instruction) እና የተጠቃሚውን መልዕክት አንድ ላይ አቀናጅተን እንልካለን
     const response = await model.generateContent({
-      contents: [{ text: message }]
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            { text: "System Instruction: You are a friendly and encouraging AI English Tutor. Help the user practice and correct their English." },
+            { text: `User Message: ${message}` }
+          ]
+        }
+      ]
     });
 
     const reply = response.response.text();
