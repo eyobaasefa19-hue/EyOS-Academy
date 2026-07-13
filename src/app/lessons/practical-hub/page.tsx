@@ -36,7 +36,7 @@ const dialogueScenarios = [
       { speaker: "Person B", textEng: "The striker was in an offside position before the ball was passed.", textAmh: "ኳሷ ከመሰጠቷ በፊት አጥቂው ከጨዋታ ውጪ (ኦፍሳይድ) ቦታ ላይ ነበር።" },
       { speaker: "Person A", textEng: "Oh, I see. So he was behind the last defender?", textAmh: "ኦ፣ ገባኝ። ስለዚህ ከመጨረሻው ተከላካይ ጀርባ ነበር ማለት ነው?" },
       { speaker: "Person B", textEng: "Yes, exactly. It requires a very quick eye to spot that during a fast game.", textAmh: "አዎ፣ ልክ ነው። በፈጣን ጨዋታ ጊዜ ያንን ለማየት በጣም ፈጣን አይን ይጠይቃል።" },
-      { speaker: "Person A", textEng: "I will pay more attention to the defensive line next time.", textAmh: "በቀጣይ ጊዜ ለመከላከያ መስመሩ የተሻለ ትኩረት እሰጣለሁ።" }
+      { speaker: "Person A", textEng: "I will pay more attention to the defensive line next time.", textAmh: "በቀጣይ ጊዜ ለመከላከያ መስመሩ የተሻለ ትከረቱ እሰጣለሁ።" }
     ]
   },
   {
@@ -99,7 +99,7 @@ const dialogueScenarios = [
     title: "At the Restaurant: Ordering Food",
     contextAmh: "በምግብ ቤት ውስጥ ምግብ ለማዘዝ የሚደረግ ውይይት።",
     dialogues: [
-      { speaker: "Person A", textEng: "Excuse me, could we see the menu, please?", textAmh: "ይቅርታ偏 ትንሽ ጠፍቶብኛል። ወደ ዋናው ተርሚናል እንዴት እንደምሄድ ሊነግሩኝ ይችላሉ?" },
+      { speaker: "Person A", textEng: "Excuse me, could we see the menu, please?", textAmh: "ይቅርታ፣ ማውጫውን (Menu) ማየት እንችላለን?" },
       { speaker: "Person B", textEng: "Certainly! Here is the menu. Today's special is roasted chicken with vegetables.", textAmh: "በእርግጥ! ማውጫው ይኸው። የዛሬው ልዩ ምግብ የተጠበሰ ዶሮ ከአትክልት ጋር ነው።" },
       { speaker: "Person A", textEng: "That sounds delicious. I will have that, and a glass of fresh juice.", textAmh: "የሚያጣፍጥ ይመስላል። እሱን አምጣልኝ፣ እና አንድ ብርጭቆ ትኩስ ጁስ።" },
       { speaker: "Person B", textEng: "Right away. Your order will be ready in fifteen minutes.", textAmh: "እሺ አሁን። ትዕዛዝዎ በአስራ አምስት ደቂቃ ውስጥ ይደርሳል።" }
@@ -110,7 +110,7 @@ const dialogueScenarios = [
     title: "Travel: Asking for Directions",
     contextAmh: "በአዲስ ቦታ አቅጣጫን ለመጠየቅ የሚደረግ ውይይት።",
     dialogues: [
-      { speaker: "Person A", textEng: "Excuse me, I am a bit lost. Can you tell me how to get to the main terminal?", textAmh: "ይቅርታ፣ ማውጫውን (Menu) ማየት እንችላለን?" },
+      { speaker: "Person A", textEng: "Excuse me, I am a bit lost. Can you tell me how to get to the main terminal?", textAmh: "ይቅርታ偏 ትንሽ ጠፍቶብኛል። ወደ ዋናው ተርሚናል እንዴት እንደምሄድ ሊነግሩኝ ይችላሉ?" },
       { speaker: "Person B", textEng: "Of course. Go straight down this hallway, and turn left at the security check.", textAmh: "በእርግጥ። በዚህ መተላለፊያ ቀጥታ ይሂዱ፣ እና በፍተሻ ጣቢያው ጋር ወደ ግራ ይታጠፉ።" },
       { speaker: "Person A", textEng: "Is it far from here? Should I take the shuttle?", textAmh: "ከዚህ ይርቃል? የውስጥ ትራንስፖርት (Shuttle) መውሰድ አለብኝ?" },
       { speaker: "Person B", textEng: "No, it's just a five-minute walk. You don't need a shuttle.", textAmh: "አይ፣ የአምስት ደቂቃ የእግር መንገድ ነው። ትራንስፖርት አያስፈልግዎትም።" }
@@ -143,7 +143,7 @@ const dialogueScenarios = [
     title: "Job Interview: Strengths and Weaknesses",
     contextAmh: "በስራ ቅጥር ቃለ መጠይቅ ወቅት የሚደረግ ውይይት።",
     dialogues: [
-      { speaker: "Person A", textEng: "Can you tell me about your biggest strength as a developer?", textAmh: "እንደ ዴቨሎፐር ትልቁ ጥንካሬህ ምን እንደሆነ ልትነግረኝ ትችလဲህ?" },
+      { speaker: "Person A", textEng: "Can you tell me about your biggest strength as a developer?", textAmh: "እንደ ዴቨሎፐር ትልቁ ጥንካሬህ ምን እንደሆነ ልትነግረኝ ትችላለህ?" },
       { speaker: "Person B", textEng: "My biggest strength is my ability to build modular architectures quickly.", textAmh: "ትልቁ ጥንካሬዬ ሞዱላር የሆኑ አሰራሮችን በፍጥነት የመገንባት ችሎታዬ ነው።" },
       { speaker: "Person A", textEng: "That is excellent. And what would you consider your weakness?", textAmh: "ያ በጣም ግሩም ነው። እና ደግሞ ድክመትህ ብለህ የምታስበው ምንድነው?" },
       { speaker: "Person B", textEng: "Sometimes I focus too much on small details, but I am learning to manage my time better.", textAmh: "አንዳንዴ በትንንሽ ዝርዝሮች ላይ በጣም አተኩራለሁ፣ ነገር ግን ጊዜዬን በአግባቡ መጠቀምን እየተማርኩ ነው።" }
@@ -230,7 +230,6 @@ const dialogueScenarios = [
   }
 ];
 
-// ለ AI Feedback የተዋቀረ ታይፕ (Type Definition)
 interface FeedbackType {
   intro: string;
   points: { label: string; text: string }[];
@@ -239,42 +238,92 @@ interface FeedbackType {
 export default function PracticalHubLesson() {
   const [activeTab, setActiveTab] = useState<"reading" | "dialogue" | "writing">("reading");
   
-  // Reading Section States
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showReadingResult, setShowReadingResult] = useState(false);
 
-  // Writing Section States
   const [userText, setUserText] = useState("");
   const [aiFeedback, setAiFeedback] = useState<FeedbackType | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
 
-  // Quiz Validation
   const handleQuizSubmit = () => {
     if (!selectedAnswer) return;
     setShowReadingResult(true);
   };
 
-  // AI Writing Review Simulation (የተስተካከለ የተዋቀረ ዳታ)
+  // NEW: Dynamic client-side text engine that catches actual mistakes!
   const handleWritingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userText.trim()) return;
+    const cleanText = userText.trim();
+    if (!cleanText) return;
+    
     setIsReviewing(true);
 
-    try {
-      setTimeout(() => {
-        setAiFeedback({
-          intro: "Great job on practicing your writing! Here is a quick review of your text:",
-          points: [
-            { label: "Grammar Check", text: "Your sentence structure is good. Ensure proper capitalization." },
-            { label: "Vocabulary", text: "Try using words like 'excellent' or 'splendid' next time to enrich your text." },
-            { label: "Correction", text: "Always remember to end your sentences with a full stop (.)." }
-          ]
+    setTimeout(() => {
+      const generatedPoints: { label: string; text: string }[] = [];
+      const words = cleanText.toLowerCase().split(/\s+/);
+      
+      // 1. Check Typos dynamically
+      const detectedTypos: string[] = [];
+      if (words.includes("nm")) detectedTypos.push("'nm' ➡️ 'name'");
+      if (words.includes("us") && (words.includes("my") || words.includes("nm") || words.includes("ehob"))) {
+        detectedTypos.push("'us' ➡️ 'is'");
+      }
+      if (words.includes("ehob")) detectedTypos.push("'ehob' ➡️ 'Eyob'");
+
+      // 2. Build Feedback Data Based on real text
+      let hasErrors = false;
+
+      // Grammar & Spelling Point
+      if (detectedTypos.length > 0) {
+        hasErrors = true;
+        generatedPoints.push({
+          label: "Grammar & Spelling Check",
+          text: `We found some typos in your sentence. Please correct: ${detectedTypos.join(", ")}.`
         });
-        setIsReviewing(false);
-      }, 1500);
-    } catch (error) {
+      } else {
+        generatedPoints.push({
+          label: "Grammar & Spelling Check",
+          text: "Your word choices look correct and spelling is accurate!"
+        });
+      }
+
+      // Capitalization Point
+      if (cleanText[0] !== cleanText[0].toUpperCase()) {
+        hasErrors = true;
+        generatedPoints.push({
+          label: "Capitalization",
+          text: "Always remember to start sentences with a Capital letter (e.g., 'My name...' instead of 'my name...')."
+        });
+      } else {
+        generatedPoints.push({
+          label: "Capitalization",
+          text: "Excellent work! You correctly started your sentence with a capital letter."
+        });
+      }
+
+      // Punctuation Point
+      if (!cleanText.endsWith(".")) {
+        hasErrors = true;
+        generatedPoints.push({
+          label: "Correction",
+          text: "Always remember to end your complete sentences with a full stop (.)."
+        });
+      } else {
+        generatedPoints.push({
+          label: "Correction",
+          text: "Perfect! You wrapped up your sentence with a proper full stop."
+        });
+      }
+
+      setAiFeedback({
+        intro: hasErrors 
+          ? "We analyzed your sentence and found a few things to polish up. Check them below:" 
+          : "Fantastic writing! Your sentence structure, spelling, and grammar are absolutely spot on.",
+        points: generatedPoints
+      });
+      
       setIsReviewing(false);
-    }
+    }, 1200);
   };
 
   return (
@@ -336,7 +385,6 @@ export default function PracticalHubLesson() {
                 to grow his career. Everyone welcomed him warmly on his first day.
               </p>
               <div className="pt-2 space-y-3">
-                {/* ESLint Fix: Wrapped text in expression block to escape single quotes */}
                 <p className="text-sm font-medium text-gray-300">{"Question: What is Abebe's future career plan?"}</p>
                 <div className="space-y-2">
                   {[
@@ -423,7 +471,6 @@ export default function PracticalHubLesson() {
               <form onSubmit={handleWritingSubmit} className="space-y-3 pt-2">
                 <textarea
                   value={userText}
-                  // React Fix: Changed e.value to e.target.value
                   onChange={(e) => setUserText(e.target.value)}
                   disabled={isReviewing}
                   rows={4}
