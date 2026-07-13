@@ -1,22 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// ቁൽፉን በቀጥታ እዚህ ጋ አስቀምጠነዋል
-const apiKey = "AQ.Ab8RN6KaBcIbJizLiuYh5Y-0vXdiisLwCrCUy_3_6urXnOpUdA";
+const apiKey = process.env.GEMINI_API_KEY;
 
 export async function POST(req: NextRequest) {
   if (!apiKey) {
     return NextResponse.json(
-      { error: 'API Key is missing.' },
+      { error: 'GEMINI_API_KEY is not configured on Vercel.' },
       { status: 500 }
     );
   }
 
   try {
-    const { message } = await req.json();
+    const body = await req.json();
+    // Frontendዱ 'message' ወይም 'text' ቢልክም እንዳይበላሽ ሁለቱንም ይፈትሻል
+    const userMessage = body.message || body.text;
 
-    if (!message) {
-      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+    if (!userMessage) {
+      return NextResponse.json({ error: 'Message or text is required' }, { status: 400 });
     }
 
     const ai = new GoogleGenerativeAI(apiKey);
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
           role: 'user',
           parts: [
             { text: "System Instruction: You are a friendly and encouraging AI English Tutor. Help the user practice and correct their English." },
-            { text: `User Message: ${message}` }
+            { text: `User Message: ${userMessage}` }
           ]
         }
       ]
