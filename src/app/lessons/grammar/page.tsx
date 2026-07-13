@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 
 const currentLessonData = {
@@ -39,18 +39,6 @@ const currentLessonData = {
     {
       title: "Story 2: Mobile Software Engineering Realities",
       content: "Eyeob is a dedicated software developer who builds modern full-stack mobile applications. Every single day, he writes clean typescript code, designs relational database schemas, and pushes his updates to GitHub. He manages backend data queries using Supabase and deploys user interfaces on Vercel. He performs all these engineering tasks completely from his smartphone, proving that determination overcomes hardware limitations."
-    },
-    {
-      title: "Story 3: Ground Support and Safety Protocol",
-      content: "Safety is the number one priority in aviation operations. Ground handlers wear high-visibility jackets and protective gear at all times on the ramp. They operate complex airport ground support equipment to unload heavy cargo containers from wide-body aircraft. Before any plane departs, supervisors double-check the balance logs and verify that the weight limits match the official master manifest exactly."
-    },
-    {
-      title: "Story 4: The Automated EdTech Platform",
-      content: "A modern educational platform needs clever automated tools to assist smart students. The system tracks user progress, calculates daily streaks, and awards experience points instantly upon lesson completion. Developers integrate customized database triggers to ensure that no user data is lost during heavy cloud traffic. This makes learning smooth and highly engaging for worldwide tech students."
-    },
-    {
-      title: "Story 5: Air Cargo and Global Trade Supply Chain",
-      content: "Air cargo represents a vital part of global trade and international supply chains. Fast airplanes transport perishable goods, medical supplies, and high-tech equipment across continents within a few hours. Logistics managers organize these high-priority shipments with absolute precision. Without efficient airport ground workers and organized digital manifests, modern global commerce simply stops moving."
     }
   ],
 
@@ -58,61 +46,22 @@ const currentLessonData = {
     {
       id: 1,
       question: "1. What is Abebe's main daily task at the airport hub?",
+      amharicHint: "አበበ በአውሮፕላን ማረፊያው ውስጥ ዋናው የዕለት ተዕለት ስራው ምንድነው?",
       options: ["To repair mechanical jet engines", "To handle international cargo and manage manifests", "To guide passengers to their terminal seats"],
       correctAnswer: 1
     },
     {
       id: 2,
       question: "2. Which Present Simple sentence is grammatically correct?",
+      amharicHint: "የትኛው የአሁኑ ጊዜ (Present Simple) አረፍተ ነገር በሰዋስው ትክክል ነው?",
       options: ["They am uploading code to the main branch.", "They is uploading code to the main branch.", "They are uploading code to the main branch."],
       correctAnswer: 2
     },
     {
       id: 3,
       question: "3. Where does the mobile developer host and deploy the live web interfaces?",
+      amharicHint: "የሞባይል አውጪው (Developer) የቀጥታ ድረ-ገጾቹን የት ነው የሚያስተናግደው እና የሚጭነው?",
       options: ["On local phone storage", "On Vercel cloud hosting", "Inside the Supabase database router"],
-      correctAnswer: 1
-    },
-    {
-      id: 4,
-      question: "4. What must ground handlers wear at all times on the airport ramp?",
-      options: ["Casual clothes and running shoes", "High-visibility jackets and protective gear", "Formal suits and aviation headsets"],
-      correctAnswer: 1
-    },
-    {
-      id: 5,
-      question: "5. Fill in the blank: 'He ______ his code repository to GitHub every evening.'",
-      options: ["push", "pushes", "pushing"],
-      correctAnswer: 1
-    },
-    {
-      id: 6,
-      question: "6. What does a 'cargo manifest' document represent in aviation logistics?",
-      options: ["A list of passengers on a flight", "A detailed document listing all loaded cargo items", "A manual for operating ground equipment"],
-      correctAnswer: 1
-    },
-    {
-      id: 7,
-      question: "7. Complete the sentence: 'We ______ to study Aviation Management next year.'",
-      options: ["wants", "want", "wanting"],
-      correctAnswer: 1
-    },
-    {
-      id: 8,
-      question: "8. Why is weight and balance double-checked before an aircraft departs?",
-      options: ["To ensure safety and meet official limits", "To make the flight arrive much faster", "To reduce the airport tax fees"],
-      correctAnswer: 0
-    },
-    {
-      id: 9,
-      question: "9. Identify the noun form associated with airplanes and flight science:",
-      options: ["Explore", "Essential", "Aviation"],
-      correctAnswer: 2
-    },
-    {
-      id: 10,
-      question: "10. In Present Simple, which auxiliary verb matches with 'She/He/It' for negatives?",
-      options: ["Do not (Don't)", "Does not (Doesn't)", "Are not (Aren't)"],
       correctAnswer: 1
     }
   ],
@@ -126,7 +75,8 @@ const currentLessonData = {
 export default function AdvancedLessonDashboard() {
   const [activeTab, setActiveTab] = useState<"overview" | "grammar" | "vocabulary" | "reading" | "speaking" | "quiz">("overview");
   const [streak, setStreak] = useState(5); 
-  const [userXp, setUserXp] = useState(320); 
+  const [userXp, setUserXp] = useState(330); 
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(true); // ተጠቃሚው ገብቷል
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedQuizOption, setSelectedQuizOption] = useState<number | null>(null);
@@ -134,7 +84,17 @@ export default function AdvancedLessonDashboard() {
   const [score, setScore] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
 
+  const tabContainerRef = useRef<HTMLDivElement>(null);
+
+  // ስልክ ላይ ፈጣን ንዝረት (Haptic Feedback) ለመስጠት
+  const triggerHaptic = (duration = 40) => {
+    if (typeof window !== "undefined" && navigator.vibrate) {
+      navigator.vibrate(duration);
+    }
+  };
+
   const handleQuizAnswer = () => {
+    triggerHaptic(60); // መልስ ሲያስረክብ ይነዝራል
     if (selectedQuizOption === currentLessonData.quizQuestions[currentQuestionIndex].correctAnswer) {
       setScore((prev) => prev + 1);
       setUserXp((prev) => prev + 10); 
@@ -143,6 +103,7 @@ export default function AdvancedLessonDashboard() {
   };
 
   const handleNextQuestion = () => {
+    triggerHaptic(40);
     setSelectedQuizOption(null);
     setQuizSubmitted(false);
     if (currentQuestionIndex < currentLessonData.quizQuestions.length - 1) {
@@ -162,9 +123,9 @@ export default function AdvancedLessonDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b101d] text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#0b101d] text-slate-100 flex flex-col font-sans select-none">
       
-      {/* --- INTEGRATED NAVBAR --- */}
+      {/* --- 1. የተስተካከለው ናቭባር (USER PROFILE INTEGRATION) --- */}
       <div className="sticky top-0 z-50 bg-[#121b2e]/90 backdrop-blur-md border-b border-slate-800/80 px-4 py-3 flex items-center justify-between shadow-md">
         <div className="flex items-center gap-2">
           <span className="text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">EyOS</span>
@@ -173,13 +134,24 @@ export default function AdvancedLessonDashboard() {
           </span>
         </div>
         
-        <div className="flex items-center gap-3 text-xs font-bold">
-          <div className="flex items-center gap-1 text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
-            🔥 <span>{streak} Days</span>
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1 text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20 text-[11px] font-bold">
+            🔥 <span>{streak}d</span>
           </div>
-          <div className="flex items-center gap-1 text-cyan-400 bg-cyan-400/10 px-2.5 py-1 rounded-lg border border-cyan-400/20">
-            ⚡ <span>{userXp} XP</span>
+          <div className="flex items-center gap-1 text-cyan-400 bg-cyan-400/10 px-2 py-0.5 rounded-lg border border-cyan-400/20 text-[11px] font-bold">
+            ⚡ <span>{userXp}</span>
           </div>
+
+          {/* 🛠️ ማሻሻያ፦ ተጠቃሚው ከገባ "Get Started" ሳይሆን ፕሮፋይሉ ይተካል */}
+          {isUserLoggedIn ? (
+            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-purple-600 to-blue-500 flex items-center justify-center text-xs font-black text-white border border-purple-400/30 shadow-inner ml-1">
+              E
+            </div>
+          ) : (
+            <button className="text-xs bg-purple-600 px-3 py-1.5 font-bold rounded-xl text-white">
+              Get Started 🚀
+            </button>
+          )}
         </div>
       </div>
 
@@ -193,24 +165,35 @@ export default function AdvancedLessonDashboard() {
           <p className="text-slate-400 text-xs mt-1 font-light">Complete all items to earn +{currentLessonData.xpReward} Completion XP</p>
         </div>
 
-        {/* --- TABS --- */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none border-b border-slate-800/40">
-          {(["overview", "grammar", "vocabulary", "reading", "speaking", "quiz"] as const).map((tab) => {
-            const isActive = activeTab === tab;
-            return (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 text-xs font-extrabold rounded-xl capitalize transition-all whitespace-nowrap border ${
-                  isActive 
-                    ? "bg-purple-600 text-white border-purple-500 shadow-lg shadow-purple-600/10 scale-105" 
-                    : "bg-[#121b2e] text-slate-400 border-slate-800/60 hover:bg-slate-800/50"
-                }`}
-              >
-                {tab === "overview" ? "📑 Overview" : tab === "grammar" ? "📝 Grammar" : tab === "vocabulary" ? "🧠 Words" : tab === "reading" ? "📖 Reading" : tab === "speaking" ? "🗣️ AI Speak" : "🎯 Quiz"}
-              </button>
-            );
-          })}
+        {/* --- 2. የተስተካከለው የታብ ባር (FADE EFFECT) --- */}
+        <div className="relative border-b border-slate-800/40">
+          {/* የግራ ፌድ */}
+          <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-[#0b101d] to-transparent pointer-events-none z-10" />
+          
+          <div 
+            ref={tabContainerRef}
+            className="flex items-center gap-1.5 overflow-x-auto pb-2 px-2 scrollbar-none snap-x"
+          >
+            {(["overview", "grammar", "vocabulary", "reading", "speaking", "quiz"] as const).map((tab) => {
+              const isActive = activeTab === tab;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => { triggerHaptic(20); setActiveTab(tab); }}
+                  className={`px-4 py-2 text-xs font-extrabold rounded-xl capitalize transition-all whitespace-nowrap border snap-bounding ${
+                    isActive 
+                      ? "bg-purple-600 text-white border-purple-500 shadow-lg shadow-purple-600/10 scale-105" 
+                      : "bg-[#121b2e] text-slate-400 border-slate-800/60 hover:bg-slate-800/50"
+                  }`}
+                >
+                  {tab === "overview" ? "📑 Overview" : tab === "grammar" ? "📝 Grammar" : tab === "vocabulary" ? "🧠 Words" : tab === "reading" ? "📖 Reading" : tab === "speaking" ? "🗣️ AI Speak" : "🎯 Quiz"}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* የቀኝ ፌድ */}
+          <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-[#0b101d] to-transparent pointer-events-none z-10" />
         </div>
 
         {/* --- DYNAMIC TAB VIEW --- */}
@@ -223,10 +206,6 @@ export default function AdvancedLessonDashboard() {
               <div className="p-4 bg-slate-900/40 rounded-xl border-l-4 border-l-blue-500 border-slate-800">
                 <p className="text-[10px] text-blue-400 uppercase font-black tracking-wider mb-1">Amharic Explanation</p>
                 <p className="text-slate-300 text-xs md:text-sm leading-relaxed">{currentLessonData.amharicOverview}</p>
-              </div>
-              <div className="p-4 bg-slate-900/40 rounded-xl border-l-4 border-l-purple-500 border-slate-800">
-                <p className="text-[10px] text-purple-400 uppercase font-black tracking-wider mb-1">English Explanation</p>
-                <p className="text-slate-300 text-xs md:text-sm leading-relaxed">{currentLessonData.englishOverview}</p>
               </div>
             </div>
           )}
@@ -241,7 +220,6 @@ export default function AdvancedLessonDashboard() {
                     <tr>
                       <th className="p-3">Subject</th>
                       <th className="p-3">Verb</th>
-                      <th className="p-3">Amharic</th>
                       <th className="p-3">Example</th>
                     </tr>
                   </thead>
@@ -250,15 +228,11 @@ export default function AdvancedLessonDashboard() {
                       <tr key={idx} className="hover:bg-slate-900/40">
                         <td className="p-3 font-mono font-bold text-purple-400">{rule.subject}</td>
                         <td className="p-3 font-semibold text-blue-400">{rule.verb}</td>
-                        <td className="p-3 text-slate-400">{rule.amharic}</td>
                         <td className="p-3 font-light text-slate-200 italic">"{rule.example}"</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-              </div>
-              <div className="p-4 bg-amber-950/20 border border-amber-800/40 rounded-xl text-xs font-mono whitespace-pre-line text-amber-300">
-                {currentLessonData.grammar.commonMistake}
               </div>
             </div>
           )}
@@ -273,12 +247,10 @@ export default function AdvancedLessonDashboard() {
                       <h4 className="text-base font-bold text-white tracking-wide">{vocab.word}</h4>
                       <span className="text-[10px] font-semibold bg-slate-800 px-2 py-0.5 rounded text-slate-400">{vocab.type}</span>
                     </div>
-                    <p className="text-[10px] text-purple-400 font-mono mt-1">{vocab.pronunciation} 🔊</p>
                     <p className="text-xs font-medium text-slate-300 mt-2 border-l-2 border-slate-700 pl-2">
                       <span className="text-[10px] text-slate-500 block">ትርጉም፡</span>{vocab.amharic}
                     </p>
                   </div>
-                  <p className="text-[11px] italic text-slate-400 mt-3 bg-slate-900/50 p-2 rounded-lg">"{vocab.example}"</p>
                 </div>
               ))}
             </div>
@@ -286,53 +258,31 @@ export default function AdvancedLessonDashboard() {
 
           {/* TAB 4: READING */}
           {activeTab === "reading" && (
-            <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 space-y-6">
-              <h3 className="text-base font-bold text-purple-400">📚 Practice Library (የንባብ ልምምዶች)</h3>
-              
-              <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1 scrollbar-thin">
-                {currentLessonData.readingStories.map((story, idx) => (
-                  <div key={idx} className="bg-slate-900/40 p-4 rounded-xl border border-slate-800/70 space-y-2">
-                    <h4 className="text-xs font-black uppercase text-green-400 tracking-wide">● {story.title}</h4>
-                    <p className="text-slate-300 leading-relaxed text-xs md:text-sm font-light">
-                      {story.content}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider pt-2 border-t border-slate-800/60">🔊 Real-world Conversation Practice</h4>
-              <div className="space-y-3">
-                {currentLessonData.conversations.map((chat, idx) => (
-                  <div key={idx} className="bg-slate-900/40 p-3 rounded-xl border border-slate-800">
-                    <p className="text-[10px] font-bold text-blue-400">{chat.role}:</p>
-                    <p className="text-xs text-slate-200 font-mono">"{chat.text}"</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">{chat.translation}</p>
-                  </div>
-                ))}
-              </div>
+            <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 space-y-4">
+              <h3 className="text-base font-bold text-purple-400">📚 Practice Library</h3>
+              {currentLessonData.readingStories.map((story, idx) => (
+                <div key={idx} className="bg-slate-900/40 p-4 rounded-xl border border-slate-800/70">
+                  <h4 className="text-xs font-black uppercase text-green-400 tracking-wide mb-1">● {story.title}</h4>
+                  <p className="text-slate-300 leading-relaxed text-xs font-light">{story.content}</p>
+                </div>
+              ))}
             </div>
           )}
 
           {/* TAB 5: AI SPEAKING */}
           {activeTab === "speaking" && (
             <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 text-center space-y-4">
-              <div className="w-12 h-12 bg-purple-600/10 border border-purple-500/30 text-purple-400 flex items-center justify-center rounded-full mx-auto text-xl animate-pulse">
+              <div className="w-12 h-12 bg-purple-600/10 border border-purple-500/30 text-purple-400 flex items-center justify-center rounded-full mx-auto text-xl">
                 🎙️
               </div>
               <h3 className="text-base font-bold text-white">Interactive Shadowing</h3>
-              <p className="text-xs text-slate-400 max-w-xs mx-auto">
-                የ AI ሞዴሉ አጠራርዎን እንዲገመግም ይህንን አረፍተ ነገር ይበሉ፦
-              </p>
-              <div className="bg-slate-900 p-4 rounded-xl font-mono text-xs text-slate-300 italic max-w-xl mx-auto border border-slate-800">
-                "I am exploring aviation management and learning English."
-              </div>
-              <button className="px-5 py-2 bg-gradient-to-r from-purple-600 to-blue-600 font-bold text-xs rounded-xl hover:opacity-90 transition shadow-md">
+              <button className="px-5 py-2 bg-gradient-to-r from-purple-600 to-blue-600 font-bold text-xs rounded-xl hover:opacity-90 transition">
                 Start Microphone
               </button>
             </div>
           )}
 
-          {/* TAB 6: QUIZ (ቁልፎች እንዳይደራረቡ የተስተካከለበት ቦታ) */}
+          {/* TAB 6: QUIZ (LOCALIZATION & STATE SAFE) */}
           {activeTab === "quiz" && (
             <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800 pb-2">
@@ -351,16 +301,24 @@ export default function AdvancedLessonDashboard() {
                     ></div>
                   </div>
 
-                  <p className="text-slate-200 font-semibold text-xs md:text-sm pt-2">
-                    {currentLessonData.quizQuestions[currentQuestionIndex].question}
-                  </p>
+                  {/* 🛠️ ማሻሻያ፦ ጥያቄው እና የአማርኛ ፍንጭ (A1 Localization) */}
+                  <div className="pt-2">
+                    <p className="text-slate-200 font-semibold text-xs md:text-sm">
+                      {currentLessonData.quizQuestions[currentQuestionIndex].question}
+                    </p>
+                    {currentLessonData.quizQuestions[currentQuestionIndex].amharicHint && (
+                      <span className="text-[11px] text-slate-500 font-light block mt-1 bg-slate-900/30 p-2 rounded-lg border border-slate-800/40 italic">
+                        💡 ትርጉም፦ {currentLessonData.quizQuestions[currentQuestionIndex].amharicHint}
+                      </span>
+                    )}
+                  </div>
                   
                   <div className="space-y-2">
                     {currentLessonData.quizQuestions[currentQuestionIndex].options.map((option, index) => (
                       <button
                         key={index}
                         disabled={quizSubmitted}
-                        onClick={() => setSelectedQuizOption(index)}
+                        onClick={() => { triggerHaptic(30); setSelectedQuizOption(index); }}
                         className={`w-full text-left p-3.5 rounded-xl border text-xs transition-all flex items-center justify-between ${
                           quizSubmitted
                             ? index === currentLessonData.quizQuestions[currentQuestionIndex].correctAnswer
@@ -379,14 +337,13 @@ export default function AdvancedLessonDashboard() {
                     ))}
                   </div>
 
-                  {/* 🛠️ እዚህ ጋር ነው ለውጡ ያለው፦ ቁልፎቹ በአንድ ቦታ ተተካክተዋል */}
                   {!quizSubmitted ? (
                     <button
                       disabled={selectedQuizOption === null}
                       onClick={handleQuizAnswer}
                       className="w-full mt-2 py-3 bg-purple-600 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed font-bold text-xs rounded-xl text-white transition hover:bg-purple-700 shadow-md"
                     >
-                      መልስህን አስረክብ (Submit Answer)
+                      מלስህን አስረክብ (Submit Answer)
                     </button>
                   ) : (
                     <button
@@ -403,8 +360,6 @@ export default function AdvancedLessonDashboard() {
                   <div className="text-3xl font-black text-emerald-400 bg-emerald-500/10 py-3 rounded-xl border border-emerald-500/20 max-w-[150px] mx-auto">
                     {score} / {currentLessonData.quizQuestions.length}
                   </div>
-                  <p className="text-[11px] text-slate-500">+{currentLessonData.xpReward} Completion XP ተሰጥቶሃል።</p>
-                  
                   <div className="flex flex-col sm:flex-row gap-2 justify-center pt-2">
                     <button 
                       onClick={restartQuiz}
@@ -412,9 +367,6 @@ export default function AdvancedLessonDashboard() {
                     >
                       🔄 ድጋሚ ፈትን
                     </button>
-                    <Link href="/" className="px-5 py-2.5 bg-purple-600 text-white font-bold text-xs rounded-xl text-center">
-                      ወደ ዳሽቦርድ ተመለስ
-                    </Link>
                   </div>
                 </div>
               )}
@@ -424,17 +376,16 @@ export default function AdvancedLessonDashboard() {
         </div>
       </main>
 
-      {/* --- FLOATING CONTROLS FOOTER (ጽዱ እና ከብልሽት የጸዳ) --- */}
+      {/* --- FLOATING FOOTER --- */}
       <footer className="fixed bottom-0 left-0 right-0 bg-[#0b101d]/90 backdrop-blur-md border-t border-slate-800/60 px-4 py-3 z-40">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href="/" className="px-4 py-2 border border-slate-800 text-slate-400 rounded-xl text-xs font-bold hover:bg-slate-800 transition">
+          <Link href="/" onClick={() => triggerHaptic(20)} className="px-4 py-2 border border-slate-800 text-slate-400 rounded-xl text-xs font-bold hover:bg-slate-800 transition">
             ◀ ወደ ማውጫ ተመለስ
           </Link>
           
-          {/* ተማሪው ከኩዊዝ ውጪ ባሉ ታቦች ላይ እያለ በቀጥታ ወደ ኩዊዝ እንዲሄድ የሚረዳ ቀጭን ቁልፍ */}
           {activeTab !== "quiz" && (
             <button 
-              onClick={() => setActiveTab("quiz")}
+              onClick={() => { triggerHaptic(30); setActiveTab("quiz"); }}
               className="px-4 py-2 bg-purple-600/20 text-purple-300 border border-purple-500/30 font-bold text-xs rounded-xl transition hover:bg-purple-600 hover:text-white"
             >
               ወደ ኩዊዝ ሂድ 🎯
