@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 export default function Navbar() {
   return (
@@ -13,9 +14,9 @@ export default function Navbar() {
           <a href="#tutor" className="hover:text-white transition">AI Tutor</a>
         </div>
         <div>
-          <button className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all">
+          <Link href="/signup" className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all inline-block">
             Get Started 🚀
-          </button>
+          </Link>
         </div>
       </div>
     </nav>
