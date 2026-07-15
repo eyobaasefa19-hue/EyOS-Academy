@@ -18,19 +18,61 @@ export default function DashboardHub() {
         return;
       }
       try {
-        // 1. መጀመሪያ የገባውን ተጠቃሚ መለያ (Auth User) ማግኘት
+        // 1. የገባውን ተጠቃሚ (Auth User) ማግኘት
         const { data: { user: authUser } } = await supabase.auth.getUser();
         if (authUser) {
           setUser(authUser);
           
-          // 2. ከ UserProfile ሰንጠረዥ የዚህን ተጠቃሚ XP እና Streak መረጃ መሳብ
+          // 2. ከ UserProfile ሰንጠረዥ የዚህን ተጠቃሚ መረጃ መሳብ (lastActive ን ጨምሮ)
           const { data: profileData, error } = await supabase
             .from('UserProfile')
-            .select('xpPoints, streak, fullName')
+            .select('xpPoints, streak, fullName, lastActive')
             .eq('id', authUser.id)
             .single();
 
           if (profileData) {
+            let currentStreak = profileData.streak ?? 0;
+            const todayStr = new Date().toISOString().split('T')[0]; // የዛሬ ቀን (YYYY-MM-DD)
+            
+            // የትላንትን ቀን ማስላት
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0]; // የትላንት ቀን (YYYY-MM-DD)
+            
+            let newStreak = currentStreak;
+            let shouldUpdate = false;
+            
+            if (!profileData.lastActive) {
+              // ለመጀመሪያ ጊዜ ሲገባ Streak 1 ይሆናል
+              newStreak = 1;
+              shouldUpdate = true;
+            } else {
+              const lastActiveStr = profileData.lastActive.split('T')[0];
+              
+              if (lastActiveStr === yesterdayStr) {
+                // ትላንት ገብቶ ነበር ➔ Streak በ 1 ይጨምራል
+                newStreak = currentStreak + 1;
+                shouldUpdate = true;
+              } else if (lastActiveStr !== todayStr) {
+                // ትላንትንም ዛሬንም አልገባም (ቀን አሳልፏል) ➔ Streak ወደ 1 ይመለሳል
+                newStreak = 1;
+                shouldUpdate = true;
+              }
+            }
+            
+            // 3. መረጃው መለወጥ ካለበት ዳታቤዙን እናሻሽላለን
+            if (shouldUpdate) {
+              const { error: updateError } = await supabase
+                .from('UserProfile')
+                .update({ streak: newStreak, lastActive: todayStr })
+                .eq('id', authUser.id);
+                
+              if (!updateError) {
+                profileData.streak = newStreak;
+                profileData.lastActive = todayStr;
+              }
+            }
+            
             setProfile(profileData);
           }
         }
@@ -98,7 +140,7 @@ export default function DashboardHub() {
           )}
         </header>
 
-        {/* 📊 User Gamification Stats Section */}
+        {/* User Gamification Stats Section */}
         {user && !loading && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
             {/* User Greeting Card */}
