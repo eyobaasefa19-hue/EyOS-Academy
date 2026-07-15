@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
+import { supabase } from "../../../lib/supabase";
 
 export default function AIChatLesson() {
   const [messages, setMessages] = useState([
@@ -11,11 +12,24 @@ export default function AIChatLesson() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   
+  // አዲስ የተጨመሩ (Userን ለማወቅ እና XP Alert ለማሳየት)
+  const [user, setUser] = useState<any>(null);
+  const [showXpAlert, setShowXpAlert] = useState(false); 
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  // ገጹ ሲከፈት ተጠቃሚውን ከዳታቤዝ ማወቅ
+  useEffect(() => {
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    }
+    getUser();
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -33,7 +47,6 @@ export default function AIChatLesson() {
     setIsTyping(true);
 
     try {
-      // ለሰርቨሩ 'message' በሚል ቁልፍ ተጠቃሚው የጻፈውን ነጠላ ፅሑፍ ብቻ እንልካለን
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -46,13 +59,36 @@ export default function AIChatLesson() {
         throw new Error(data.error || "Failed to fetch");
       }
 
-      // ሰርቨሩ የመለሰልንን 'reply' እዚህ ጋር እናስቀምጣለን
       const aiMessage = {
         id: Date.now(),
         sender: "ai",
         text: data.reply
       };
       setMessages((prev) => [...prev, aiMessage]);
+
+      // 🌟 እዚህ ጋር የ XP ነጥብ መጨመሪያውን ጨመርን 🌟
+      if (user) {
+        // 1. መጀመሪያ ያለውን XP ከዳታቤዝ እናነባለን
+        const { data: profile } = await supabase
+          .from('UserProfile')
+          .select('xpPoints')
+          .eq('id', user.id)
+          .single();
+
+        const currentXP = profile?.xpPoints || 0;
+        const newXP = currentXP + 10; // ለእያንዳንዱ መልእክት 10 XP ይጨመራል
+
+        // 2. አዲሱን የነጥብ ድምር ዳታቤዝ ላይ እናስቀምጣለን
+        await supabase
+          .from('UserProfile')
+          .update({ xpPoints: newXP })
+          .eq('id', user.id);
+
+        // 3. አሪፍ ማሳወቂያ ለ 3 ሰከንድ እናሳያለን
+        setShowXpAlert(true);
+        setTimeout(() => setShowXpAlert(false), 3000);
+      }
+
     } catch (error) {
       console.error(error);
       setMessages((prev) => [
@@ -65,9 +101,16 @@ export default function AIChatLesson() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-white p-4 sm:p-6 flex flex-col">
+    <div className="min-h-screen bg-[#0B0F19] text-white p-4 sm:p-6 flex flex-col relative">
+      
+      {/* 🌟 የ XP መጨመሩን የሚያሳውቅ ብቅ ባይ አኒሜሽን 🌟 */}
+      {showXpAlert && (
+        <div className="fixed top-10 right-1/2 translate-x-1/2 md:translate-x-0 md:right-10 z-50 bg-amber-500 text-white text-sm font-bold px-5 py-2 rounded-full animate-bounce shadow-lg shadow-amber-500/50">
+          +10 XP አግኝተዋል! 🎉
+        </div>
+      )}
+
       <div className="max-w-3xl w-full mx-auto flex-1 flex flex-col">
-        
         <div>
           <Link href="/dashboard" className="text-indigo-400 hover:underline mb-4 inline-block">
             ← ወደ ዳሽቦርድ ይመለሱ
