@@ -1,25 +1,46 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { BookOpen, BrainCircuit, Bot, GraduationCap, LayoutGrid, User } from 'lucide-react';
+import { BookOpen, BrainCircuit, Bot, GraduationCap, LayoutGrid, User, Flame, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 
 export default function DashboardHub() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function getUser() {
-      if (!supabase || !supabase.auth) return;
+    async function getDashboardData() {
+      if (!supabase || !supabase.auth) {
+        setLoading(false);
+        return;
+      }
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
+        // 1. መጀመሪያ የገባውን ተጠቃሚ መለያ (Auth User) ማግኘት
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (authUser) {
+          setUser(authUser);
+          
+          // 2. ከ UserProfile ሰንጠረዥ የዚህን ተጠቃሚ XP እና Streak መረጃ መሳብ
+          const { data: profileData, error } = await supabase
+            .from('UserProfile')
+            .select('xpPoints, streak, fullName')
+            .eq('id', authUser.id)
+            .single();
+
+          if (profileData) {
+            setProfile(profileData);
+          }
+        }
       } catch (e) {
-        console.error(e);
+        console.error('Error fetching dashboard data:', e);
+      } finally {
+        setLoading(false);
       }
     }
-    getUser();
+    getDashboardData();
   }, []);
 
   const menuItems = [
@@ -29,7 +50,7 @@ export default function DashboardHub() {
       description: 'በሙያዎ እና በዕለት ተዕለት ሕይወትዎ የሚጠቅሙትን የእንግሊዘኛ ትምህርቶች ይማሩ።',
       icon: <BookOpen className="w-6 h-6" />,
       color: 'bg-indigo-600',
-      route: '/lessons/grammar' // ወደ ሰራኸው ሰዋስው/ትምህርት ገጽ ይወስዳል
+      route: '/lessons/grammar'
     },
     {
       id: '02',
@@ -37,7 +58,7 @@ export default function DashboardHub() {
       description: 'ቃላትን በፍጥነት የሚያጠኑበት እና አጠቃቀማቸውን የሚለማመዱበት ልዩ ክፍል::',
       icon: <BrainCircuit className="w-6 h-6" />,
       color: 'bg-fuchsia-600',
-      route: '/lessons/vocabulary' // ወደ ሰራኸው vocabulary ፎልደር ይወስዳል
+      route: '/lessons/vocabulary'
     },
     {
       id: '03',
@@ -45,7 +66,7 @@ export default function DashboardHub() {
       description: 'ከአርቲፊሻል ኢንተለጀንስ አስተማሪ ጋር በቀጥታ በድምፅ እና በፅሁፍ ይለማመዱ::',
       icon: <Bot className="w-6 h-6" />,
       color: 'bg-emerald-600',
-      route: '/lessons/ai-chat' // ወደ ሰራኸው ai-chat ፎልደር ይወስዳል
+      route: '/lessons/ai-chat'
     },
     {
       id: '04',
@@ -53,13 +74,15 @@ export default function DashboardHub() {
       description: 'ማንበብ፣ የዕለት ተዕለት ውይይቶችን መለማመድ እና የፅሁፍ ብቃትዎን ያሳድጉ::',
       icon: <GraduationCap className="w-6 h-6" />,
       color: 'bg-blue-600',
-      route: '/lessons/practical-hub' // ወደ ሰራኸው practical-hub ፎልደር ይወስዳል
+      route: '/lessons/practical-hub'
     }
   ];
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 p-4 md:p-8 font-sans">
       <div className="max-w-4xl mx-auto">
+        
+        {/* Header */}
         <header className="mb-10 border-b border-slate-800 pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-white bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
@@ -75,6 +98,51 @@ export default function DashboardHub() {
           )}
         </header>
 
+        {/* 📊 User Gamification Stats Section */}
+        {user && !loading && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+            {/* User Greeting Card */}
+            <div className="bg-slate-800/40 p-4 rounded-2xl border border-slate-800/60 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center border border-blue-500/20">
+                <User className="w-5 h-5 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-400">እንኳን ደህና መጡ 👋</p>
+                <p className="text-sm font-semibold text-white truncate max-w-[150px]">
+                  {profile?.fullName || user.email?.split('@')[0]}
+                </p>
+              </div>
+            </div>
+
+            {/* XP Points Card */}
+            <div className="bg-slate-800/40 p-4 rounded-2xl border border-slate-800/60 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-600/10 flex items-center justify-center border border-amber-500/20">
+                <Zap className="w-5 h-5 text-amber-400 animate-pulse" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-400">ያገኙት ነጥብ</p>
+                <p className="text-lg font-bold text-amber-400">
+                  {profile?.xpPoints ?? 0} XP
+                </p>
+              </div>
+            </div>
+
+            {/* Streak Card */}
+            <div className="bg-slate-800/40 p-4 rounded-2xl border border-slate-800/60 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-600/10 flex items-center justify-center border border-rose-500/20">
+                <Flame className="w-5 h-5 text-rose-400" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-400">የቀናት ተከታታይነት</p>
+                <p className="text-lg font-bold text-rose-400">
+                  {profile?.streak ?? 0} ቀናት
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Learning Hub Sections */}
         <div className="space-y-6">
           <h2 className="text-xl font-bold text-slate-200 flex items-center gap-2 mb-4">
             <LayoutGrid className="w-5 h-5 text-blue-400" /> የመማሪያ ክፍሎች (Learning Hub)
@@ -82,9 +150,9 @@ export default function DashboardHub() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {menuItems.map((item) => (
-              <div key={item.id} className="bg-slate-800/50 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+              <div key={item.id} className="bg-slate-800/50 border border-slate-800/80 rounded-2xl p-6 shadow-xl flex flex-col justify-between hover:border-slate-700/60 transition-all duration-300">
                 <div>
-                  <div className={`w-12 h-12 rounded-xl ${item.color} flex items-center justify-center text-white mb-4`}>
+                  <div className={`w-12 h-12 rounded-xl ${item.color} flex items-center justify-center text-white mb-4 shadow-lg`}>
                     {item.icon}
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
