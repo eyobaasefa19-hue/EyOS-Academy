@@ -11,7 +11,6 @@ export default function Navbar() {
   const router = useRouter();
 
   useEffect(() => {
-    // 1. የአሁኑን ተጠቃሚ ሴሽን ማረጋገጥ
     async function checkUser() {
       if (!supabase) return;
       const { data: { user: authUser } } = await supabase.auth.getUser();
@@ -19,7 +18,6 @@ export default function Navbar() {
     }
     checkUser();
 
-    // 2. ተጠቃሚው ሎግኢን ወይም ሎግአውት ሲያደርግ በራሱ እንዲያውቅ ማድረግ
     if (supabase) {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
         setUser(session?.user ?? null);
@@ -28,7 +26,6 @@ export default function Navbar() {
     }
   }, []);
 
-  // ሎግአውት የማድረጊያ ፈንክሽን
   const handleSignOut = async () => {
     if (supabase) {
       await supabase.auth.signOut();
@@ -37,13 +34,13 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-gray-800 bg-[#090d16]/85 backdrop-blur-md px-6 py-4">
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-gray-800 bg-[#090d16]/85 backdrop-blur-md px-4 py-3.5 sm:px-6">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         
         {/* Logo Section */}
-        <div className="flex items-center space-x-2">
-          <span className="text-2xl font-black tracking-wider bg-gradient-to-r from-blue-500 to-indigo-400 bg-clip-text text-transparent">EyOS</span>
-          <span className="text-sm font-semibold bg-gray-800 text-blue-400 px-2 py-0.5 rounded-full">Academy</span>
+        <div className="flex items-center space-x-1.5 shrink-0">
+          <span className="text-xl sm:text-2xl font-black tracking-wider bg-gradient-to-r from-blue-500 to-indigo-400 bg-clip-text text-transparent">EyOS</span>
+          <span className="text-[11px] sm:text-sm font-semibold bg-gray-800 text-blue-400 px-2 py-0.5 rounded-full">Academy</span>
         </div>
         
         {/* Desktop Navigation Links */}
@@ -52,29 +49,30 @@ export default function Navbar() {
           <a href="#tutor" className="hover:text-white transition">AI Tutor</a>
         </div>
 
-        {/* 🌟 Dynamic Auth Buttons 🌟 */}
-        <div className="flex items-center space-x-4">
+        {/* 🌟 Dynamic Auth Buttons (Optimized for Mobile Touch) 🌟 */}
+        <div className="flex items-center gap-2 sm:gap-3">
           {user ? (
             <>
-              {/* ተጠቃሚው ሎግኢን ካደረገ የሚታይ */}
+              {/* Dashboard Button: Now styled as a proper, highly-clickable button on all devices */}
               <Link 
                 href="/dashboard" 
-                className="text-xs font-semibold text-gray-400 hover:text-white flex items-center gap-1.5 transition"
+                className="bg-slate-900/90 hover:bg-slate-800/80 border border-slate-800 hover:border-slate-700 text-slate-300 text-xs font-semibold px-2.5 py-2 rounded-xl transition-all flex items-center gap-1.5 active:scale-95 shrink-0"
               >
-                <LayoutDashboard className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Dashboard</span>
+                <LayoutDashboard className="w-3.5 h-3.5 text-blue-400" />
+                <span className="text-[11px] sm:text-xs">Dashboard</span>
               </Link>
               
+              {/* Sign Out Button */}
               <button 
                 onClick={handleSignOut}
-                className="bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-750 text-slate-300 text-xs font-semibold px-3 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-md active:scale-95"
+                className="bg-slate-900/90 hover:bg-slate-800/80 border border-slate-800 hover:border-slate-700 text-slate-300 text-xs font-semibold px-2.5 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-md active:scale-95 shrink-0"
               >
                 <LogOut className="w-3.5 h-3.5 text-rose-400" />
-                <span>Sign Out</span>
+                <span className="hidden sm:inline">Sign Out</span>
+                <span className="sm:hidden text-[11px]">Exit</span>
               </button>
             </>
           ) : (
-            /* ተጠቃሚው ሎግኢን ካላደረገ የሚታይ */
             <Link 
               href="/signup" 
               className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all inline-block shadow-lg active:scale-95"
