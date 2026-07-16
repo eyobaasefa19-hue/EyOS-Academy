@@ -69,8 +69,6 @@ export default function DashboardHub() {
           }
         }
 
-        // 🌟 አዲሱ የ Leaderboard ኮድ 🌟
-        // ከፍተኛ XP ያላቸውን 5 ተማሪዎች ከዳታቤዝ ማምጣት
         const { data: topUsers } = await supabase
           .from('UserProfile')
           .select('fullName, xpPoints, email')
@@ -146,7 +144,7 @@ export default function DashboardHub() {
 
         {user && !loading && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            {/* Stats Column (Takes 2/3 space on desktop) */}
+            {/* Stats Column */}
             <div className="md:col-span-2 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-slate-800/40 p-5 rounded-2xl border border-slate-800/60 flex items-center gap-4">
@@ -170,7 +168,6 @@ export default function DashboardHub() {
                 </div>
               </div>
 
-              {/* 🌟 አዲሱ የ Leaderboard ዩአይ (UI) 🌟 */}
               <div className="bg-slate-800/40 border border-slate-800/60 rounded-2xl p-5">
                 <h2 className="text-lg font-bold text-slate-200 flex items-center gap-2 mb-4">
                   <Trophy className="w-5 h-5 text-yellow-400" /> ከፍተኛ ተማሪዎች (Top 5 Learners)
@@ -206,21 +203,27 @@ export default function DashboardHub() {
             </div>
 
             {/* Profile Info Column */}
-            <div className="bg-slate-800/40 p-6 rounded-2xl border border-slate-800/60 flex flex-col items-center justify-center text-center">
+            <div className="bg-slate-800/40 p-6 rounded-2xl border border-slate-800/60 flex flex-col items-center justify-center text-center mt-0">
               <div className="w-20 h-20 rounded-full bg-blue-600/20 flex items-center justify-center border-4 border-slate-800 mb-4 relative">
                 <User className="w-10 h-10 text-blue-400" />
-                <div className="absolute -bottom-2 -right-2 bg-slate-800 p-1.5 rounded-full border border-slate-700">
+                <div className="absolute -bottom-1 -right-1 bg-slate-800 p-1 rounded-full border border-slate-700">
                   <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
                 </div>
               </div>
-              <h3 className="text-lg font-bold text-white mb-1">
+              <h3 className="text-lg font-bold text-white mb-0.5">
                 {profile?.fullName || user.email?.split('@')[0]}
               </h3>
               <p className="text-xs text-slate-400 mb-4">{user.email}</p>
-              <div className="w-full bg-slate-800 rounded-full h-2 mb-2 overflow-hidden border border-slate-700">
-                <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full" style={{ width: `${Math.min(((profile?.xpPoints || 0) / 100) * 100, 100)}%` }}></div>
+              
+              <div className="w-full max-w-[200px]">
+                <div className="flex justify-between text-[10px] text-slate-500 mb-1">
+                   <span>ደረጃዎ</span>
+                   <span>{Math.min(((profile?.xpPoints || 0) / 100) * 100, 100).toFixed(0)}%</span>
+                </div>
+                <div className="w-full bg-slate-900 rounded-full h-2 mb-2 overflow-hidden border border-slate-700">
+                  <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full" style={{ width: `${Math.min(((profile?.xpPoints || 0) / 100) * 100, 100)}%` }}></div>
+                </div>
               </div>
-              <p className="text-[10px] text-slate-500">ወደ ቀጣዩ ደረጃ ለመድረስ አዲስ ነጥቦችን ይሰብስቡ</p>
             </div>
           </div>
         )}
