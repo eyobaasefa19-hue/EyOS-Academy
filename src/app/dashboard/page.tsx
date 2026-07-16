@@ -124,21 +124,21 @@ export default function DashboardHub() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-sans antialiased">
+    <div className="min-h-screen bg-slate-955 text-slate-100 p-4 md:p-8 font-sans antialiased">
       <div className="max-w-5xl mx-auto space-y-6">
         
-        {/* Header */}
+        {/* 🌟 የተስተካከለው ፕሪሚየም ሄደር (Personalized Welcome) 🌟 */}
         <header className="border-b border-slate-900 pb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-black tracking-tight text-white bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
-              EyOS Academy
+            <h1 className="text-2xl font-black tracking-tight text-white">
+              ሰላም፣ <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">{profile?.fullName || user?.email?.split('@')[0] || 'ተማሪ'}</span> 👋
             </h1>
-            <p className="text-slate-400 text-xs mt-0.5 font-medium">Professional & Vocational English Accelerator</p>
+            <p className="text-slate-400 text-xs mt-1 font-medium">የዛሬውን የእንግሊዘኛ ትምህርቶን እዚህ ይጀምሩ</p>
           </div>
           {user && (
-            <div className="bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800 text-[11px] text-slate-400 flex items-center gap-2 shadow-sm">
+            <div className="bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-850 text-[11px] text-slate-400 flex items-center gap-2 shadow-sm">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Session: <span className="text-blue-400 font-mono">{user.email}</span></span>
+              <span>አካውንት: <span className="text-blue-400 font-mono">{user.email}</span></span>
             </div>
           )}
         </header>
@@ -146,10 +146,10 @@ export default function DashboardHub() {
         {user && !loading && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            {/* ─── LEFT COLUMN: CORE LEARNING & QUICK STATS ─── */}
+            {/* ─── LEFT COLUMN: STATS & LEARNING ─── */}
             <div className="lg:col-span-2 space-y-6">
               
-              {/* Quick Stats: Side-by-Side on Mobile to save space */}
+              {/* Quick Stats */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-900 shadow-xl flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 shrink-0">
@@ -172,9 +172,9 @@ export default function DashboardHub() {
                 </div>
               </div>
 
-              {/* Learning Hub: Moved Up for immediate user action */}
+              {/* Learning Hub */}
               <div className="space-y-4">
-                <h2 className="text-base font-bold text-slate-300 flex items-center gap-2">
+                <h2 className="text-sm font-bold text-slate-400 flex items-center gap-2 uppercase tracking-wider">
                   <LayoutGrid className="w-4 h-4 text-blue-400" /> የመማሪያ ክፍሎች (Learning Hub)
                 </h2>
                 
@@ -182,7 +182,7 @@ export default function DashboardHub() {
                   {menuItems.map((item) => (
                     <div key={item.id} className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 shadow-lg flex flex-col justify-between hover:border-slate-800/80 transition-all duration-300 group">
                       <div>
-                        <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center text-white mb-3 shadow-md group-hover:scale-105 transition-transform`}>
+                        <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center text-white mb-3 shadow-md`}>
                           {item.icon}
                         </div>
                         <h3 className="text-base font-bold text-white mb-1.5 group-hover:text-blue-400 transition-colors">{item.title}</h3>
@@ -201,7 +201,7 @@ export default function DashboardHub() {
 
             </div>
 
-            {/* ─── RIGHT COLUMN: SIDEBAR (PROFILE & LEADERBOARD) ─── */}
+            {/* ─── RIGHT COLUMN: SIDEBAR ─── */}
             <div className="space-y-6">
               
               {/* Profile Card */}
@@ -213,13 +213,13 @@ export default function DashboardHub() {
                   </div>
                 </div>
                 <h3 className="text-base font-bold text-white tracking-tight">
-                  {profile?.fullName || user.email?.split('@')[0]}
+                  {profile?.fullName || user?.email?.split('@')[0]}
                 </h3>
                 <p className="text-[11px] text-slate-500 font-mono mb-4">{user.email}</p>
                 
                 <div className="w-full bg-slate-950 border border-slate-900 rounded-xl p-3 space-y-1.5">
                   <div className="flex justify-between text-[10px] font-medium text-slate-400">
-                     <span>የአሁኑ ደረጃ ፕሮግረስ</span>
+                     <span>የደረጃዎ ፕሮግረስ</span>
                      <span className="text-blue-400 font-bold">{Math.min(((profile?.xpPoints || 0) / 100) * 100, 100).toFixed(0)}%</span>
                   </div>
                   <div className="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
