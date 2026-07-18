@@ -1,5 +1,8 @@
 import './globals.css';
 import Navbar from '../components/Navbar';
+import { Inter } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
   title: 'EyOS Academy - AI English Tutor',
@@ -13,9 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased">
+      <body className={`${inter.className} antialiased bg-gray-50 text-gray-900`}>
         <Navbar />
-        <div className="pt-20">
+        <div className="pt-20 min-h-screen">
           {children}
         </div>
       </body>
