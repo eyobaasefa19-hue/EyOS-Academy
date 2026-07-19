@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-// 🛠️ በትክክለኛው ቦታ ከተፈጠረው ፋይል ላይ መረጃዎቹን አገናኘን
+// የ Supabase ኮኔክሽን ከትክክለኛው ፎልደር - (የ path አቅጣጫውን እንዳስፈላጊነቱ አስተካክለው)
+import { supabase } from "../../../lib/supabase"; 
 import { readingStories, lessonModules } from "./lessonData";
 
 const staticLessonData = {
@@ -41,9 +42,12 @@ const staticLessonData = {
 
 export default function AdvancedLessonDashboard() {
   const [activeTab, setActiveTab] = useState<"overview" | "grammar" | "vocabulary" | "reading" | "speaking" | "quiz">("overview");
-  const [streak, setStreak] = useState(5); 
-  const [userXp, setUserXp] = useState(330); 
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(true);
+  
+  // State variables for Database Auth & Stats
+  const [authUser, setAuthUser] = useState<any>(null);
+  const [streak, setStreak] = useState(0); 
+  const [userXp, setUserXp] = useState(0); 
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedQuizOption, setSelectedQuizOption] = useState<number | null>(null);
@@ -51,10 +55,31 @@ export default function AdvancedLessonDashboard() {
   const [score, setScore] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
 
-  // 🛠️ ጥያቄዎቹን ከ lessonModules እያመጣን ነው
   const questions = lessonModules[0].questions;
-
   const tabContainerRef = useRef<HTMLDivElement>(null);
+
+  // 🛠️ 1. ገፁ ሲከፈት የዩዘሩን ትክክለኛ XP እና Streak ከ Supabase እናመጣለን
+  useEffect(() => {
+    async function loadUserData() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setAuthUser(user);
+        setIsUserLoggedIn(true);
+        
+        const { data: profile } = await supabase
+          .from('UserProfile')
+          .select('xpPoints, streak')
+          .eq('id', user.id)
+          .single();
+
+        if (profile) {
+          setUserXp(profile.xpPoints || 0);
+          setStreak(profile.streak || 0);
+        }
+      }
+    }
+    loadUserData();
+  }, []);
 
   const triggerHaptic = (duration = 40) => {
     if (typeof window !== "undefined" && navigator.vibrate) {
@@ -66,20 +91,37 @@ export default function AdvancedLessonDashboard() {
     triggerHaptic(60); 
     if (selectedQuizOption === questions[currentQuestionIndex].correctAnswer) {
       setScore((prev) => prev + 1);
-      setUserXp((prev) => prev + 10); 
+      setUserXp((prev) => prev + 10); // ጥያቄ ሲመልስ 10 XP በጊዜያዊነት (Locally) ይጨምራል
     }
     setQuizSubmitted(true);
   };
 
-  const handleNextQuestion = () => {
+  // 🛠️ 2. ጥያቄው ሲያልቅ አዲሱን ጠቅላላ የ XP መጠን በቀጥታ ዳታቤዝ ላይ ሴቭ እናደርጋለን
+  const handleNextQuestion = async () => {
     triggerHaptic(40);
     setSelectedQuizOption(null);
     setQuizSubmitted(false);
+    
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
       setQuizFinished(true);
-      setUserXp((prev) => prev + staticLessonData.xpReward);
+      
+      // 150 Completion XP ከጥያቄዎቹ XP ጋር እንደምራለን
+      const finalXpToSave = userXp + staticLessonData.xpReward;
+      setUserXp(finalXpToSave); // UI አፕዴት ለማድረግ
+      
+      // አዲሱን XP ዳታቤዝ ላይ ማስቀመጥ (Saving to Supabase)
+      if (authUser) {
+        try {
+          await supabase
+            .from('UserProfile')
+            .update({ xpPoints: finalXpToSave })
+            .eq('id', authUser.id);
+        } catch (error) {
+          console.error("Error updating XP in database:", error);
+        }
+      }
     }
   };
 
@@ -113,7 +155,7 @@ export default function AdvancedLessonDashboard() {
 
           {isUserLoggedIn ? (
             <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-purple-600 to-blue-500 flex items-center justify-center text-xs font-black text-white border border-purple-400/30 shadow-inner ml-1">
-              E
+              {authUser?.email?.charAt(0).toUpperCase() || 'E'}
             </div>
           ) : (
             <button className="text-xs bg-purple-600 px-3 py-1.5 font-bold rounded-xl text-white">
@@ -228,7 +270,7 @@ export default function AdvancedLessonDashboard() {
             </div>
           )}
 
-          {/* TAB 4: READING (50+ STORIES) */}
+          {/* TAB 4: READING */}
           {activeTab === "reading" && (
             <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 space-y-4">
               <h3 className="text-base font-bold text-purple-400">📚 Practice Library ({readingStories.length} Stories)</h3>
@@ -265,7 +307,7 @@ export default function AdvancedLessonDashboard() {
             </div>
           )}
 
-          {/* TAB 6: QUIZ (50+ QUESTIONS) */}
+          {/* TAB 6: QUIZ */}
           {activeTab === "quiz" && (
             <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800 pb-2">
@@ -342,6 +384,9 @@ export default function AdvancedLessonDashboard() {
                   <div className="text-3xl font-black text-emerald-400 bg-emerald-500/10 py-3 rounded-xl border border-emerald-500/20 max-w-[150px] mx-auto">
                     {score} / {questions.length}
                   </div>
+                  <p className="text-slate-400 text-xs mt-2">
+                    +{staticLessonData.xpReward} Completion XP ወደ አካውንትህ ተደምሯል!
+                  </p>
                   <div className="flex flex-col sm:flex-row gap-2 justify-center pt-2">
                     <button 
                       onClick={restartQuiz}
@@ -361,7 +406,7 @@ export default function AdvancedLessonDashboard() {
       {/* FLOATING FOOTER */}
       <footer className="fixed bottom-0 left-0 right-0 bg-[#0b101d]/90 backdrop-blur-md border-t border-slate-800/60 px-4 py-3 z-40">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href="/" onClick={() => triggerHaptic(20)} className="px-4 py-2 border border-slate-800 text-slate-400 rounded-xl text-xs font-bold hover:bg-slate-800 transition">
+          <Link href="/Dashboard" onClick={() => triggerHaptic(20)} className="px-4 py-2 border border-slate-800 text-slate-400 rounded-xl text-xs font-bold hover:bg-slate-800 transition">
             ◀ ወደ ማውጫ ተመለስ
           </Link>
           
