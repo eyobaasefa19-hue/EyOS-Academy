@@ -13,14 +13,16 @@ export default function DashboardHub() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function getDashboardData() {
       if (!supabase || !supabase.auth) {
-        setLoading(false);
+        if (isMounted) setLoading(false);
         return;
       }
       try {
         const { data: { user: authUser } } = await supabase.auth.getUser();
-        if (authUser) {
+        if (authUser && isMounted) {
           setUser(authUser);
           
           const { data: profileData } = await supabase
@@ -56,6 +58,7 @@ export default function DashboardHub() {
             }
             
             if (shouldUpdate) {
+              // Streak update in Supabase
               await supabase
                 .from('UserProfile')
                 .update({ streak: newStreak, lastActive: todayStr })
@@ -65,27 +68,33 @@ export default function DashboardHub() {
               profileData.lastActive = todayStr;
             }
             
-            setProfile(profileData);
+            if (isMounted) setProfile(profileData);
           }
         }
 
+        // Fetch Top 5 Leaders
         const { data: topUsers } = await supabase
           .from('UserProfile')
           .select('fullName, xpPoints, email')
           .order('xpPoints', { ascending: false })
           .limit(5);
 
-        if (topUsers) {
+        if (topUsers && isMounted) {
           setLeaders(topUsers);
         }
 
       } catch (e) {
         console.error('Error fetching dashboard data:', e);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
+
     getDashboardData();
+
+    return () => {
+      isMounted = false; // Cleanup to prevent memory leaks if component unmounts quickly
+    };
   }, []);
 
   const menuItems = [
@@ -124,10 +133,10 @@ export default function DashboardHub() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-955 text-slate-100 p-4 md:p-8 font-sans antialiased">
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-sans antialiased">
       <div className="max-w-5xl mx-auto space-y-6">
         
-        {/* 🌟 የተስተካከለው ፕሪሚየም ሄደር (Personalized Welcome) 🌟 */}
+        {/* Header Section */}
         <header className="border-b border-slate-900 pb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-black tracking-tight text-white">
@@ -136,22 +145,26 @@ export default function DashboardHub() {
             <p className="text-slate-400 text-xs mt-1 font-medium">የዛሬውን የእንግሊዘኛ ትምህርቶን እዚህ ይጀምሩ</p>
           </div>
           {user && (
-            <div className="bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-850 text-[11px] text-slate-400 flex items-center gap-2 shadow-sm">
+            <div className="bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800 text-[11px] text-slate-400 flex items-center gap-2 shadow-sm">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>አካውንት: <span className="text-blue-400 font-mono">{user.email}</span></span>
             </div>
           )}
         </header>
 
-        {user && !loading && (
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : user && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            {/* ─── LEFT COLUMN: STATS & LEARNING ─── */}
+            {/* Left Column */}
             <div className="lg:col-span-2 space-y-6">
               
               {/* Quick Stats */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-900 shadow-xl flex items-center gap-3">
+                <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 shadow-xl flex items-center gap-3 transition-transform hover:scale-[1.02]">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 shrink-0">
                     <Zap className="w-5 h-5 text-amber-400 animate-pulse" />
                   </div>
@@ -161,7 +174,7 @@ export default function DashboardHub() {
                   </div>
                 </div>
 
-                <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-900 shadow-xl flex items-center gap-3">
+                <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 shadow-xl flex items-center gap-3 transition-transform hover:scale-[1.02]">
                   <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20 shrink-0">
                     <Flame className="w-5 h-5 text-rose-400" />
                   </div>
@@ -180,9 +193,9 @@ export default function DashboardHub() {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {menuItems.map((item) => (
-                    <div key={item.id} className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 shadow-lg flex flex-col justify-between hover:border-slate-800/80 transition-all duration-300 group">
+                    <div key={item.id} className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between hover:border-blue-500/30 transition-all duration-300 group cursor-pointer">
                       <div>
-                        <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center text-white mb-3 shadow-md`}>
+                        <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center text-white mb-3 shadow-md group-hover:scale-110 transition-transform`}>
                           {item.icon}
                         </div>
                         <h3 className="text-base font-bold text-white mb-1.5 group-hover:text-blue-400 transition-colors">{item.title}</h3>
@@ -190,7 +203,7 @@ export default function DashboardHub() {
                       </div>
                       <button 
                         onClick={() => router.push(item.route)}
-                        className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-blue-600 text-white font-semibold text-xs transition-all shadow-md active:scale-[0.98]"
+                        className="w-full py-2.5 rounded-xl bg-slate-800 group-hover:bg-blue-600 text-white font-semibold text-xs transition-all shadow-md active:scale-[0.98]"
                       >
                         ትምህርቱን ጀምር
                       </button>
@@ -201,12 +214,12 @@ export default function DashboardHub() {
 
             </div>
 
-            {/* ─── RIGHT COLUMN: SIDEBAR ─── */}
+            {/* Right Column */}
             <div className="space-y-6">
               
               {/* Profile Card */}
-              <div className="bg-slate-900/60 p-5 rounded-2xl border border-slate-900 shadow-xl flex flex-col items-center justify-center text-center">
-                <div className="w-16 h-16 rounded-full bg-blue-600/10 flex items-center justify-center border-2 border-slate-800 mb-3 relative">
+              <div className="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 shadow-xl flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 rounded-full bg-blue-600/10 flex items-center justify-center border-2 border-blue-500/30 mb-3 relative">
                   <User className="w-7 h-7 text-blue-400" />
                   <div className="absolute bottom-0 right-0 bg-slate-950 p-1 rounded-full border border-slate-800">
                     <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
@@ -217,21 +230,21 @@ export default function DashboardHub() {
                 </h3>
                 <p className="text-[11px] text-slate-500 font-mono mb-4">{user.email}</p>
                 
-                <div className="w-full bg-slate-950 border border-slate-900 rounded-xl p-3 space-y-1.5">
+                <div className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-1.5">
                   <div className="flex justify-between text-[10px] font-medium text-slate-400">
                      <span>የደረጃዎ ፕሮግረስ</span>
                      <span className="text-blue-400 font-bold">{Math.min(((profile?.xpPoints || 0) / 100) * 100, 100).toFixed(0)}%</span>
                   </div>
-                  <div className="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                     <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${Math.min(((profile?.xpPoints || 0) / 100) * 100, 100)}%` }}></div>
                   </div>
                 </div>
               </div>
 
               {/* Leaderboard Card */}
-              <div className="bg-slate-900/60 border border-slate-900 rounded-2xl p-4 shadow-xl">
+              <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 shadow-xl">
                 <h2 className="text-sm font-bold text-slate-300 flex items-center gap-2 mb-3.5">
-                  <Trophy className="w-4 h-4 text-yellow-500" /> ከፍተኛ ተማሪዎች (Top 5 Learners)
+                  <Trophy className="w-4 h-4 text-yellow-500" /> ከፍተኛ ተማሪዎች
                 </h2>
                 <div className="space-y-2">
                   {leaders.length > 0 ? (
@@ -239,14 +252,14 @@ export default function DashboardHub() {
                       <div key={index} className={`flex items-center justify-between p-2.5 rounded-xl border transition-all ${
                         user.email === leader.email 
                           ? 'bg-blue-600/10 border-blue-500/30' 
-                          : 'bg-slate-950/40 border-slate-900 hover:bg-slate-950'
+                          : 'bg-slate-950/40 border-slate-800 hover:bg-slate-900'
                       }`}>
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-[11px] shadow-sm shrink-0 ${
                             index === 0 ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 
                             index === 1 ? 'bg-slate-400/10 text-slate-300 border border-slate-400/30' : 
                             index === 2 ? 'bg-orange-600/10 text-orange-400 border border-orange-600/30' : 
-                            'bg-slate-900 text-slate-500 border border-slate-800'
+                            'bg-slate-800 text-slate-400 border border-slate-700'
                           }`}>
                             {index + 1}
                           </div>
