@@ -23,8 +23,8 @@ export async function POST(req: NextRequest) {
     }
 
     const ai = new GoogleGenerativeAI(apiKey);
-    // ለፈጣን እና አስተማማኝ ምላሽ gemini-1.5-flashን እንጠቀማለን
-    const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    // ለፈጣን እና ወቅታዊ ምላሽ gemini-2.5-flashን እንጠቀማለን
+    const model = ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     // ለ AI አስተማሪው የተሰጠ ልዩ መመሪያ (System Instruction)
     const systemInstruction = `
