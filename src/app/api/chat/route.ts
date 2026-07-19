@@ -13,7 +13,6 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-
     const userMessage = body.message || body.text || body.prompt;
 
     if (!userMessage) {
@@ -24,14 +23,26 @@ export async function POST(req: NextRequest) {
     }
 
     const ai = new GoogleGenerativeAI(apiKey);
-    const model = ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    // ለፈጣን እና አስተማማኝ ምላሽ gemini-1.5-flashን እንጠቀማለን
+    const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+    // ለ AI አስተማሪው የተሰጠ ልዩ መመሪያ (System Instruction)
+    const systemInstruction = `
+      አንተ 'EyOS Academy' የተሰኘ ፕላትፎርም ላይ የምትሰራ ምርጥ የእንግሊዘኛ ቋንቋ አስተማሪ ነህ። 
+      ተማሪው አማርኛ ተናጋሪ ነው።
+      
+      ትዕዛዝ: 
+      1. የተማሪው የእንግሊዘኛ አጠቃቀም ላይ ስህተት ካለበት በትህትና አርመው።
+      2. ምላሽህ ሁልጊዜም አጭር፣ አበረታች እና ግልፅ ይሁን።
+      3. አስፈላጊ ሲሆን ሰዋስው (Grammar) ደንቦችን በአማርኛ እና በእንግሊዘኛ ቀላቅለህ አስረዳ።
+    `;
 
     const response = await model.generateContent({
       contents: [
         {
           role: 'user',
           parts: [
-            { text: "System Instruction: You are a friendly and encouraging AI English Tutor. Help the user practice and improve their English." },
+            { text: systemInstruction },
             { text: `User Message: ${userMessage}` }
           ]
         }
