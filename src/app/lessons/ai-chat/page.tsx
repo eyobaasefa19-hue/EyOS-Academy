@@ -1,18 +1,20 @@
-"use client";
+'use client';
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "../../../lib/supabase";
+import { Send, Bot, User, ArrowLeft, Loader2 } from "lucide-react";
 
 export default function AIChatLesson() {
+  const router = useRouter();
   const [messages, setMessages] = useState([
     { id: 1, sender: "ai", text: "Hello! I am your AI English Tutor. Let's practice English. Tell me about yourself or ask me anything!" }
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   
-  // አዲስ የተጨመሩ (Userን ለማወቅ እና XP Alert ለማሳየት)
+  // የባለቤትነት እና የ XP መረጃዎች
   const [user, setUser] = useState<any>(null);
   const [showXpAlert, setShowXpAlert] = useState(false); 
   
@@ -22,7 +24,7 @@ export default function AIChatLesson() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // ገጹ ሲከፈት ተጠቃሚውን ከዳታቤዝ ማወቅ
+  // ተጠቃሚውን ከ Supabase ማረጋገጥ
   useEffect(() => {
     async function getUser() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -39,7 +41,7 @@ export default function AIChatLesson() {
     e.preventDefault();
     if (!input.trim() || isTyping) return;
 
-    const userText = input;
+    const userText = input.trim();
     const userMessage = { id: messages.length + 1, sender: "user", text: userText };
     
     setMessages((prev) => [...prev, userMessage]);
@@ -66,9 +68,8 @@ export default function AIChatLesson() {
       };
       setMessages((prev) => [...prev, aiMessage]);
 
-      // 🌟 እዚህ ጋር የ XP ነጥብ መጨመሪያውን ጨመርን 🌟
+      // 🌟 የ Supabase XP ነጥብ መጨመሪያ ሎጂክ 🌟
       if (user) {
-        // 1. መጀመሪያ ያለውን XP ከዳታቤዝ እናነባለን
         const { data: profile } = await supabase
           .from('UserProfile')
           .select('xpPoints')
@@ -76,15 +77,13 @@ export default function AIChatLesson() {
           .single();
 
         const currentXP = profile?.xpPoints || 0;
-        const newXP = currentXP + 10; // ለእያንዳንዱ መልእክት 10 XP ይጨመራል
+        const newXP = currentXP + 10; // ለእያንዳንዱ ቻት 10 XP
 
-        // 2. አዲሱን የነጥብ ድምር ዳታቤዝ ላይ እናስቀምጣለን
         await supabase
           .from('UserProfile')
           .update({ xpPoints: newXP })
           .eq('id', user.id);
 
-        // 3. አሪፍ ማሳወቂያ ለ 3 ሰከንድ እናሳያለን
         setShowXpAlert(true);
         setTimeout(() => setShowXpAlert(false), 3000);
       }
@@ -93,7 +92,7 @@ export default function AIChatLesson() {
       console.error(error);
       setMessages((prev) => [
         ...prev,
-        { id: Date.now(), sender: "ai", text: "Something went wrong. Please check your network or API settings." }
+        { id: Date.now(), sender: "ai", text: "የግንኙነት ችግር አጋጥሟል። እባክህ መስመርህን አረጋግጠህ እንደገና ሞክር።" }
       ]);
     } finally {
       setIsTyping(false);
@@ -101,72 +100,104 @@ export default function AIChatLesson() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-white p-4 sm:p-6 flex flex-col relative">
+    <div className="min-h-screen bg-slate-950 flex flex-col font-sans relative text-white">
       
-      {/* 🌟 የ XP መጨመሩን የሚያሳውቅ ብቅ ባይ አኒሜሽን 🌟 */}
+      {/* 🌟 የ XP መጨመሩን የሚያሳውቅ ባውንሲንግ አኒሜሽን 🌟 */}
       {showXpAlert && (
-        <div className="fixed top-10 right-1/2 translate-x-1/2 md:translate-x-0 md:right-10 z-50 bg-amber-500 text-white text-sm font-bold px-5 py-2 rounded-full animate-bounce shadow-lg shadow-amber-500/50">
+        <div className="fixed top-20 right-1/2 translate-x-1/2 z-50 bg-amber-500 text-white text-sm font-bold px-5 py-2 rounded-full animate-bounce shadow-lg shadow-amber-500/50">
           +10 XP አግኝተዋል! 🎉
         </div>
       )}
 
-      <div className="max-w-3xl w-full mx-auto flex-1 flex flex-col">
-        <div>
-          <Link href="/dashboard" className="text-indigo-400 hover:underline mb-4 inline-block">
-            ← ወደ ዳሽቦርድ ይመለሱ
-          </Link>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-indigo-400 bg-clip-text text-transparent mb-1">
-            Lesson 03: AI Chat Tutor
-          </h1>
-          <p className="text-sm text-gray-400 mb-6">ከእውነተኛ አርቴፊሻል ኢንተለጀንስ አስተማሪዎ ጋር በቀጥታ ይለማመዱ።</p>
+      {/* ሄደር ባር */}
+      <header className="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-10 shadow-sm">
+        <div className="max-w-3xl mx-auto flex items-center justify-between">
+          <button 
+            onClick={() => router.push('/dashboard')}
+            className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+          >
+            <ArrowLeft className="w-4 h-4" /> ወደ ዳሽቦርድ
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+              <Bot className="w-4 h-4 text-emerald-400" />
+            </div>
+            <h1 className="text-white font-bold text-sm tracking-wide">Lesson 03: AI Tutor</h1>
+          </div>
         </div>
+      </header>
 
-        <div className="flex-1 bg-[#161B26]/40 backdrop-blur-md border border-gray-800 rounded-2xl flex flex-col h-[500px] overflow-hidden">
-          <div className="flex-1 p-4 overflow-y-auto space-y-4">
-            {messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${
-                  msg.sender === "user" ? "bg-indigo-600 text-white rounded-tr-none" : "bg-[#161B26] border border-gray-800 text-gray-200 rounded-tl-none"
-                }`}>
-                  <ReactMarkdown 
-                    className="text-sm space-y-2 text-gray-200 break-words"
-                    components={{
-                      strong: ({node, ...props}) => <strong className="font-bold text-emerald-400 inline" {...props} />,
-                      ul: ({node, ...props}) => <ul className="list-disc pl-5 space-y-1 my-2 block" {...props} />,
-                      ol: ({node, ...props}) => <ol className="list-decimal pl-5 space-y-1 my-2 block" {...props} />,
-                      li: ({node, ...props}) => <li className="list-item" {...props} />,
-                      p: ({node, ...props}) => <p className="mb-1 leading-relaxed" {...props} />
-                    }}
-                  >
-                    {msg.text}
-                  </ReactMarkdown>
-                </div>
-              </div>
-            ))}
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className="bg-[#161B26] border border-gray-800 text-gray-400 text-xs rounded-2xl rounded-tl-none px-4 py-2 animate-pulse">
-                  AI አስተማሪዎ እየጻፈ ነው...
-                </div>
+      {/* የቻት መድረክ */}
+      <main className="flex-1 overflow-y-auto p-4 space-y-6 max-w-3xl mx-auto w-full pb-32">
+        {messages.map((msg) => (
+          <div key={msg.id} className={`flex gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+            {msg.sender === 'ai' && (
+              <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shrink-0 mt-1">
+                <Bot className="w-4 h-4 text-emerald-400" />
               </div>
             )}
-            <div ref={messagesEndRef} />
+            <div className={`p-4 rounded-2xl max-w-[85%] text-sm leading-relaxed shadow-sm ${
+              msg.sender === 'user' 
+                ? 'bg-blue-600 text-white rounded-tr-sm' 
+                : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-sm'
+            }`}>
+              {/* ያንተ ውብ ማርክዳውን ፓርሰር */}
+              <ReactMarkdown 
+                className="text-sm space-y-2 text-gray-200 break-words"
+                components={{
+                  strong: ({node, ...props}) => <strong className="font-bold text-emerald-400 inline" {...props} />,
+                  ul: ({node, ...props}) => <ul className="list-disc pl-5 space-y-1 my-2 block" {...props} />,
+                  ol: ({node, ...props}) => <ol className="list-decimal pl-5 space-y-1 my-2 block" {...props} />,
+                  li: ({node, ...props}) => <li className="list-item" {...props} />,
+                  p: ({node, ...props}) => <p className="mb-1 leading-relaxed" {...props} />
+                }}
+              >
+                {msg.text}
+              </ReactMarkdown>
+            </div>
+            {msg.sender === 'user' && (
+              <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-md shrink-0 mt-1">
+                <User className="w-4 h-4 text-white" />
+              </div>
+            )}
           </div>
+        ))}
+        
+        {/* AI በሚያስብበት ጊዜ የሚታይ የጭነት አኒሜሽን */}
+        {isTyping && (
+          <div className="flex gap-3 justify-start">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shrink-0">
+              <Bot className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex gap-1.5 items-center rounded-tl-sm">
+              <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" />
+              <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce delay-75" />
+              <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce delay-150" />
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </main>
 
-          <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-800 flex gap-2 bg-[#161B26]/60">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              disabled={isTyping}
-              placeholder={isTyping ? "Waiting..." : "እዚህ ጋር ይጻፉ..."}
-              className="flex-1 bg-[#0B0F19] border border-gray-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors disabled:opacity-50"
-            />
-            <button type="submit" disabled={isTyping} className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 font-medium rounded-xl text-sm transition-all disabled:opacity-50">
-              Send
-            </button>
-          </form>
-        </div>
+      {/* የፅሁፍ መፃፊያ ፎርም */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-950/90 backdrop-blur-md border-t border-slate-800">
+        <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto relative flex items-end gap-2">
+          <input 
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={isTyping ? "አስተማሪዎ እየመረመረ ነው..." : "እዚህ ጋር ይጻፉ..."}
+            className="w-full bg-slate-900 border border-slate-800 rounded-2xl pl-5 pr-14 py-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all disabled:opacity-50"
+            disabled={isTyping}
+          />
+          <button 
+            type="submit"
+            disabled={isTyping || !input.trim()}
+            className="absolute right-2 bottom-2 w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-500 flex items-center justify-center text-white transition-colors"
+          >
+            {isTyping ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 ml-1" />}
+          </button>
+        </form>
       </div>
     </div>
   );
