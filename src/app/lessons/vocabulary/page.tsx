@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { lessonTwoVocabulary } from "./vocabularyData"; 
+import { supabase } from "../../../lib/supabase";
 
 export default function VocabularyLesson() {
   const [isClaiming, setIsClaiming] = useState(false);
@@ -13,16 +14,36 @@ export default function VocabularyLesson() {
     setIsClaiming(true);
 
     try {
-      // ለወደፊት እዚህ ጋር የ Supabase XP መጨመሪያ ኮድ እናስገባለን
-      // ለምሳሌ API በመጥራት: await fetch('/api/update-xp', { ... })
+      // 1. የገባውን ተጠቃሚ (User) መለየት
+      const { data: { user } } = await supabase.auth.getUser();
 
-      // አሁን ግን ሰርቨሩ ላይ የገባ ለማስመሰል (Simulation) 1.5 ሰከንድ እንጠብቃለን
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (user) {
+        // 2. አሁን ያለውን የ XP መጠን ከ UserProfile ቴብል ማምጣት
+        const { data: profile, error: fetchError } = await supabase
+          .from('UserProfile')
+          .select('xpPoints')
+          .eq('id', user.id)
+          .single();
 
-      // XPው ተመዝግቦ ሲያልቅ በቀጥታ ወደ ዳሽቦርድ ይመልሰዋል
+        if (fetchError) throw fetchError;
+
+        const currentXP = profile?.xpPoints || 0;
+
+        // 3. አዲሱን 50 XP ደምሮ UserProfile ቴብሉን አፕዴት ማድረግ
+        const { error: updateError } = await supabase
+          .from('UserProfile')
+          .update({ xpPoints: currentXP + 50 })
+          .eq('id', user.id);
+
+        if (updateError) throw updateError;
+      }
+
+      // ሁሉም ሲሳካ ወደ ዳሽቦርድ መመለስ
       router.push("/dashboard");
+      router.refresh();
     } catch (error) {
       console.error("Error claiming XP:", error);
+    } finally {
       setIsClaiming(false);
     }
   };
@@ -56,7 +77,7 @@ export default function VocabularyLesson() {
             </p>
             
             <div className="bg-[#0B0F19] p-4 rounded-xl border border-gray-800/50">
-              <p className="text-sm text-gray-400 mb-1">ምሳሌ በአረፍተ ነገር:-</p>
+              <p className="text-sm text-gray-400 mb-1`">ምሳሌ በአረፍተ ነገር:-</p>
               <p className="text-gray-200 italic">
                 "{item.exampleEng}"
               </p>
