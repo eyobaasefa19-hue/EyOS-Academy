@@ -1,10 +1,10 @@
-
- "use client";
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { supabase } from "../../../lib/supabase";
 
-// 100 በላይ የውይይት መስመሮችን (Dialogue Turns) የያዘው ግዙፍ ዳታ በአንድ ላይ እዚህ ተካቷል
 const dialogueScenarios = [
   {
     id: 1,
@@ -111,122 +111,10 @@ const dialogueScenarios = [
     title: "Travel: Asking for Directions",
     contextAmh: "በአዲስ ቦታ አቅጣጫን ለመጠየቅ የሚደረግ ውይይት።",
     dialogues: [
-      { speaker: "Person A", textEng: "Excuse me, I am a bit lost. Can you tell me how to get to the main terminal?", textAmh: "ይቅርታ偏 ትንሽ ጠፍቶብኛል። ወደ ዋናው ተርሚናል እንዴት እንደምሄድ ሊነግሩኝ ይችላሉ?" },
+      { speaker: "Person A", textEng: "Excuse me, I am a bit lost. Can you tell me how to get to the main terminal?", textAmh: "ይቅርታ፤ ትንሽ ጠፍቶብኛል። ወደ ዋናው ተርሚናል እንዴት እንደምሄድ ሊነግሩኝ ይችላሉ?" },
       { speaker: "Person B", textEng: "Of course. Go straight down this hallway, and turn left at the security check.", textAmh: "በእርግጥ። በዚህ መተላለፊያ ቀጥታ ይሂዱ፣ እና በፍተሻ ጣቢያው ጋር ወደ ግራ ይታጠፉ።" },
       { speaker: "Person A", textEng: "Is it far from here? Should I take the shuttle?", textAmh: "ከዚህ ይርቃል? የውስጥ ትራንስፖርት (Shuttle) መውሰድ አለብኝ?" },
       { speaker: "Person B", textEng: "No, it's just a five-minute walk. You don't need a shuttle.", textAmh: "አይ፣ የአምስት ደቂቃ የእግር መንገድ ነው። ትራንስፖርት አያስፈልግዎትም።" }
-    ]
-  },
-  {
-    id: 11,
-    title: "Healthcare: Doctor Appointment",
-    contextAmh: "በህክምና ማዕከል ለቀጠሮ የሚደረግ ውይይት።",
-    dialogues: [
-      { speaker: "Person A", textEng: "Good morning. I have an appointment with Dr. Sarah at 10:00 AM.", textAmh: "እንደምን አደሩ። ከዶክተር ሳራ ጋር በ 4:00 ሰዓት ቀጠሮ ነበረኝ።" },
-      { speaker: "Person B", textEng: "Let me check the system. Yes, your name is on the list. Please have a seat.", textAmh: "ሲስተሙን ልየው። አዎ፣ ስምዎ በዝርዝሩ ውስጥ አለ። እባክዎትን ይቀመጡ።" },
-      { speaker: "Person A", textEng: "Thank you. Do I need to fill out any medical forms?", textAmh: "አመሰግናለሁ። ምንም አይነት የህክምና ፎርም መሙላት ያስፈልገኛል?" },
-      { speaker: "Person B", textEng: "No, your records are already updated. The doctor will call you soon.", textAmh: "አይ፣ መረጃዎችዎ አስቀድመው ተስተካክለዋል። ዶክተሯ በቅርቡ ትጠራዎታለች።" }
-    ]
-  },
-  {
-    id: 12,
-    title: "Shopping: Buying Clothes",
-    contextAmh: "ልብስ መደብር ውስጥ ግብይት ሲፈፀም የሚደረግ ውይይት።",
-    dialogues: [
-      { speaker: "Person A", textEng: "I really like this jacket. Do you have it in a medium size?", textAmh: "ይሄ ጃኬት በጣም ወድጄዋለሁ። መካከለኛ (Medium) መጠን አላችሁ?" },
-      { speaker: "Person B", textEng: "Let me check the stockroom for you. Yes, we have one left in medium.", textAmh: "እስኪ መጋዘኑን ልይሎት። አዎ፣ በመካከለኛ መጠን አንድ ቀርቶናል።" },
-      { speaker: "Person A", textEng: "Great! Can I try it on before I buy it?", textAmh: "አሪፍ! ከመግዛቴ በፊት ለብሼ ልሞክረው እችላለሁ?" },
-      { speaker: "Person B", textEng: "Absolutely. The fitting rooms are right there, behind the mirror.", textAmh: "በእርግጥ። ልብስ መሞከሪያ ክፍሎቹ እዛ ጋር偏 ከመስተዋቱ ጀርባ ናቸው።" }
-    ]
-  },
-  {
-    id: 13,
-    title: "Job Interview: Strengths and Weaknesses",
-    contextAmh: "በስራ ቅጥር ቃለ መጠይቅ ወቅት የሚደረግ ውይይት።",
-    dialogues: [
-      { speaker: "Person A", textEng: "Can you tell me about your biggest strength as a developer?", textAmh: "እንደ ዴቨሎፐር ትልቁ ጥንካሬህ ምን እንደሆነ ልትነግረኝ ትችላለህ?" },
-      { speaker: "Person B", textEng: "My biggest strength is my ability to build modular architectures quickly.", textAmh: "ትልቁ ጥንካሬዬ ሞዱላር የሆኑ አሰራሮችን በፍጥነት የመገንባት ችሎታዬ ነው።" },
-      { speaker: "Person A", textEng: "That is excellent. And what would you consider your weakness?", textAmh: "ያ በጣም ግሩም ነው። እና ደግሞ ድክመትህ ብለህ የምታስበው ምንድነው?" },
-      { speaker: "Person B", textEng: "Sometimes I focus too much on small details, but I am learning to manage my time better.", textAmh: "አንዳንዴ በትንንሽ ዝርዝሮች ላይ በጣም አተኩራለሁ፣ ነገር ግን ጊዜዬን በአግባቡ መጠቀምን እየተማርኩ ነው።" }
-    ]
-  },
-  {
-    id: 14,
-    title: "At the Bank: Opening an Account",
-    contextAmh: "ባንክ ውስጥ አዲስ የባንክ ሂሳብ ለመክፈት የሚደረግ ውይይት።",
-    dialogues: [
-      { speaker: "Person A", textEng: "Hello, I would like to open a new savings account, please.", textAmh: "ጤና ይስጥልኝ፣ አዲስ የቁጠባ ሂሳብ መክፈት እፈልግ ነበር።" },
-      { speaker: "Person B", textEng: "Sure, we can help with that. Do you have your public ID card with you?", textAmh: "እሺ፣ በዚህ ላይ ልንረዳዎ እንችላለን። መታወቂያ ካርድዎን ይዘዋል?" },
-      { speaker: "Person A", textEng: "Yes, here is my ID card and my driving license.", textAmh: "አዎ፣ መታወቂያዬ እና የመንጃ ፍቃዴ ይኸው።" },
-      { speaker: "Person B", textEng: "Thank you. Please fill out this application form and sign at the bottom.", textAmh: "አመሰግናለሁ። እባክዎን ይህንን የማመልከቻ ቅፅ ይሙሉ እና ከታች ይፈርሙ።" }
-    ]
-  },
-  {
-    id: 15,
-    title: "Hotel Reception: Checking In",
-    contextAmh: "ሆቴል ውስጥ ክፍል ለመያዝ (Check-in) የሚደረግ ውይይት።",
-    dialogues: [
-      { speaker: "Person A", textEng: "Welcome to the Grand Hotel. How can I help you today?", textAmh: "ወደ ግራንድ ሆቴል እንኳን ደህና መጡ። ዛሬ በምን ልረዳዎ እችላለሁ?" },
-      { speaker: "Person B", textEng: "Hi, I have a reservation under the name Eyob. It is for two nights.", textAmh: "ሰላም፣ በእዮብ ስም የተያዘ ቦታ (Reservation) አለኝ። ለሁለት ምሽቶች ነው።" },
-      { speaker: "Person A", textEng: "Let me find your booking. Ah, yes. A single room with a city view.", textAmh: "እስኪ ምዝገባዎን ልፈልገው። አሃ፣ አዎ። ባለአንድ አልጋ ክፍል ከከተማ እይታ ጋር።" },
-      { speaker: "Person B", textEng: "Perfect. What time is breakfast served in the morning?", textAmh: "አሪፍ። ጠዋት ቁርስ ስንት ሰዓት ነው የሚቀርበው?" },
-      { speaker: "Person A", textEng: "Breakfast is served from 6:30 AM to 10:00 AM in the main hall.", textAmh: "ቁርስ ከጠዋቱ 12:30 እስከ 4:00 ሰዓት በዋናው አዳራሽ ይቀርባል።" }
-    ]
-  },
-  {
-    id: 16,
-    title: "Daily Commute: Taking a Taxi",
-    contextAmh: "ታክሲ ውስጥ አቅጣጫ እና ሂሳብ ለመነጋገር የሚደረግ ውይይት።",
-    dialogues: [
-      { speaker: "Person A", textEng: "Can you take me to the airport cargo terminal, please?", textAmh: "ወደ አየር መንገድ ካርጎ ተርሚናል ሊወስዱኝ ይችላሉ?" },
-      { speaker: "Person B", textEng: "Sure. The traffic is a bit heavy right now, so it might take 30 minutes.", textAmh: "እሺ። አሁን ትራፊክ ትንሽ ስለበዛ፣ 30 ደቂቃ ሊወስድብን ይችላል።" },
-      { speaker: "Person A", textEng: "That is fine. How much will the fare be?", textAmh: "ችግር የለውም። ሂሳቡ ስንት ይሆናል?" },
-      { speaker: "Person B", textEng: "It will be around 300 Birr. Please put your seatbelt on.", textAmh: "ወደ 300 ብር አካባቢ ይሆናል። እባክዎን የደህንነት ቀበቶዎን ያስሩ።" }
-    ]
-  },
-  {
-    id: 17,
-    title: "Education: Discussing Courses",
-    contextAmh: "ስለ ትምህርት እና ኮርሶች ምርጫ የሚደረግ ውይይት።",
-    dialogues: [
-      { speaker: "Person A", textEng: "Are you planning to take the advanced database management course?", textAmh: "የላቀውን የዳታቤዝ ማኔጅመንት ኮርስ ለመውሰድ እያሰብክ ነው?" },
-      { speaker: "Person B", textEng: "I am not sure yet. I am currently focused on finishing my EdTech startup project.", textAmh: "እስካሁን እርግጠኛ አይደለሁም። አሁን ትኩረቴ የኤድ-ቴክ (EdTech) ጅማሬ ፕሮጀክቴን መጨረስ ላይ ነው።" },
-      { speaker: "Person A", textEng: "That sounds like a lot of work. The EYOB X TECH AI project, right?", textAmh: "ብዙ ስራ ያለበት ይመስላል። የ EYOB X TECH AI ፕሮጀክት፣ አይደል?" },
-      { speaker: "Person B", textEng: "Yes! I am building the folder layouts and monetization frameworks this week.", textAmh: "አዎ! በዚህ ሳምንት የፎልደር አቀማመጦችን እና የገቢ ማስገኛ መዋቅሮችን እየገነባሁ ነው።" }
-    ]
-  },
-  {
-    id: 18,
-    title: "Weather Talk: Weekend Plans",
-    contextAmh: "ስለ አየር ንብረት እና የሳምንት መጨረሻ እቅድ የሚደረግ ውይይት።",
-    dialogues: [
-      { speaker: "Person A", textEng: "The weather forecast says it will rain heavily this weekend.", textAmh: "የአየር ንብረት ትንበያው በዚህ ሳምንት መጨረሻ ከባድ ዝናብ ይኖራል ይላል።" },
-      { speaker: "Person B", textEng: "Really? I was planning to go to the stadium to watch the football match.", textAmh: "በእውነት? የእግር ኳስ ጨዋታውን ለማየት ወደ ስታዲየም ለመሄድ አስቤ ነበር።" },
-      { speaker: "Person A", textEng: "You might want to watch it at home on your satellite TV instead.", textAmh: "በሱ ፈንታ ቤት ውስጥ በሳተላይት ቲቪህ ብታየው ይሻልሀል።" },
-      { speaker: "Person B", textEng: "Good idea. I will stay indoors and practice my English lessons on my phone.", textAmh: "ጥሩ ሀሳብ። ቤት ውስጥ ሆኜ የእንግሊዝኛ ትምህርቶቼን በስልኬ እለማመዳለሁ።" }
-    ]
-  },
-  {
-    id: 19,
-    title: "Grocery Shopping: Finding Items",
-    contextAmh: "ሱፐርማርኬት ውስጥ ዕቃዎችን ለመፈለግ የሚደረግ ውይይት።",
-    dialogues: [
-      { speaker: "Person A", textEng: "Excuse me, where can I find the fresh vegetables and fruits?", textAmh: "ይቅርታ፣ ትኩስ አትክልቶች እና ፍራፍሬዎችን የት ላገኛቸው እችላለሁ?" },
-      { speaker: "Person B", textEng: "They are in aisle 4, right next to the dairy products.", textAmh: "መተላለፊያ 4 ውስጥ፣ ከወተት ተዋፅኦዎቹ አጠገብ ይገኛሉ።" },
-      { speaker: "Person A", textEng: "Thank you. Do you also sell organic coffee beans?", textAmh: "አመሰግናለሁ። ኦርጋኒክ የቡና ፍሬዎችስ ትሸጣላችሁ?" },
-      { speaker: "Person B", textEng: "Yes, we do. The coffee section is just behind you on the bottom shelf.", textAmh: "አዎ እንሸጣለን። የቡናው ክፍል ከጀርባዎ በታችኛው መደርደሪያ ላይ ነው።" }
-    ]
-  },
-  {
-    id: 20,
-    title: "Socializing: Inviting a Friend",
-    contextAmh: "ጓደኛን ወደ ፕሮግራም ለመጋበዝ የሚደረግ ውይይት።",
-    dialogues: [
-      { speaker: "Person A", textEng: "Are you free this Friday evening? We are having a small get-together.", textAmh: "በዚህ አርብ ማታ ትመቻለህ? ትንሽ ስብሰባ (የመዝናኛ ፕሮግራም) አዘጋጅተናል።" },
-      { speaker: "Person B", textEng: "I think so. I finish my cargo shift at 5:00 PM.", textAmh: "የምመች ይመስለኛል። የካርጎ ስራ ፈረቃዬን 11:00 ሰዓት ላይ እጨርሳለሁ።" },
-      { speaker: "Person A", textEng: "Awesome! We will play some music and eat dinner around 7:00 PM.", textAmh: "አሪፍ! 1:00 ሰዓት አካባቢ ሙዚቃ ከፍተን እራት እንበላለን።" },
-      { speaker: "Person B", textEng: "Count me in. Should I bring anything to drink?", textAmh: "እኔንም አስቡኝ። የምጠጣው ነገር ይዤ ልምጣ?" },
-      { speaker: "Person A", textEng: "No need, we have plenty of drinks. Just bring yourself!", textAmh: "አያስፈልግም፣ በቂ መጠጥ አለን። ራስህን ብቻ ይዘህ ና!" }
     ]
   }
 ];
@@ -246,12 +134,16 @@ export default function PracticalHubLesson() {
   const [aiFeedback, setAiFeedback] = useState<FeedbackType | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
 
+  // XP handling state
+  const [isClaiming, setIsClaiming] = useState(false);
+  const router = useRouter();
+
   const handleQuizSubmit = () => {
     if (!selectedAnswer) return;
     setShowReadingResult(true);
   };
 
-  // NEW: Dynamic client-side text engine that catches actual mistakes!
+  // Enhanced Writing Logic (Fixes typos like "naame" or "nm")
   const handleWritingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanText = userText.trim();
@@ -263,23 +155,21 @@ export default function PracticalHubLesson() {
       const generatedPoints: { label: string; text: string }[] = [];
       const words = cleanText.toLowerCase().split(/\s+/);
       
-      // 1. Check Typos dynamically
       const detectedTypos: string[] = [];
       if (words.includes("nm")) detectedTypos.push("'nm' ➡️ 'name'");
-      if (words.includes("us") && (words.includes("my") || words.includes("nm") || words.includes("ehob"))) {
+      if (words.includes("naame")) detectedTypos.push("'naame' ➡️ 'name'");
+      if (words.includes("us") && (words.includes("my") || words.includes("nm") || words.includes("eyob"))) {
         detectedTypos.push("'us' ➡️ 'is'");
       }
       if (words.includes("ehob")) detectedTypos.push("'ehob' ➡️ 'Eyob'");
 
-      // 2. Build Feedback Data Based on real text
       let hasErrors = false;
 
-      // Grammar & Spelling Point
       if (detectedTypos.length > 0) {
         hasErrors = true;
         generatedPoints.push({
           label: "Grammar & Spelling Check",
-          text: `We found some typos in your sentence. Please correct: ${detectedTypos.join(", ")}.`
+          text: `We found spelling issues: ${detectedTypos.join(", ")}.`
         });
       } else {
         generatedPoints.push({
@@ -288,7 +178,6 @@ export default function PracticalHubLesson() {
         });
       }
 
-      // Capitalization Point
       if (cleanText[0] !== cleanText[0].toUpperCase()) {
         hasErrors = true;
         generatedPoints.push({
@@ -302,7 +191,6 @@ export default function PracticalHubLesson() {
         });
       }
 
-      // Punctuation Point
       if (!cleanText.endsWith(".")) {
         hasErrors = true;
         generatedPoints.push({
@@ -318,8 +206,8 @@ export default function PracticalHubLesson() {
 
       setAiFeedback({
         intro: hasErrors 
-          ? "We analyzed your sentence and found a few things to polish up. Check them below:" 
-          : "Fantastic writing! Your sentence structure, spelling, and grammar are absolutely spot on.",
+          ? "We analyzed your sentence and found a few things to polish up:" 
+          : "Fantastic writing! Your sentence structure and spelling are spot on.",
         points: generatedPoints
       });
       
@@ -327,8 +215,43 @@ export default function PracticalHubLesson() {
     }, 1200);
   };
 
+  // Complete Lesson and add 50 XP to Supabase UserProfile
+  const handleCompleteLesson = async () => {
+    setIsClaiming(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data: profile, error: fetchError } = await supabase
+          .from('UserProfile')
+          .select('xpPoints')
+          .eq('id', user.id)
+          .single();
+
+        if (fetchError) throw fetchError;
+
+        const currentXP = profile?.xpPoints || 0;
+
+        const { error: updateError } = await supabase
+          .from('UserProfile')
+          .update({ xpPoints: currentXP + 50 })
+          .eq('id', user.id);
+
+        if (updateError) throw updateError;
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch (error) {
+      console.error("Error claiming XP:", error);
+    } finally {
+      setIsClaiming(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-white p-4 sm:p-6 flex flex-col">
+    <div className="min-h-screen bg-[#0B0F19] text-white p-4 sm:p-6 flex flex-col pb-24">
       <div className="max-w-3xl w-full mx-auto flex-1 flex flex-col">
         
         {/* Header */}
@@ -429,7 +352,7 @@ export default function PracticalHubLesson() {
 
           {/* TAB 2: DIALOGUE */}
           {activeTab === "dialogue" && (
-            <div className="space-y-8 max-h-[70vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-800">
+            <div className="space-y-8 max-h-[60vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-800">
               {dialogueScenarios.map((scenario) => (
                 <div key={scenario.id} className="space-y-4 border-b border-gray-800 pb-6 last:border-0">
                   <div className="border-l-4 border-emerald-500 pl-3">
@@ -505,12 +428,19 @@ export default function PracticalHubLesson() {
 
         </div>
 
-        {/* Footer Navigation */}
-        <div className="mt-6 flex justify-between items-center">
-          <span className="text-xs text-gray-500">Lesson 4 of 4</span>
-          <Link href="/dashboard" className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 font-medium rounded-xl text-xs sm:text-sm transition-all">
-            ወደ ማውጫ ተመለስ
-          </Link>
+        {/* Complete Lesson & XP Claim Button */}
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={handleCompleteLesson}
+            disabled={isClaiming}
+            className={`px-8 py-3.5 rounded-full font-bold text-sm sm:text-base transition-all shadow-lg ${
+              isClaiming
+                ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-emerald-600 to-indigo-600 hover:scale-105 hover:shadow-emerald-500/20 text-white"
+            }`}
+          >
+            {isClaiming ? "XP እየመዘገበ ነው ⏳..." : "🎉 ትምህርቱን ጨርሻለሁ (+50 XP)"}
+          </button>
         </div>
 
       </div>
