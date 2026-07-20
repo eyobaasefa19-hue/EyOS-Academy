@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "endl"; // wait, keeping standard react imports below
 import Link from "next/link";
-// የ Supabase ኮኔክሽን ከትክክለኛው ፎልደር - (የ path አቅጣጫውን እንዳስፈላጊነቱ አስተካክለው)
-import { supabase } from "../../../lib/supabase"; 
+// የ Supabase ኮኔክሽን ከትክክለኛው ፎልደር (Path ስተካከልቷል)
+import { supabase } from "../../lib/supabase"; 
 import { readingStories, lessonModules } from "./lessonData";
 
 const staticLessonData = {
@@ -35,7 +35,7 @@ const staticLessonData = {
   ],
 
   conversations: [
-    { role: "Airport Agent", text: "Good morning! Can I see your passport and ticket, please?", translation: "እንደምን አደሩ! እባክዎን ፓስፖርትዎን እና ቲኬትዎን ላይም እችላለሁ?" },
+    { role: "Airport Agent", text: "Good morning! Can I see your passport and ticket, please?", translation: "እንደምን አደሩ! እባክዎን ፓስፖርትዎን እና ቲኬትዎን ማየት እችላለሁ?" },
     { role: "Passenger (You)", text: "Sure, here they are. I am flying to Washington, D.C.", translation: "እንዴታ፣ ይኸውልዎት። ወደ ዋሽንግተን ዲሲ እየበረርኩ ነው።" }
   ]
 };
