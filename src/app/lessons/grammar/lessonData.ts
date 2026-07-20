@@ -70,7 +70,7 @@ export const readingStories = [
   { id: 20, title: "Evening Relax", content: "After work, he listens to Reggaeton. The rhythm helps him relax." }
 ];
 
-// 3. MASTER GRAMMAR LESSONS ARRAY (8 Dynamic Tense Modules)
+// 3. MASTER GRAMMAR LESSONS ARRAY (8 Dynamic Tense Modules - Total 100 Questions)
 export const allGrammarLessons: GrammarLesson[] = [
   {
     id: "l1",
@@ -105,7 +105,15 @@ export const allGrammarLessons: GrammarLesson[] = [
       { id: 2, question: "He ___ the cargo manifest carefully.", options: ["check", "checks"], correctAnswer: 1, amharicHint: "ለ 'He' ግሱ 's' ይጨመርለታል" },
       { id: 3, question: "They ___ mobile applications.", options: ["builds", "build"], correctAnswer: 1, amharicHint: "ለብዙ ቁጥር (They) ግሱ 's' አይወስድም" },
       { id: 4, question: "She ___ fluent English.", options: ["speak", "speaks"], correctAnswer: 1, amharicHint: "ለ 'She' ግሱ 's' ይወስዳል" },
-      { id: 5, question: "The developer ___ code on his smartphone.", options: ["writes", "write"], correctAnswer: 0, amharicHint: "አንድ ሰው ስለሆነ 's' ይወስዳል" }
+      { id: 5, question: "The developer ___ code on his smartphone.", options: ["writes", "write"], correctAnswer: 0, amharicHint: "አንድ ሰው ስለሆነ 's' ይወስዳል" },
+      { id: 6, question: "Water ___ at 100 degrees Celsius.", options: ["boils", "boil"], correctAnswer: 0, amharicHint: "ለተፈጥሯዊ እውነታ Present Simple እንጠቀማለን" },
+      { id: 7, question: "We ___ Supabase for our database backend.", options: ["use", "uses"], correctAnswer: 0, amharicHint: "ለ 'We' ግሱ አይቀየርም" },
+      { id: 8, question: "Ethiopian Airlines ___ flights worldwide.", options: ["operates", "operate"], correctAnswer: 0, amharicHint: "አንድ ድርጅት (It) ስለሆነ 's' ይጨምራል" },
+      { id: 9, question: "I do not ___ coffee in the evening.", options: ["drink", "drinks"], correctAnswer: 0, amharicHint: "ከ 'do not' በኋላ መደበኛ ግስ ይቀመጣል" },
+      { id: 10, question: "___ you work at the airport terminal?", options: ["Do", "Does"], correctAnswer: 0, amharicHint: "ለ 'You' ጥያቄ 'Do' እንጠቀማለን" },
+      { id: 11, question: "Does he ___ the satellite dish manually?", options: ["adjust", "adjusts"], correctAnswer: 0, amharicHint: "በ 'Does' ጥያቄ ውስጥ ግሱ 's' አይወስድም" },
+      { id: 12, question: "Pilots ___ rigorous training before flying.", options: ["undergo", "undergoes"], correctAnswer: 0, amharicHint: "ብዙ ቁጥር (Pilots) ስለሆነ 'undergo'" },
+      { id: 13, question: "The sun ___ in the east.", options: ["rises", "rise"], correctAnswer: 0, amharicHint: "ለተፈጥሮ እውነት Present Simple" }
     ]
   },
   {
@@ -139,7 +147,15 @@ export const allGrammarLessons: GrammarLesson[] = [
       { id: 2, question: "I ___ my Next.js code at this moment.", options: ["am debugging", "debugs"], correctAnswer: 0, amharicHint: "ለ 'I' 'am + ing'" },
       { id: 3, question: "They ___ the cargo boxes onto the ULD container.", options: ["are loading", "loads"], correctAnswer: 0, amharicHint: "ለ 'They' 'are + ing'" },
       { id: 4, question: "She ___ not responding to the API call.", options: ["is", "are"], correctAnswer: 0, amharicHint: "ለ 'She' አፍራሽ 'is not'" },
-      { id: 5, question: "___ you writing a new prompt for the video bot?", options: ["Are", "Is"], correctAnswer: 0, amharicHint: "ለ 'You' ጥያቄ 'Are'" }
+      { id: 5, question: "___ you writing a new prompt for the video bot?", options: ["Are", "Is"], correctAnswer: 0, amharicHint: "ለ 'You' ጥያቄ 'Are'" },
+      { id: 6, question: "Listen! The engine ___ a strange sound.", options: ["is making", "makes"], correctAnswer: 0, amharicHint: "አሁን በሁነቱ እየተሰማ ያለ" },
+      { id: 7, question: "We ___ the Next.js app to Vercel right now.", options: ["are deploying", "deploy"], correctAnswer: 0, amharicHint: "'Right now' የሚያሳየው አሁን እየተከናወነ ያለውን ነው" },
+      { id: 8, question: "The ground handlers ___ the safety gear.", options: ["are wearing", "wears"], correctAnswer: 0, amharicHint: "የብዙ ቁጥር እያደረጉት ያለ ድርጊት" },
+      { id: 9, question: "Why ___ he adjusting the satellite frequency?", options: ["is", "are"], correctAnswer: 0, amharicHint: "ለ 'He' መጠይቅ 'is'" },
+      { id: 10, question: "I am not ___ video editing at the moment.", options: ["doing", "do"], correctAnswer: 0, amharicHint: "ከ 'am not' በኋላ 'ing' ግስ ይከተላል" },
+      { id: 11, question: "The system ___ real-time telemetry data.", options: ["is streaming", "streams"], correctAnswer: 0, amharicHint: "አሁን እየተከናወነ ያለ የሲስተም ሂደት" },
+      { id: 12, question: "Are they ___ the Telegram bot menu buttons?", options: ["updating", "update"], correctAnswer: 0, amharicHint: "ከ 'Are' ጥያቄ በኋላ 'ing' ግስ" },
+      { id: 13, question: "The plane's radar ___ targets accurately.", options: ["is tracking", "track"], correctAnswer: 0, amharicHint: "አሁን በመከታተል ላይ ያለ" }
     ]
   },
   {
@@ -173,7 +189,15 @@ export const allGrammarLessons: GrammarLesson[] = [
       { id: 2, question: "I ___ my Grade 12 national exam last year.", options: ["completed", "complete"], correctAnswer: 0, amharicHint: "ባለፈው ዓመት የተጠናቀቀ" },
       { id: 3, question: "They did not ___ the flight schedule.", options: ["change", "changed"], correctAnswer: 0, amharicHint: "ከ 'did not' በኋላ መደበኛ ግስ (Base Form) ይቀመጣል" },
       { id: 4, question: "___ you inspect the baggage scanning machine?", options: ["Did", "Do"], correctAnswer: 0, amharicHint: "ባለፈው ጊዜ ለተደረገ ጥያቄ 'Did'" },
-      { id: 5, question: "The referee ___ the final whistle 5 minutes ago.", options: ["blew", "blows"], correctAnswer: 0, amharicHint: "የ 'blow' ያለፈው ጊዜ 'blew' ነው" }
+      { id: 5, question: "The referee ___ the final whistle 5 minutes ago.", options: ["blew", "blows"], correctAnswer: 0, amharicHint: "የ 'blow' ያለፈው ጊዜ 'blew' ነው" },
+      { id: 6, question: "We ___ the Supabase authentication last week.", options: ["integrated", "integrate"], correctAnswer: 0, amharicHint: "ባለፈው ሳምንት የተጠናቀቀ (Past)" },
+      { id: 7, question: "The pilot ___ the aircraft safely despite heavy rain.", options: ["landed", "lands"], correctAnswer: 0, amharicHint: "ያለፈ ጊዜ መደበኛ ግስ (-ed)" },
+      { id: 8, question: "I ___ a new Telegram bot using ManyBot yesterday.", options: ["created", "create"], correctAnswer: 0, amharicHint: "ትላንት የተደረገ ድርጊት" },
+      { id: 9, question: "Did they ___ the ULD container weight limit?", options: ["check", "checked"], correctAnswer: 0, amharicHint: "ከ 'Did' በኋላ የመጀመሪያው የግስ ቅርጽ ይከተላል" },
+      { id: 10, question: "He ___ the satellite dish position two hours ago.", options: ["shifted", "shift"], correctAnswer: 0, amharicHint: "ከሁለት ሰዓት በፊት የተፈፀመ" },
+      { id: 11, question: "The flight crew ___ early at the departure gate.", options: ["met", "meet"], correctAnswer: 0, amharicHint: "የ 'meet' ያለፈው ጊዜ 'met' ነው" },
+      { id: 12, question: "I did not ___ any syntax errors in the console.", options: ["find", "found"], correctAnswer: 0, amharicHint: "ከ 'did not' በኋላ base verb 'find'" },
+      { id: 13, question: "The match ___ in a 2-2 draw last Sunday.", options: ["ended", "ends"], correctAnswer: 0, amharicHint: "ያለፈው እሁድ የተደረገ" }
     ]
   },
   {
@@ -205,7 +229,15 @@ export const allGrammarLessons: GrammarLesson[] = [
       { id: 2, question: "They ___ the runway lights while it was raining.", options: ["were checking", "was checking"], correctAnswer: 0, amharicHint: "ለ 'They' 'were + ing'" },
       { id: 3, question: "She ___ not sleeping at midnight; she was studying.", options: ["was", "were"], correctAnswer: 0, amharicHint: "ለ 'She' 'was not'" },
       { id: 4, question: "What ___ you doing when the server crashed?", options: ["were", "was"], correctAnswer: 0, amharicHint: "ለ 'You' 'were'" },
-      { id: 5, question: "The ground handlers ___ moving containers at 5 AM.", options: ["were", "was"], correctAnswer: 0, amharicHint: "Handlers (ብዙ ቁጥር) 'were'" }
+      { id: 5, question: "The ground handlers ___ moving containers at 5 AM.", options: ["were", "was"], correctAnswer: 0, amharicHint: "Handlers (ብዙ ቁጥር) 'were'" },
+      { id: 6, question: "While I ___ the database, the internet went down.", options: ["was syncing", "were syncing"], correctAnswer: 0, amharicHint: "ለ 'I' 'was + ing'" },
+      { id: 7, question: "The engine ___ loudly when the technician opened the hatch.", options: ["was vibrating", "were vibrating"], correctAnswer: 0, amharicHint: "አንድ ሞተር (It) ስለሆነ 'was'" },
+      { id: 8, question: "We ___ football on satellite TV when power cut out.", options: ["were watching", "was watching"], correctAnswer: 0, amharicHint: "ለ 'We' 'were + ing'" },
+      { id: 9, question: "Was the pilot ___ with ATC during turbulence?", options: ["communicating", "communicate"], correctAnswer: 0, amharicHint: "ከ 'Was' በኋላ 'ing' ግስ ይከተላል" },
+      { id: 10, question: "The developers ___ not sleeping; they were fixing bugs.", options: ["were", "was"], correctAnswer: 0, amharicHint: "Developers (ብዙ ቁጥር) 'were'" },
+      { id: 11, question: "At 10 PM last night, I ___ rendering my video project.", options: ["was", "am"], correctAnswer: 0, amharicHint: "ትላንት ማታ ለነበረ ድርጊት 'was'" },
+      { id: 12, question: "Were you ___ the flight manifest when I arrived?", options: ["reviewing", "reviews"], correctAnswer: 0, amharicHint: "ከ 'Were' ጥያቄ በኋላ 'ing'" },
+      { id: 13, question: "The AI model ___ high-resolution prompt details.", options: ["was processing", "were processing"], correctAnswer: 0, amharicHint: "ለነጠላ አካል 'was + ing'" }
     ]
   },
   {
@@ -237,7 +269,14 @@ export const allGrammarLessons: GrammarLesson[] = [
       { id: 2, question: "The pilot ___ just requested permission to land.", options: ["has", "have"], correctAnswer: 0, amharicHint: "Pilot (He/She) 'has'" },
       { id: 3, question: "We have ___ three new mobile UI components.", options: ["built", "build"], correctAnswer: 0, amharicHint: "ከ 'have' በኋላ V3 ቅርፅ (built) ይቀመጣል" },
       { id: 4, question: "Have you ever ___ a stealth fighter jet?", options: ["seen", "saw"], correctAnswer: 0, amharicHint: "የ 'see' V3 ቅርፅ 'seen' ነው" },
-      { id: 5, question: "They have not ___ the manifest files yet.", options: ["received", "receive"], correctAnswer: 0, amharicHint: "ከ 'have not' በኋላ V3" }
+      { id: 5, question: "They have not ___ the manifest files yet.", options: ["received", "receive"], correctAnswer: 0, amharicHint: "ከ 'have not' በኋላ V3" },
+      { id: 6, question: "He has ___ his Supabase account successfully.", options: ["connected", "connect"], correctAnswer: 0, amharicHint: "ከ 'has' በኋላ V3" },
+      { id: 7, question: "___ you configured the satellite transponder?", options: ["Have", "Has"], correctAnswer: 0, amharicHint: "ለ 'You' ጥያቄ 'Have'" },
+      { id: 8, question: "The flight team has ___ all cargo loading protocols.", options: ["verified", "verify"], correctAnswer: 0, amharicHint: "V3 Verb" },
+      { id: 9, question: "I have never ___ such an efficient Flutter framework.", options: ["used", "use"], correctAnswer: 0, amharicHint: "የህይወት ልምድ ለመግለጽ V3" },
+      { id: 10, question: "She has ___ the video rendering process.", options: ["optimized", "optimize"], correctAnswer: 0, amharicHint: "ከ 'has' በኋላ 'optimized'" },
+      { id: 11, question: "We have ___ our target score in the test.", options: ["exceeded", "exceed"], correctAnswer: 0, amharicHint: "V3" },
+      { id: 12, question: "Has the airplane ___ off yet?", options: ["taken", "took"], correctAnswer: 0, amharicHint: "የ 'take' V3 'taken' ነው" }
     ]
   },
   {
@@ -269,7 +308,14 @@ export const allGrammarLessons: GrammarLesson[] = [
       { id: 2, question: "The aircraft ___ depart as soon as cargo loading finishes.", options: ["will", "is"], correctAnswer: 0, amharicHint: "ወደፊት ለሚከናወን ድርጊት" },
       { id: 3, question: "They ___ not miss the technical review.", options: ["won't", "don't"], correctAnswer: 0, amharicHint: "Future Negative 'won't'" },
       { id: 4, question: "Will you ___ the new Prisma schema tonight?", options: ["push", "pushed"], correctAnswer: 0, amharicHint: "ከ 'will' በኋላ መደበኛ ግስ" },
-      { id: 5, question: "I think it ___ rain at the airport later.", options: ["will", "does"], correctAnswer: 0, amharicHint: "ለወደፊት ግምት (Prediction)" }
+      { id: 5, question: "I think it ___ rain at the airport later.", options: ["will", "does"], correctAnswer: 0, amharicHint: "ለወደፊት ግምት (Prediction)" },
+      { id: 6, question: "We ___ test the canvas rendering engine soon.", options: ["will", "are"], correctAnswer: 0, amharicHint: "ወደፊት ለሚሆን 'will'" },
+      { id: 7, question: "The technician ___ fix the ground power unit.", options: ["will", "was"], correctAnswer: 0, amharicHint: "ለወደፊት ቃል ኪዳን/ውሳኔ" },
+      { id: 8, question: "Will they ___ the satellite dish angle?", options: ["adjust", "adjusted"], correctAnswer: 0, amharicHint: "ከ 'will' በኋላ መደበኛ ግስ" },
+      { id: 9, question: "I promises I ___ complete the module on time.", options: ["will", "did"], correctAnswer: 0, amharicHint: "ለቃል ኪዳን (Promise) 'will'" },
+      { id: 10, question: "The football match ___ start in 20 minutes.", options: ["will", "has"], correctAnswer: 0, amharicHint: "ወደፊት የሚከናወን" },
+      { id: 11, question: "She ___ assist you with your baggage check-in.", options: ["will", "is"], correctAnswer: 0, amharicHint: "የወደፊት እገዛ" },
+      { id: 12, question: "The server ___ automatically restart after update.", options: ["will", "would"], correctAnswer: 0, amharicHint: "Future Simple" }
     ]
   },
   {
@@ -302,7 +348,14 @@ export const allGrammarLessons: GrammarLesson[] = [
       { id: 2, question: "Look at those dark clouds! It ___ going to rain.", options: ["is", "are"], correctAnswer: 0, amharicHint: "በእርግጠኝነት ለሚታይ ማስረጃ 'It is going to'" },
       { id: 3, question: "They are going to ___ a new Supabase database.", options: ["create", "created"], correctAnswer: 0, amharicHint: "ከ 'going to' በኋላ መደበኛ ግስ" },
       { id: 4, question: "___ she going to attend the ground handling exam?", options: ["Is", "Are"], correctAnswer: 0, amharicHint: "ለ 'She' ጥያቄ 'Is'" },
-      { id: 5, question: "We are not going to ___ the production server.", options: ["stop", "stopped"], correctAnswer: 0, amharicHint: "መደበኛ ግስ" }
+      { id: 5, question: "We are not going to ___ the production server.", options: ["stop", "stopped"], correctAnswer: 0, amharicHint: "መደበኛ ግስ" },
+      { id: 6, question: "I am going to ___ my mobile development workspace.", options: ["upgrade", "upgraded"], correctAnswer: 0, amharicHint: "ከ 'going to' በኋላ Base Verb" },
+      { id: 7, question: "The airline is going to ___ new cargo routes.", options: ["open", "opens"], correctAnswer: 0, amharicHint: "የታቀደ እቅድ" },
+      { id: 8, question: "Are you going to ___ your prompt engineering skills?", options: ["enhance", "enhanced"], correctAnswer: 0, amharicHint: "መደበኛ ግስ" },
+      { id: 9, question: "He is going to ___ his Grade 12 certificates tomorrow.", options: ["collect", "collects"], correctAnswer: 0, amharicHint: "ለ 'He' ከ 'going to' በኋላ 'collect'" },
+      { id: 10, question: "They are going to ___ the new football stadium.", options: ["visit", "visiting"], correctAnswer: 0, amharicHint: "የታቀደ ጉብኝት" },
+      { id: 11, question: "The pilot is going to ___ the pre-flight checklist.", options: ["review", "reviewed"], correctAnswer: 0, amharicHint: "Base Verb" },
+      { id: 12, question: "I am not going to ___ any code without testing.", options: ["deploy", "deployed"], correctAnswer: 0, amharicHint: "Negative Intention" }
     ]
   },
   {
@@ -334,12 +387,19 @@ export const allGrammarLessons: GrammarLesson[] = [
       { id: 2, question: "This time next week, they ___ flying to Europe.", options: ["will be", "are"], correctAnswer: 0, amharicHint: "በወደፊት ጊዜ የሚቀጥል ድርጊት" },
       { id: 3, question: "She will be ___ the flight manifest during her shift.", options: ["reviewing", "review"], correctAnswer: 0, amharicHint: "ከ 'will be' በኋላ 'ing'" },
       { id: 4, question: "___ you be using the smartphone dev environment tonight?", options: ["Will", "Do"], correctAnswer: 0, amharicHint: "ለወደፊት ጥያቄ 'Will'" },
-      { id: 5, question: "The server will be ___ system backup at midnight.", options: ["running", "run"], correctAnswer: 0, amharicHint: "'will be + ing'" }
+      { id: 5, question: "The server will be ___ system backup at midnight.", options: ["running", "run"], correctAnswer: 0, amharicHint: "'will be + ing'" },
+      { id: 6, question: "Tomorrow morning, we will be ___ ground equipment.", options: ["operating", "operate"], correctAnswer: 0, amharicHint: "ከ 'will be' በኋላ 'ing'" },
+      { id: 7, question: "He will not be ___ satellite signals at 2 AM.", options: ["tracking", "track"], correctAnswer: 0, amharicHint: "Future Continuous Negative" },
+      { id: 8, question: "At this exact time tomorrow, I will be ___ my flight.", options: ["boarding", "board"], correctAnswer: 0, amharicHint: "'will be + ing'" },
+      { id: 9, question: "Will the team be ___ new AI features during the stream?", options: ["demonstrating", "demonstrate"], correctAnswer: 0, amharicHint: "ከ 'will ... be' በኋላ 'ing'" },
+      { id: 10, question: "They will be ___ foreign language courses next month.", options: ["attending", "attend"], correctAnswer: 0, amharicHint: "የወደፊት የትምህርት ሂደት" },
+      { id: 11, question: "I will be ___ the database tables at midnight.", options: ["migrating", "migrate"], correctAnswer: 0, amharicHint: "Future Continuous" },
+      { id: 12, question: "The referee will be ___ the football match live.", options: ["officiating", "officiate"], correctAnswer: 0, amharicHint: "'will be + ing'" }
     ]
   }
 ];
 
-// 4. BACKWARDS COMPATIBILITY EXPORTS (ለድሮ ኮዶች እንዳይበላሹ)
+// 4. BACKWARDS COMPATIBILITY EXPORTS
 export const staticLessonData = allGrammarLessons[0];
 export const lessonModules = [
   {
