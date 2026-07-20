@@ -28,6 +28,13 @@ export default function AdvancedLessonDashboard() {
   const [score, setScore] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
 
+  // AI SPEECH RECOGNITION & SHADOWING STATES
+  const [selectedConvIndex, setSelectedConvIndex] = useState<number>(0);
+  const [isListening, setIsListening] = useState(false);
+  const [userTranscript, setUserTranscript] = useState("");
+  const [matchScore, setMatchScore] = useState<number | null>(null);
+  const [speechError, setSpeechError] = useState<string | null>(null);
+
   const questions = currentLesson.questions;
   const tabContainerRef = useRef<HTMLDivElement>(null);
 
@@ -58,9 +65,10 @@ export default function AdvancedLessonDashboard() {
     loadUserData();
   }, []);
 
-  // 2. Reset Quiz State when switching Lessons
+  // Reset Quiz & Speech State when switching Lessons
   useEffect(() => {
     restartQuiz();
+    resetSpeechState();
   }, [activeLessonId]);
 
   const triggerHaptic = (duration = 40) => {
@@ -69,6 +77,119 @@ export default function AdvancedLessonDashboard() {
     }
   };
 
+  // ----------------------------------------------------
+  // SPEECH SYNTHESIS (TEXT TO SPEECH)
+  // ----------------------------------------------------
+  const handlePlayAudio = (text: string) => {
+    triggerHaptic(30);
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.85; // slightly slower for language learning
+      window.speechSynthesis.speak(utterance);
+    } else {
+      alert("Text-to-speech is not supported in this browser.");
+    }
+  };
+
+  // ----------------------------------------------------
+  // SPEECH RECOGNITION (VOICE TO TEXT & MATCHING)
+  // ----------------------------------------------------
+  const resetSpeechState = () => {
+    setIsListening(false);
+    setUserTranscript("");
+    setMatchScore(null);
+    setSpeechError(null);
+  };
+
+  const handleStartListening = () => {
+    triggerHaptic(50);
+    resetSpeechState();
+
+    if (typeof window === "undefined") return;
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setSpeechError("የድምፅ መቅረጫው በዚህ ብራውዘር ላይ አይሰራም። እባክዎን Chrome ወይም Edge ይጠቀሙ።");
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcriptText = Array.from(event.results)
+          .map((result: any) => result[0].transcript)
+          .join('');
+        
+        setUserTranscript(transcriptText);
+
+        if (event.results[0].isFinal) {
+          calculateMatchScore(transcriptText);
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error("Speech Recognition Error:", event.error);
+        setIsListening(false);
+        if (event.error === 'not-allowed') {
+          setSpeechError("እባክዎን የብራውዘርዎን ማይክራፎን ፈቃድ (Microphone Permission) ይፍቀዱ።");
+        } else {
+          setSpeechError("ድምፅ አልተሰማም ወይም ችግር አጋጥሟል። እባክዎን ደግመው ይሞክሩ።");
+        }
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+
+    } catch (err) {
+      setIsListening(false);
+      setSpeechError("ማይክራፎኑን ማስነሳት አልተቻለም።");
+    }
+  };
+
+  const calculateMatchScore = (spokenText: string) => {
+    const targetText = currentLesson.conversations[selectedConvIndex]?.text || "";
+    
+    const clean = (str: string) => str.toLowerCase().replace(/[^\w\s]/gi, '').trim().split(/\s+/);
+    const spokenWords = clean(spokenText);
+    const targetWords = clean(targetText);
+
+    if (targetWords.length === 0) return;
+
+    let matched = 0;
+    targetWords.forEach(word => {
+      if (spokenWords.includes(word)) {
+        matched++;
+      }
+    });
+
+    const calculatedPercent = Math.min(100, Math.round((matched / targetWords.length) * 100));
+    setMatchScore(calculatedPercent);
+
+    // Award XP bonus for good practice (>60%)
+    if (calculatedPercent >= 60) {
+      const newXp = userXp + 15;
+      setUserXp(newXp);
+      triggerHaptic(100);
+    }
+  };
+
+  // ----------------------------------------------------
+  // QUIZ ENGINE HANDLERS
+  // ----------------------------------------------------
   const handleQuizAnswer = () => {
     triggerHaptic(60); 
     if (selectedQuizOption === questions[currentQuestionIndex].correctAnswer) {
@@ -91,12 +212,10 @@ export default function AdvancedLessonDashboard() {
       const finalXpToSave = userXp + currentLesson.xpReward;
       setUserXp(finalXpToSave);
       
-      // Update Completed Lessons Array locally
       if (!completedLessons.includes(currentLesson.id)) {
         setCompletedLessons((prev) => [...prev, currentLesson.id]);
       }
       
-      // Sync with Supabase
       if (authUser) {
         try {
           await supabase
@@ -153,7 +272,7 @@ export default function AdvancedLessonDashboard() {
       {/* CORE CONTENT FRAME */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 space-y-5 pb-24">
         
-        {/* GRAMMAR MODULE SWITCHER (HORIZONTAL SCROLL) */}
+        {/* GRAMMAR MODULE SWITCHER */}
         <div className="space-y-1.5">
           <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 px-1">Select Grammar Module ({allGrammarLessons.length})</span>
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none snap-x">
@@ -194,9 +313,7 @@ export default function AdvancedLessonDashboard() {
 
         {/* TAB CONTROLS */}
         <div className="relative border-b border-slate-800/40">
-          <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-[#0b101d] to-transparent pointer-events-none z-10" />
-          
-          <div ref={tabContainerRef} className="flex items-center gap-1.5 overflow-x-auto pb-2 px-2 scrollbar-none snap-x">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 px-1 scrollbar-none snap-x">
             {(["overview", "grammar", "vocabulary", "reading", "speaking", "quiz"] as const).map((tab) => {
               const isActive = activeTab === tab;
               return (
@@ -214,8 +331,6 @@ export default function AdvancedLessonDashboard() {
               );
             })}
           </div>
-
-          <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-[#0b101d] to-transparent pointer-events-none z-10" />
         </div>
 
         {/* DYNAMIC TAB VIEW */}
@@ -302,25 +417,109 @@ export default function AdvancedLessonDashboard() {
             </div>
           )}
 
-          {/* TAB 5: AI SPEAKING */}
+          {/* TAB 5: AI SPEAKING & SHADOWING (REAL MICROPHONE ENGINE) */}
           {activeTab === "speaking" && (
             <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 text-center space-y-5">
-              <div className="w-12 h-12 bg-purple-600/10 border border-purple-500/30 text-purple-400 flex items-center justify-center rounded-full mx-auto text-xl">
-                🎙️
+              <div className="flex items-center justify-center gap-2">
+                <div className={`w-12 h-12 border rounded-full flex items-center justify-center text-xl transition-all ${
+                  isListening 
+                    ? "bg-red-500/20 border-red-500 text-red-400 animate-pulse scale-110" 
+                    : "bg-purple-600/10 border-purple-500/30 text-purple-400"
+                }`}>
+                  🎙️
+                </div>
               </div>
-              <h3 className="text-base font-bold text-white">Interactive Shadowing</h3>
-              <div className="space-y-3 text-left max-w-md mx-auto bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                {currentLesson.conversations.map((conv, index) => (
-                  <div key={index} className="text-xs space-y-0.5">
-                    <span className="font-bold text-blue-400 block">{conv.role}:</span>
-                    <p className="text-slate-200">"{conv.text}"</p>
-                    <p className="text-slate-500 italic">({conv.translation})</p>
+
+              <div>
+                <h3 className="text-base font-bold text-white">Interactive Shadowing</h3>
+                <p className="text-slate-400 text-xs mt-0.5">ዓረፍተ ነገሩን መርጠህ 🔊 ድምፁን አዳምጥ፡ ከዚያም ማይክራፎኑን ተጭነህ በድምፅ ተለማመድ።</p>
+              </div>
+
+              {/* Conversation Selector Box */}
+              <div className="space-y-3 text-left max-w-md mx-auto bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+                {currentLesson.conversations.map((conv, index) => {
+                  const isSelected = selectedConvIndex === index;
+                  return (
+                    <div 
+                      key={index} 
+                      onClick={() => { triggerHaptic(20); setSelectedConvIndex(index); resetSpeechState(); }}
+                      className={`p-3 rounded-xl border transition-all cursor-pointer relative ${
+                        isSelected 
+                          ? "bg-purple-950/40 border-purple-500 text-white shadow-md" 
+                          : "bg-slate-900/30 border-slate-800/80 hover:bg-slate-800/40 text-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold text-xs text-blue-400">{conv.role}:</span>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handlePlayAudio(conv.text); }}
+                          className="px-2 py-1 bg-slate-800 hover:bg-purple-600 hover:text-white rounded-lg text-[10px] text-slate-300 transition flex items-center gap-1"
+                        >
+                          🔊 <span>Listen</span>
+                        </button>
+                      </div>
+                      <p className="text-xs font-semibold text-slate-100">"{conv.text}"</p>
+                      <p className="text-[11px] text-slate-400 italic mt-0.5">({conv.translation})</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Live Speech Recognition Panel */}
+              <div className="max-w-md mx-auto space-y-3">
+                
+                {isListening && (
+                  <div className="p-3 bg-red-950/30 border border-red-800/50 rounded-xl text-red-300 text-xs animate-pulse flex items-center justify-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                    <span>ድምፅህን በማዳመጥ ላይ ነው... አሁን ተናገር!</span>
                   </div>
-                ))}
+                )}
+
+                {speechError && (
+                  <div className="p-3 bg-amber-950/30 border border-amber-800/50 rounded-xl text-amber-300 text-xs">
+                    {speechError}
+                  </div>
+                )}
+
+                {userTranscript && (
+                  <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-left space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">የተናገርከው ድምፅ (Transcribed):</span>
+                    <p className="text-xs font-mono text-purple-300">"{userTranscript}"</p>
+                  </div>
+                )}
+
+                {matchScore !== null && (
+                  <div className={`p-4 rounded-xl border text-center space-y-1 ${
+                    matchScore >= 80 
+                      ? "bg-emerald-950/40 border-emerald-500/50 text-emerald-300" 
+                      : matchScore >= 50 
+                      ? "bg-amber-950/40 border-amber-500/50 text-amber-300" 
+                      : "bg-red-950/40 border-red-500/50 text-red-300"
+                  }`}>
+                    <div className="text-2xl font-black">{matchScore}% Match</div>
+                    <p className="text-xs font-medium">
+                      {matchScore >= 80 
+                        ? "🔥 Excellent Pronunciation! (+15 XP)" 
+                        : matchScore >= 50 
+                        ? "👍 Good try! Keep practicing for higher accuracy." 
+                        : "💡 Try listening to the sentence audio again."}
+                    </p>
+                  </div>
+                )}
+
+                {/* Microhpone Action Button */}
+                <button 
+                  onClick={handleStartListening}
+                  disabled={isListening}
+                  className={`w-full py-3.5 px-5 font-bold text-xs rounded-xl transition shadow-lg flex items-center justify-center gap-2 ${
+                    isListening 
+                      ? "bg-red-600 text-white animate-pulse cursor-wait" 
+                      : "bg-gradient-to-r from-purple-600 to-blue-600 hover:opacity-90 text-white"
+                  }`}
+                >
+                  <span>{isListening ? "⏹️ Listening... (Speak Now)" : "🎙️ Start Microphone"}</span>
+                </button>
               </div>
-              <button className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 font-bold text-xs rounded-xl hover:opacity-90 transition shadow-md">
-                Start Microphone
-              </button>
             </div>
           )}
 
