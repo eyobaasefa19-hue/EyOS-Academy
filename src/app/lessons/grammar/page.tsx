@@ -34,21 +34,25 @@ export default function AdvancedLessonDashboard() {
   // 1. Fetch User Data from Supabase
   useEffect(() => {
     async function loadUserData() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setAuthUser(user);
-        setIsUserLoggedIn(true);
-        
-        const { data: profile } = await supabase
-          .from('UserProfile')
-          .select('xpPoints, streak')
-          .eq('id', user.id)
-          .single();
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setAuthUser(user);
+          setIsUserLoggedIn(true);
+          
+          const { data: profile } = await supabase
+            .from('UserProfile')
+            .select('xpPoints, streak')
+            .eq('id', user.id)
+            .single();
 
-        if (profile) {
-          setUserXp(profile.xpPoints || 0);
-          setStreak(profile.streak || 0);
+          if (profile) {
+            setUserXp(profile.xpPoints || 0);
+            setStreak(profile.streak || 0);
+          }
         }
+      } catch (error) {
+        console.error("User data loading error:", error);
       }
     }
     loadUserData();
@@ -149,7 +153,7 @@ export default function AdvancedLessonDashboard() {
       {/* CORE CONTENT FRAME */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 space-y-5 pb-24">
         
-        {/* 🆕 GRAMMAR MODULE SWITCHER (HORIZONTAL SCROLL) */}
+        {/* GRAMMAR MODULE SWITCHER (HORIZONTAL SCROLL) */}
         <div className="space-y-1.5">
           <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 px-1">Select Grammar Module ({allGrammarLessons.length})</span>
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none snap-x">
@@ -332,7 +336,7 @@ export default function AdvancedLessonDashboard() {
 
               {!quizFinished ? (
                 <>
-                  <div className="w-full bg-slate-900 h-1 rounded-full overflow-hidden">
+                  <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
                     <div 
                       className="bg-purple-500 h-full transition-all duration-300"
                       style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
@@ -344,7 +348,7 @@ export default function AdvancedLessonDashboard() {
                       {questions[currentQuestionIndex].question}
                     </p>
                     {questions[currentQuestionIndex].amharicHint && (
-                      <span className="text-[11px] text-slate-500 font-light block mt-1 bg-slate-900/30 p-2 rounded-lg border border-slate-800/40 italic">
+                      <span className="text-[11px] text-slate-400 font-light block mt-1.5 bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/60 italic">
                         💡 ትርጉም፦ {questions[currentQuestionIndex].amharicHint}
                       </span>
                     )}
@@ -417,10 +421,14 @@ export default function AdvancedLessonDashboard() {
       </main>
 
       {/* FLOATING FOOTER */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-[#0b101d]/90 backdrop-blur-md border-t border-slate-800/60 px-4 py-3 z-40">
+      <footer className="fixed bottom-0 left-0 right-0 bg-[#0b101d]/95 backdrop-blur-md border-t border-slate-800/80 px-4 py-3 z-40">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href="/Dashboard" onClick={() => triggerHaptic(20)} className="px-4 py-2 border border-slate-800 text-slate-400 rounded-xl text-xs font-bold hover:bg-slate-800 transition">
-            ◀ ወደ ማውጫ ተመለስ
+          <Link 
+            href="/dashboard" 
+            onClick={() => triggerHaptic(20)} 
+            className="px-4 py-2 border border-slate-800 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-800/80 transition flex items-center gap-1.5"
+          >
+            <span>◀</span> ወደ ማውጫ ተመለስ
           </Link>
           
           {activeTab !== "quiz" && (
