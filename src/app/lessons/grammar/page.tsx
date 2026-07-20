@@ -1,65 +1,37 @@
-
 'use client';
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-// የ Supabase ኮኔክሽን ከትክክለኛው ፎልደር - (የ path አቅጣጫውን እንዳስፈላጊነቱ አስተካክለው)
 import { supabase } from "../../../lib/supabase"; 
-import { readingStories, lessonModules } from "./lessonData";
-
-const staticLessonData = {
-  id: "l1",
-  title: "Lesson 01: Master The Present Simple",
-  cefrLevel: "A1",
-  category: "Grammar & Practical",
-  xpReward: 150, 
-  amharicOverview: "የአሁኑን ጊዜ (Present Simple) ዘወትር ለምናደርጋቸው ድርጊቶች፣ ልማዶች፣ የዕለት ተዕለት ውሎዎች እና ሁልጊዜም እውነት ለሆኑ እውነታዎች ለመግለፅ እንጠቀምበታለን።",
-  englishOverview: "We use the Present Simple to talk about habits, permanent situations, daily routines, and general facts.",
-  
-  grammar: {
-    title: "Verb 'To Be' & Sentence Structure",
-    rules: [
-      { subject: "I", verb: "am", amharic: "እኔ ነኝ", example: "I am an airport ground handler." },
-      { subject: "He/She/It", verb: "is", amharic: "እሱ/እሷ/እሱ ነው", example: "She is fluent in English communications." },
-      { subject: "We/You/They", verb: "are", amharic: "እኛ/እናንተ/እነሱ ናቸው", example: "They are ready for the cargo aircraft loading." }
-    ],
-    commonMistake: "❌ Don't say: 'He am working at the terminal.' \n✅ Say: 'He is working at the terminal.'\n\n❌ Don't say: 'They works everyday.'\n✅ Say: 'They work everyday.'"
-  },
-
-  vocabulary: [
-    { word: "Explore", type: "Verb", amharic: "አዲስ ነገርን ማወቅ/መረመር", pronunciation: "/ɪkˈsplɔːr/", example: "I explore new frameworks on my phone." },
-    { word: "Essential", type: "Adjective", amharic: "በጣም አስፈላጊ/ግዴታ የሆነ", pronunciation: "/ɪˈsen.ʃəl/", example: "English is essential for aviation logistics." },
-    { word: "Aviation", type: "Noun", amharic: "የአቪዬሽን/የበረራ ሳይንስ እና ኢንዱስትሪ", pronunciation: "/ˌeɪ.viˈeɪ.ʃən/", example: "He studies aviation operations." },
-    { word: "Cargo", type: "Noun", amharic: "በአውሮፕላን የሚጓጓዝ ጭነት/ዕቃ", pronunciation: "/ˈkɑːr.ɡoʊ/", example: "The team updates the cargo manifest." },
-    { word: "Manifest", type: "Noun", amharic: "የጭነት ዕቃዎች ዝርዝር ሰነድ", pronunciation: "/ˈmæn.ɪ.fest/", example: "Check the weight on the cargo manifest." },
-    { word: "Deploy", type: "Verb", amharic: "የተሰራን ሶፍትዌር ለተጠቃሚ ክፍት ማድረግ", pronunciation: "/dɪˈplɔɪ/", example: "We deploy the application using Vercel." }
-  ],
-
-  conversations: [
-    { role: "Airport Agent", text: "Good morning! Can I see your passport and ticket, please?", translation: "እንደምን አደሩ! እባክዎን ፓስፖርትዎን እና ቲኬትዎን ላይም እችላለሁ?" },
-    { role: "Passenger (You)", text: "Sure, here they are. I am flying to Washington, D.C.", translation: "እንዴታ፣ ይኸውልዎት። ወደ ዋሽንግተን ዲሲ እየበረርኩ ነው።" }
-  ]
-};
+import { readingStories, allGrammarLessons, GrammarLesson } from "./lessonData";
 
 export default function AdvancedLessonDashboard() {
+  // 1. ACTIVE LESSON STATE (Default: Lesson 01 Present Simple)
+  const [activeLessonId, setActiveLessonId] = useState<string>("l1");
+  const currentLesson: GrammarLesson = allGrammarLessons.find(l => l.id === activeLessonId) || allGrammarLessons[0];
+
   const [activeTab, setActiveTab] = useState<"overview" | "grammar" | "vocabulary" | "reading" | "speaking" | "quiz">("overview");
   
-  // State variables for Database Auth & Stats
+  // Auth & User Profile Stats
   const [authUser, setAuthUser] = useState<any>(null);
   const [streak, setStreak] = useState(0); 
   const [userXp, setUserXp] = useState(0); 
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
 
+  // Completion Tracking State
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+
+  // Quiz Engine States
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedQuizOption, setSelectedQuizOption] = useState<number | null>(null);
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
 
-  const questions = lessonModules[0].questions;
+  const questions = currentLesson.questions;
   const tabContainerRef = useRef<HTMLDivElement>(null);
 
-  // 🛠️ 1. ገፁ ሲከፈት የዩዘሩን ትክክለኛ XP እና Streak ከ Supabase እናመጣለን
+  // 1. Fetch User Data from Supabase
   useEffect(() => {
     async function loadUserData() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -82,6 +54,11 @@ export default function AdvancedLessonDashboard() {
     loadUserData();
   }, []);
 
+  // 2. Reset Quiz State when switching Lessons
+  useEffect(() => {
+    restartQuiz();
+  }, [activeLessonId]);
+
   const triggerHaptic = (duration = 40) => {
     if (typeof window !== "undefined" && navigator.vibrate) {
       navigator.vibrate(duration);
@@ -92,12 +69,11 @@ export default function AdvancedLessonDashboard() {
     triggerHaptic(60); 
     if (selectedQuizOption === questions[currentQuestionIndex].correctAnswer) {
       setScore((prev) => prev + 1);
-      setUserXp((prev) => prev + 10); // ጥያቄ ሲመልስ 10 XP በጊዜያዊነት (Locally) ይጨምራል
+      setUserXp((prev) => prev + 10);
     }
     setQuizSubmitted(true);
   };
 
-  // 🛠️ 2. ጥያቄው ሲያልቅ አዲሱን ጠቅላላ የ XP መጠን በቀጥታ ዳታቤዝ ላይ ሴቭ እናደርጋለን
   const handleNextQuestion = async () => {
     triggerHaptic(40);
     setSelectedQuizOption(null);
@@ -108,11 +84,15 @@ export default function AdvancedLessonDashboard() {
     } else {
       setQuizFinished(true);
       
-      // 150 Completion XP ከጥያቄዎቹ XP ጋር እንደምራለን
-      const finalXpToSave = userXp + staticLessonData.xpReward;
-      setUserXp(finalXpToSave); // UI አፕዴት ለማድረግ
+      const finalXpToSave = userXp + currentLesson.xpReward;
+      setUserXp(finalXpToSave);
       
-      // አዲሱን XP ዳታቤዝ ላይ ማስቀመጥ (Saving to Supabase)
+      // Update Completed Lessons Array locally
+      if (!completedLessons.includes(currentLesson.id)) {
+        setCompletedLessons((prev) => [...prev, currentLesson.id]);
+      }
+      
+      // Sync with Supabase
       if (authUser) {
         try {
           await supabase
@@ -142,7 +122,7 @@ export default function AdvancedLessonDashboard() {
         <div className="flex items-center gap-2">
           <span className="text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">EyOS</span>
           <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30">
-            {staticLessonData.cefrLevel} Level
+            {currentLesson.cefrLevel} Level
           </span>
         </div>
         
@@ -169,11 +149,43 @@ export default function AdvancedLessonDashboard() {
       {/* CORE CONTENT FRAME */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 space-y-5 pb-24">
         
-        {/* Lesson Header */}
-        <div className="bg-gradient-to-br from-[#16223f] to-[#121b2e] rounded-2xl p-5 border border-slate-800 shadow-xl">
-          <span className="text-[10px] font-black tracking-widest text-blue-400 uppercase">{staticLessonData.category}</span>
-          <h1 className="text-xl md:text-2xl font-extrabold text-white mt-0.5">{staticLessonData.title}</h1>
-          <p className="text-slate-400 text-xs mt-1 font-light">Complete all items to earn +{staticLessonData.xpReward} Completion XP</p>
+        {/* 🆕 GRAMMAR MODULE SWITCHER (HORIZONTAL SCROLL) */}
+        <div className="space-y-1.5">
+          <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 px-1">Select Grammar Module ({allGrammarLessons.length})</span>
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none snap-x">
+            {allGrammarLessons.map((lesson) => {
+              const isActive = lesson.id === activeLessonId;
+              const isDone = completedLessons.includes(lesson.id);
+              return (
+                <button
+                  key={lesson.id}
+                  onClick={() => { triggerHaptic(20); setActiveLessonId(lesson.id); setActiveTab("overview"); }}
+                  className={`snap-start whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-black transition-all border flex items-center gap-1.5 ${
+                    isActive
+                      ? "bg-purple-600 text-white border-purple-400 shadow-lg scale-105"
+                      : isDone
+                      ? "bg-emerald-950/40 text-emerald-400 border-emerald-800/60"
+                      : "bg-[#121b2e] text-slate-400 border-slate-800 hover:bg-slate-800/50"
+                  }`}
+                >
+                  <span>{lesson.title.split(":")[1]}</span>
+                  {isDone && <span className="text-emerald-400 text-[10px]">✓</span>}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Dynamic Lesson Header */}
+        <div className="bg-gradient-to-br from-[#16223f] to-[#121b2e] rounded-2xl p-5 border border-slate-800 shadow-xl relative overflow-hidden">
+          {completedLessons.includes(currentLesson.id) && (
+            <div className="absolute top-0 right-0 bg-emerald-600 text-white text-[9px] font-black px-3 py-1 rounded-bl-xl tracking-wider">
+              COMPLETED ✅
+            </div>
+          )}
+          <span className="text-[10px] font-black tracking-widest text-blue-400 uppercase">{currentLesson.category}</span>
+          <h1 className="text-xl md:text-2xl font-extrabold text-white mt-0.5">{currentLesson.title}</h1>
+          <p className="text-slate-400 text-xs mt-1 font-light">Complete all items to earn +{currentLesson.xpReward} Completion XP</p>
         </div>
 
         {/* TAB CONTROLS */}
@@ -193,7 +205,7 @@ export default function AdvancedLessonDashboard() {
                       : "bg-[#121b2e] text-slate-400 border-slate-800/60 hover:bg-slate-800/50"
                   }`}
                 >
-                  {tab === "overview" ? "📑 Overview" : tab === "grammar" ? "📝 Grammar" : tab === "vocabulary" ? "🧠 Words" : tab === "reading" ? `📖 Reading (${readingStories.length})` : tab === "speaking" ? "🗣️ AI Speak" : `🎯 Quiz (${questions.length})`}
+                  {tab === "overview" ? "📑 Overview" : tab === "grammar" ? "📝 Grammar" : tab === "vocabulary" ? `🧠 Words (${currentLesson.vocabulary.length})` : tab === "reading" ? `📖 Reading (${readingStories.length})` : tab === "speaking" ? "🗣️ AI Speak" : `🎯 Quiz (${questions.length})`}
                 </button>
               );
             })}
@@ -211,11 +223,11 @@ export default function AdvancedLessonDashboard() {
               <h3 className="text-base font-bold text-slate-200">የአጠቃላይ መግለጫ (Overview)</h3>
               <div className="p-4 bg-slate-900/40 rounded-xl border-l-4 border-l-blue-500 border-slate-800">
                 <p className="text-[10px] text-blue-400 uppercase font-black tracking-wider mb-1">Amharic Explanation</p>
-                <p className="text-slate-300 text-xs md:text-sm leading-relaxed">{staticLessonData.amharicOverview}</p>
+                <p className="text-slate-300 text-xs md:text-sm leading-relaxed">{currentLesson.amharicOverview}</p>
               </div>
               <div className="p-4 bg-slate-900/40 rounded-xl border-l-4 border-l-purple-500 border-slate-800">
                 <p className="text-[10px] text-purple-400 uppercase font-black tracking-wider mb-1">English Explanation</p>
-                <p className="text-slate-300 text-xs md:text-sm leading-relaxed">{staticLessonData.englishOverview}</p>
+                <p className="text-slate-300 text-xs md:text-sm leading-relaxed">{currentLesson.englishOverview}</p>
               </div>
             </div>
           )}
@@ -223,18 +235,18 @@ export default function AdvancedLessonDashboard() {
           {/* TAB 2: GRAMMAR */}
           {activeTab === "grammar" && (
             <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 space-y-4">
-              <h3 className="text-base font-bold text-slate-200">{staticLessonData.grammar.title}</h3>
+              <h3 className="text-base font-bold text-slate-200">{currentLesson.grammar.title}</h3>
               <div className="overflow-x-auto rounded-xl border border-slate-800">
                 <table className="w-full text-left text-xs text-slate-300">
                   <thead className="bg-slate-900 text-slate-400 uppercase text-[10px] tracking-wider">
                     <tr>
                       <th className="p-3">Subject</th>
-                      <th className="p-3">Verb</th>
-                      <th className="p-3">Example</th>
+                      <th className="p-3">Verb Form</th>
+                      <th className="p-3">Example Sentence</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/50 bg-slate-900/20">
-                    {staticLessonData.grammar.rules.map((rule, idx) => (
+                    {currentLesson.grammar.rules.map((rule, idx) => (
                       <tr key={idx} className="hover:bg-slate-900/40">
                         <td className="p-3 font-mono font-bold text-purple-400">{rule.subject}</td>
                         <td className="p-3 font-semibold text-blue-400">{rule.verb}</td>
@@ -245,7 +257,7 @@ export default function AdvancedLessonDashboard() {
                 </table>
               </div>
               <div className="p-4 bg-red-950/20 rounded-xl border border-red-900/40 text-xs whitespace-pre-line text-slate-300 font-mono">
-                {staticLessonData.grammar.commonMistake}
+                {currentLesson.grammar.commonMistake}
               </div>
             </div>
           )}
@@ -253,7 +265,7 @@ export default function AdvancedLessonDashboard() {
           {/* TAB 3: VOCABULARY */}
           {activeTab === "vocabulary" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {staticLessonData.vocabulary.map((vocab, index) => (
+              {currentLesson.vocabulary.map((vocab, index) => (
                 <div key={index} className="bg-[#121b2e] p-4 rounded-2xl border border-slate-800 flex flex-col justify-between shadow-sm">
                   <div>
                     <div className="flex items-center justify-between">
@@ -294,7 +306,7 @@ export default function AdvancedLessonDashboard() {
               </div>
               <h3 className="text-base font-bold text-white">Interactive Shadowing</h3>
               <div className="space-y-3 text-left max-w-md mx-auto bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                {staticLessonData.conversations.map((conv, index) => (
+                {currentLesson.conversations.map((conv, index) => (
                   <div key={index} className="text-xs space-y-0.5">
                     <span className="font-bold text-blue-400 block">{conv.role}:</span>
                     <p className="text-slate-200">"{conv.text}"</p>
@@ -312,7 +324,7 @@ export default function AdvancedLessonDashboard() {
           {activeTab === "quiz" && (
             <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                <h3 className="text-base font-bold text-white">Lesson Assessment</h3>
+                <h3 className="text-base font-bold text-white">{currentLesson.title.split(":")[1]} Assessment</h3>
                 <span className="text-[10px] bg-purple-900/50 text-purple-300 font-mono px-2 py-0.5 rounded border border-purple-700/30">
                   {!quizFinished ? `Question ${currentQuestionIndex + 1} of ${questions.length}` : "Finished"}
                 </span>
@@ -386,7 +398,7 @@ export default function AdvancedLessonDashboard() {
                     {score} / {questions.length}
                   </div>
                   <p className="text-slate-400 text-xs mt-2">
-                    +{staticLessonData.xpReward} Completion XP ወደ አካውንትህ ተደምሯል!
+                    +{currentLesson.xpReward} Completion XP ወደ አካውንትህ ተደምሯል!
                   </p>
                   <div className="flex flex-col sm:flex-row gap-2 justify-center pt-2">
                     <button 
