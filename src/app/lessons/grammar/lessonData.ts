@@ -1,4 +1,4 @@
-// 1. TYPES & INTERFACES (TypeScript Strict Typing)
+// 1. TYPES & INTERFACES
 export interface GrammarRule {
   subject: string;
   verb: string;
@@ -28,6 +28,13 @@ export interface QuizQuestion {
   amharicHint?: string;
 }
 
+export interface Story {
+  id: number;
+  title: string;
+  content: string;
+  amharicTranslation: string; // አዲስ የተጨመረ
+}
+
 export interface GrammarLesson {
   id: string;
   title: string;
@@ -46,31 +53,131 @@ export interface GrammarLesson {
   questions: QuizQuestion[];
 }
 
-// 2. READING STORIES (20 Stories)
-export const readingStories = [
-  { id: 1, title: "Airport Operations", content: "The ground handler works at the terminal. He checks the cargo manifest every morning." },
-  { id: 2, title: "Mobile Coding", content: "A developer builds full-stack apps on a smartphone. He uses GitHub and Vercel to deploy projects." },
-  { id: 3, title: "Football Match", content: "The referee blows the whistle. The player understands the offside rule perfectly." },
-  { id: 4, title: "Music Production", content: "She produces Amharic Afrobeat music. The track plays at 110 BPM." },
-  { id: 5, title: "Aviation Tech", content: "Modern stealth fighter jets fly very fast. They use advanced biomimicry designs." },
-  { id: 6, title: "Satellite Setup", content: "He configures the satellite transponder. The TV shows live sports broadcasts." },
-  { id: 7, title: "Smart Guide", content: "The Addis Airport Smart Guide bot helps travelers. It provides quick logistics data." },
-  { id: 8, title: "Database Schema", content: "The system connects to a Supabase project. Prisma manages the relational database." },
-  { id: 9, title: "Daily Flight", content: "The airplane takes off at 8:00 AM. The pilot speaks to the control tower." },
-  { id: 10, title: "Video Editing", content: "The modular architecture supports heavy video editing. The app renders files quickly." },
-  { id: 11, title: "Ground Support", content: "The team operates airport ground support equipment. They load the cargo safely." },
-  { id: 12, title: "Language Learning", content: "The student practices English grammar. He repeats the words every day." },
-  { id: 13, title: "Morning Routine", content: "I wake up early. I drink coffee and start coding my new application." },
-  { id: 14, title: "Security Check", content: "The security agent scans the luggage. Passengers wait in the line patiently." },
-  { id: 15, title: "Tech Startup", content: "The EdTech startup provides online courses. Students learn new skills easily." },
-  { id: 16, title: "Match Analysis", content: "The coach analyzes the football game. The team practices new strategies." },
-  { id: 17, title: "Cargo Loading", content: "Workers read the abbreviations on the boxes. They pack everything tightly." },
-  { id: 18, title: "Server Response", content: "The API fetches data from the server. The user interface updates instantly." },
-  { id: 19, title: "Training Day", content: "Trainees prepare for the aviation exams. They study appearance and practical skills." },
-  { id: 20, title: "Evening Relax", content: "After work, he listens to Reggaeton. The rhythm helps him relax." }
+// 2. READING STORIES (20 Stories - ከሙሉ የአማርኛ ትርጉም ጋር)
+export const readingStories: Story[] = [
+  { 
+    id: 1, 
+    title: "Airport Operations", 
+    content: "The ground handler works at the terminal. He checks the cargo manifest every morning.",
+    amharicTranslation: "የኤርፖርት መሬት ላይ አስተናጋጁ በተርሚናሉ ውስጥ ይሰራል:: በየጠዋቱ የጭነት ዝርዝሩን ይፈትሻል::"
+  },
+  { 
+    id: 2, 
+    title: "Mobile Coding", 
+    content: "A developer builds full-stack apps on a smartphone. He uses GitHub and Vercel to deploy projects.",
+    amharicTranslation: "አንድ ዴቨሎፐር በስማርትፎን ላይ ሙሉ አፕሊኬሽኖችን ይሰራል:: ፕሮጀክቶቹን ለመጫን ጊትሀብ እና ቨርሴልን ይጠቀማል::"
+  },
+  { 
+    id: 3, 
+    title: "Football Match", 
+    content: "The referee blows the whistle. The player understands the offside rule perfectly.",
+    amharicTranslation: "ዳኛው ፊሽካ ይነፋል:: ተጫዋቹ የኦፍሳይድ ህግን በሚገባ ይረዳል::"
+  },
+  { 
+    id: 4, 
+    title: "Music Production", 
+    content: "She produces Amharic Afrobeat music. The track plays at 110 BPM.",
+    amharicTranslation: "እሷ የአማርኛ አፍሮቢት ሙዚቃን ታዘጋጃለች:: ሙዚቃው በ110 BPM ፍጥነት ይጫወታል::"
+  },
+  { 
+    id: 5, 
+    title: "Aviation Tech", 
+    content: "Modern stealth fighter jets fly very fast. They use advanced biomimicry designs.",
+    amharicTranslation: "ዘመናዊ የድብቅ ተዋጊ ጄቶች በጣም በፍጥነት ይበራሉ:: የላቁ ባዮሚሚክሪ ዲዛይኖችን ይጠቀማሉ::"
+  },
+  { 
+    id: 6, 
+    title: "Satellite Setup", 
+    content: "He configures the satellite transponder. The TV shows live sports broadcasts.",
+    amharicTranslation: "የሳተላይት ትራንስፖንደሩን ያስተካክላል:: ቴሌቪዥኑ የቀጥታ የስፖርት ስርጭቶችን ያሳያል::"
+  },
+  { 
+    id: 7, 
+    title: "Smart Guide", 
+    content: "The Addis Airport Smart Guide bot helps travelers. It provides quick logistics data.",
+    amharicTranslation: "የአዲስ ኤርፖርት ስማርት ጋይድ ቦት መንገደኞችን ይረዳል:: ፈጣን የሎጂስቲክስ መረጃዎችን ያቀርባል::"
+  },
+  { 
+    id: 8, 
+    title: "Database Schema", 
+    content: "The system connects to a Supabase project. Prisma manages the relational database.",
+    amharicTranslation: "ሲስተሙ ከሱፓቤዝ (Supabase) ፕሮጀክት ጋር ይገናኛል:: ፕሪስማ (Prisma) ዳታቤዙን ያስተዳድራል::"
+  },
+  { 
+    id: 9, 
+    title: "Daily Flight", 
+    content: "The airplane takes off at 8:00 AM. The pilot speaks to the control tower.",
+    amharicTranslation: "አውሮፕላኑ ጠዋት 2:00 ሰዓት ላይ ይነሳል:: ፓይለቱ ከቁጥጥር ማሰራጫው ጋር ይነጋገራል::"
+  },
+  { 
+    id: 10, 
+    title: "Video Editing", 
+    content: "The modular architecture supports heavy video editing. The app renders files quickly.",
+    amharicTranslation: "ሞዱላር አርክቴክቸሩ ከባድ የቪዲዮ ኤዲቲንግ ስራዎችን ይደግፋል:: አፑ ፋይሎችን በፍጥነት ያዘጋጃል (render ያደርጋል)::"
+  },
+  { 
+    id: 11, 
+    title: "Ground Support", 
+    content: "The team operates airport ground support equipment. They load the cargo safely.",
+    amharicTranslation: "ቡድኑ የኤርፖርት የመሬት ላይ ድጋፍ መስጫ መሳሪያዎችን ያንቀሳቅሳል:: ጭነቱን በደህና ይጭናሉ::"
+  },
+  { 
+    id: 12, 
+    title: "Language Learning", 
+    content: "The student practices English grammar. He repeats the words every day.",
+    amharicTranslation: "ተማሪው የእንግሊዘኛ ግራመርን ይለማመዳል:: በየቀኑ ቃላቱን ይደግማል::"
+  },
+  { 
+    id: 13, 
+    title: "Morning Routine", 
+    content: "I wake up early. I drink coffee and start coding my new application.",
+    amharicTranslation: "ማለዳ እነቃለሁ:: ቡና ጠጥቼ አዲሱን አፕሊኬሽኔን መስራት እጀምራለሁ::"
+  },
+  { 
+    id: 14, 
+    title: "Security Check", 
+    content: "The security agent scans the luggage. Passengers wait in the line patiently.",
+    amharicTranslation: "የጸጥታ ሰራተኛው ጓዞችን ይፈትሻል:: ተሳፋሪዎች በተራ በታጋሽነት ይጠብቃሉ::"
+  },
+  { 
+    id: 15, 
+    title: "Tech Startup", 
+    content: "The EdTech startup provides online courses. Students learn new skills easily.",
+    amharicTranslation: "የቴክኖሎጂ ስታርታፑ የኦንላይን ትምህርቶችን ያቀርባል:: ተማሪዎች አዳዲስ ክህሎቶችን በቀላሉ ይማራሉ::"
+  },
+  { 
+    id: 16, 
+    title: "Match Analysis", 
+    content: "The coach analyzes the football game. The team practices new strategies.",
+    amharicTranslation: "አሰልጣኙ የኳስ ጨዋታውን ይገመግማል:: ቡድኑ አዳዲስ ስልቶችን ይለማመዳል::"
+  },
+  { 
+    id: 17, 
+    title: "Cargo Loading", 
+    content: "Workers read the abbreviations on the boxes. They pack everything tightly.",
+    amharicTranslation: "ሰራተኞቹ በሳጥኖቹ ላይ ያሉትን አህጽሮተ ቃላት ያነባሉ:: ሁሉንም ነገር በጥንቃቄ ያሸጉታል::"
+  },
+  { 
+    id: 18, 
+    title: "Server Response", 
+    content: "The API fetches data from the server. The user interface updates instantly.",
+    amharicTranslation: "ኤፒአዩ (API) ከሰርቨሩ ዳታ ያመጣል:: የዩዘር ኢንተርፌሱ ወዲያውኑ ይታደሳል::"
+  },
+  { 
+    id: 19, 
+    title: "Training Day", 
+    content: "Trainees prepare for the aviation exams. They study appearance and practical skills.",
+    amharicTranslation: "ሰልጣኞች ለአቪዬሽን ፈተና ይዘጋጃሉ:: ገጽታን እና የተግባር ክህሎቶችን ይማራሉ::"
+  },
+  { 
+    id: 20, 
+    title: "Evening Relax", 
+    content: "After work, he listens to Reggaeton. The rhythm helps him relax.",
+    amharicTranslation: "ከስራ በኋላ ሬጌቶን ሙዚቃ ያዳምጣል:: ዜማው ዘና እንዲል ይረዳዋል::"
+  }
 ];
 
-// 3. MASTER GRAMMAR LESSONS ARRAY (8 Dynamic Tense Modules - Total 100 Questions)
+// 3. MASTER GRAMMAR LESSONS ARRAY (የአነባበብ ፊደላት ተስተካክለዋል)
 export const allGrammarLessons: GrammarLesson[] = [
   {
     id: "l1",
@@ -90,11 +197,11 @@ export const allGrammarLessons: GrammarLesson[] = [
       commonMistake: "❌ Don't say: 'He code on his phone.' \n✅ Say: 'He codes on his phone.'\n\n❌ Don't say: 'They works everyday.'\n✅ Say: 'They work everyday.'"
     },
     vocabulary: [
-      { word: "Explore", type: "Verb", amharic: "አዲስ ነገርን ማወቅ/መረመር", pronunciation: "/ɪkˈsplɔːr/", example: "I explore new frameworks." },
-      { word: "Essential", type: "Adjective", amharic: "በጣም አስፈላጊ/ግዴታ", pronunciation: "/ɪˈsen.ʃəl/", example: "English is essential for aviation." },
-      { word: "Aviation", type: "Noun", amharic: "የአቪዬሽን/የበረራ ኢንዱስትሪ", pronunciation: "/ˌeɪ.viˈeɪ.ʃən/", example: "He studies aviation operations." },
-      { word: "Cargo", type: "Noun", amharic: "በአውሮፕላን የሚጓጓዝ ጭነት", pronunciation: "/ˈkɑːr.ɡoʊ/", example: "The cargo is heavy." },
-      { word: "Deploy", type: "Verb", amharic: "ሶፍትዌርን ክፍት ማድረግ", pronunciation: "/dɪˈplɔɪ/", example: "We deploy the application." }
+      { word: "Explore", type: "Verb", amharic: "አዲስ ነገርን ማወቅ/መረመር", pronunciation: "/ik-SPLOR/", example: "I explore new frameworks." },
+      { word: "Essential", type: "Adjective", amharic: "በጣም አስፈላጊ/ግዴታ", pronunciation: "/uh-SEN-shul/", example: "English is essential for aviation." },
+      { word: "Aviation", type: "Noun", amharic: "የአቪዬሽን/የበረራ ኢንዱስትሪ", pronunciation: "/ey-vee-EY-shun/", example: "He studies aviation operations." },
+      { word: "Cargo", type: "Noun", amharic: "በአውሮፕላን የሚጓጓዝ ጭነት", pronunciation: "/KAR-go/", example: "The cargo is heavy." },
+      { word: "Deploy", type: "Verb", amharic: "ሶፍትዌርን ክፍት ማድረግ", pronunciation: "/dih-PLOY/", example: "We deploy the application." }
     ],
     conversations: [
       { role: "Airport Agent", text: "Good morning! Can I see your passport and ticket, please?", translation: "እንደምን አደሩ! እባክዎን ፓስፖርትዎን እና ቲኬትዎን ላሳይ?" },
@@ -134,9 +241,9 @@ export const allGrammarLessons: GrammarLesson[] = [
       commonMistake: "❌ Don't say: 'I loading the cargo now.' \n✅ Say: 'I am loading the cargo now.'\n\n❌ Don't say: 'He is code continuous.'\n✅ Say: 'He is coding right now.'"
     },
     vocabulary: [
-      { word: "Inspecting", type: "Verb", amharic: "በመመርመር ላይ ያለ", pronunciation: "/ɪnˈspektɪŋ/", example: "He is inspecting the ground support unit." },
-      { word: "Rendering", type: "Verb", amharic: "ቪዲዮ በማዘጋጀት ላይ ያለ", pronunciation: "/ˈrendərɪŋ/", example: "The video application is rendering the file." },
-      { word: "Verifying", type: "Verb", amharic: "በማረጋገጥ ላይ ያለ", pronunciation: "/ˈverɪfaɪɪŋ/", example: "We are verifying the flight manifest." }
+      { word: "Inspecting", type: "Verb", amharic: "በመመርመር ላይ ያለ", pronunciation: "/in-SPEKT-ing/", example: "He is inspecting the ground support unit." },
+      { word: "Rendering", type: "Verb", amharic: "ቪዲዮ በማዘጋጀት ላይ ያለ", pronunciation: "/REN-dur-ing/", example: "The video application is rendering the file." },
+      { word: "Verifying", type: "Verb", amharic: "በማረጋገጥ ላይ ያለ", pronunciation: "/VER-uh-fy-ing/", example: "We are verifying the flight manifest." }
     ],
     conversations: [
       { role: "Supervisor", text: "What are you doing at the runway right now?", translation: "አሁን መንደርደሪያው ላይ ምን እያደረግክ ነው?" },
@@ -176,9 +283,9 @@ export const allGrammarLessons: GrammarLesson[] = [
       commonMistake: "❌ Don't say: 'I did went to work.' \n✅ Say: 'I went to work.'\n\n❌ Don't say: 'He deployeded the code.'\n✅ Say: 'He deployed the code.'"
     },
     vocabulary: [
-      { word: "Departed", type: "Verb (Past)", amharic: "ተነሳ / ተጓዘ", pronunciation: "/dɪˈpɑːrtɪd/", example: "The jet departed on schedule." },
-      { word: "Configured", type: "Verb (Past)", amharic: "አስተካከለ / አዋቀረ", pronunciation: "/kənˈfɪɡərd/", example: "I configured the Prisma ORM." },
-      { word: "Submitted", type: "Verb (Past)", amharic: "አስገባ / አስረከበ", pronunciation: "/səbˈmɪtɪd/", example: "He submitted the exam results." }
+      { word: "Departed", type: "Verb (Past)", amharic: "ተነሳ / ተጓዘ", pronunciation: "/dih-PAHR-tid/", example: "The jet departed on schedule." },
+      { word: "Configured", type: "Verb (Past)", amharic: "አስተካከለ / አዋቀረ", pronunciation: "/kun-FIG-yurd/", example: "I configured the Prisma ORM." },
+      { word: "Submitted", type: "Verb (Past)", amharic: "አስገባ / አስረከበ", pronunciation: "/sub-MIT-id/", example: "He submitted the exam results." }
     ],
     conversations: [
       { role: "Team Lead", text: "Did you push the latest update last night?", translation: "ትላንት ማታ የመጨረሻውን አፕዴት ገፋኸው?" },
@@ -217,8 +324,8 @@ export const allGrammarLessons: GrammarLesson[] = [
       commonMistake: "❌ Don't say: 'They was working late.' \n✅ Say: 'They were working late.'\n\n❌ Don't say: 'I was code when you called.'\n✅ Say: 'I was coding when you called.'"
     },
     vocabulary: [
-      { word: "Interrupt", type: "Verb", amharic: "ማቋረጥ", pronunciation: "/ˌɪntəˈrʌpt/", example: "The flight announcement interrupted our conversation." },
-      { word: "Simultaneously", type: "Adverb", amharic: "በአንድ ጊዜ/በተመሳሳይ ሰዓት", pronunciation: "/ˌsɪmlˈteɪniəsli/", example: "Two tasks were running simultaneously." }
+      { word: "Interrupt", type: "Verb", amharic: "ማቋረጥ", pronunciation: "/in-tuh-RUPT/", example: "The flight announcement interrupted our conversation." },
+      { word: "Simultaneously", type: "Adverb", amharic: "በአንድ ጊዜ/በተመሳሳይ ሰዓት", pronunciation: "/sy-mul-TAY-nee-us-lee/", example: "Two tasks were running simultaneously." }
     ],
     conversations: [
       { role: "Colleague", text: "What were you doing at 8 PM yesterday?", translation: "ትላንት ማታ 2 ሰዓት ላይ ምን እያደረግክ ነበር?" },
@@ -257,8 +364,8 @@ export const allGrammarLessons: GrammarLesson[] = [
       commonMistake: "❌ Don't say: 'I have deploy the code.' \n✅ Say: 'I have deployed the code.'\n\n❌ Don't say: 'He have finished the exam.'\n✅ Say: 'He has finished the exam.'"
     },
     vocabulary: [
-      { word: "Deployed", type: "Verb (V3)", amharic: "የተዘረጋ / ስራ ላይ የዋለ", pronunciation: "/dɪˈplɔɪd/", example: "We have deployed the new features." },
-      { word: "Achieved", type: "Verb (V3)", amharic: "ያከናወነ / ያሳካ", pronunciation: "/əˈtʃiːvd/", example: "He has achieved a high score." }
+      { word: "Deployed", type: "Verb (V3)", amharic: "የተዘረጋ / ስራ ላይ የዋለ", pronunciation: "/dih-PLOYD/", example: "We have deployed the new features." },
+      { word: "Achieved", type: "Verb (V3)", amharic: "ያከናወነ / ያሳካ", pronunciation: "/uh-CHEEVD/", example: "He has achieved a high score." }
     ],
     conversations: [
       { role: "Client", text: "Have you uploaded the database schema?", translation: "የዳታቤዝ ስኪማውን ጭነኸዋል?" },
@@ -296,8 +403,8 @@ export const allGrammarLessons: GrammarLesson[] = [
       commonMistake: "❌ Don't say: 'I will coding tomorrow.' \n✅ Say: 'I will code tomorrow.'\n\n❌ Don't say: 'He will to come.'\n✅ Say: 'He will come.'"
     },
     vocabulary: [
-      { word: "Predict", type: "Verb", amharic: "መተንበይ / መገመት", pronunciation: "/prɪˈdɪkt/", example: "We predict high traffic on the app." },
-      { word: "Guarantee", type: "Verb", amharic: "ዋስትና መስጠት", pronunciation: "/ˌɡærənˈtiː/", example: "This setup will guarantee speed." }
+      { word: "Predict", type: "Verb", amharic: "መተንበይ / መገመት", pronunciation: "/pruh-DIKT/", example: "We predict high traffic on the app." },
+      { word: "Guarantee", type: "Verb", amharic: "ዋስትና መስጠት", pronunciation: "/gair-un-TEE/", example: "This setup will guarantee speed." }
     ],
     conversations: [
       { role: "Manager", text: "When will you launch the Smart Guide bot?", translation: "የስማርት ጋይድ ቦቱን መቼ ታስጀምረዋለህ?" },
@@ -336,8 +443,8 @@ export const allGrammarLessons: GrammarLesson[] = [
       commonMistake: "❌ Don't say: 'I going to code.' \n✅ Say: 'I am going to code.'\n\n❌ Don't say: 'He is going to coding.'\n✅ Say: 'He is going to code.'"
     },
     vocabulary: [
-      { word: "Intention", type: "Noun", amharic: "እቅድ / ሐሳብ", pronunciation: "/ɪnˈtenʃn/", example: "My intention is to master Full Stack development." },
-      { word: "Schedule", type: "Verb/Noun", amharic: "መርሐግብር ማውጣት", pronunciation: "/ˈskedʒuːl/", example: "We are going to schedule the flight." }
+      { word: "Intention", type: "Noun", amharic: "እቅድ / ሐሳብ", pronunciation: "/in-TEN-shun/", example: "My intention is to master Full Stack development." },
+      { word: "Schedule", type: "Verb/Noun", amharic: "መርሐግብር ማውጣት", pronunciation: "/SKEJ-ool/", example: "We are going to schedule the flight." }
     ],
     conversations: [
       { role: "Developer Friend", text: "What are your plans for this weekend?", translation: "ለዚህ ቅዳሜና እሁድ ምን አቅደሃል?" },
@@ -375,8 +482,8 @@ export const allGrammarLessons: GrammarLesson[] = [
       commonMistake: "❌ Don't say: 'I will be load the cargo.' \n✅ Say: 'I will be loading the cargo.'\n\n❌ Don't say: 'They will being working.'\n✅ Say: 'They will be working.'"
     },
     vocabulary: [
-      { word: "Duration", type: "Noun", amharic: "የጊዜ ርዝማኔ", pronunciation: "/djuˈreɪʃn/", example: "The duration of the flight is 3 hours." },
-      { word: "Continuous", type: "Adjective", amharic: "የማያቋርጥ / የሚቀጥል", pronunciation: "/kənˈtɪnjuəs/", example: "Future continuous tense." }
+      { word: "Duration", type: "Noun", amharic: "የጊዜ ርዝማኔ", pronunciation: "/doo-RAY-shun/", example: "The duration of the flight is 3 hours." },
+      { word: "Continuous", type: "Adjective", amharic: "የማያቋርጥ / የሚቀጥል", pronunciation: "/kun-TIN-yoo-us/", example: "Future continuous tense." }
     ],
     conversations: [
       { role: "Shift Supervisor", text: "Will you be working at Terminal 1 tomorrow afternoon?", translation: "ነገ ከሰዓት በተርሚናል 1 እያሰራህ ትሆናለህ?" },
@@ -386,25 +493,11 @@ export const allGrammarLessons: GrammarLesson[] = [
       { id: 1, question: "At 3 PM tomorrow, I ___ coding my app.", options: ["will be", "will"], correctAnswer: 0, amharicHint: "ወደፊት በዚያ ሰዓት 'will be + ing'" },
       { id: 2, question: "This time next week, they ___ flying to Europe.", options: ["will be", "are"], correctAnswer: 0, amharicHint: "በወደፊት ጊዜ የሚቀጥል ድርጊት" },
       { id: 3, question: "She will be ___ the flight manifest during her shift.", options: ["reviewing", "review"], correctAnswer: 0, amharicHint: "ከ 'will be' በኋላ 'ing'" },
-      { id: 4, question: "___ you be using the smartphone dev environment tonight?", options: ["Will", "Do"], correctAnswer: 0, amharicHint: "ለወደፊት ጥያቄ 'Will'" },
-      { id: 5, question: "The server will be ___ system backup at midnight.", options: ["running", "run"], correctAnswer: 0, amharicHint: "'will be + ing'" },
-      { id: 6, question: "Tomorrow morning, we will be ___ ground equipment.", options: ["operating", "operate"], correctAnswer: 0, amharicHint: "ከ 'will be' በኋላ 'ing'" },
-      { id: 7, question: "He will not be ___ satellite signals at 2 AM.", options: ["tracking", "track"], correctAnswer: 0, amharicHint: "Future Continuous Negative" },
-      { id: 8, question: "At this exact time tomorrow, I will be ___ my flight.", options: ["boarding", "board"], correctAnswer: 0, amharicHint: "'will be + ing'" },
-      { id: 9, question: "Will the team be ___ new AI features during the stream?", options: ["demonstrating", "demonstrate"], correctAnswer: 0, amharicHint: "ከ 'will ... be' በኋላ 'ing'" },
-      { id: 10, question: "They will be ___ foreign language courses next month.", options: ["attending", "attend"], correctAnswer: 0, amharicHint: "የወደፊት የትምህርት ሂደት" },
-      { id: 11, question: "I will be ___ the database tables at midnight.", options: ["migrating", "migrate"], correctAnswer: 0, amharicHint: "Future Continuous" },
-      { id: 12, question: "The referee will be ___ the football match live.", options: ["officiating", "officiate"], correctAnswer: 0, amharicHint: "'will be + ing'" }
+      { id: 4, question: "Will you be ___ at the cargo terminal tonight?", options: ["working", "work"], correctAnswer: 0, amharicHint: "ከ 'will be' በኋላ 'ing'" },
+      { id: 5, question: "The developers will be ___ new features all day.", options: ["testing", "tested"], correctAnswer: 0, amharicHint: "Future Continuous" },
+      { id: 6, question: "We will not be ___ the system during peak hours.", options: ["updating", "updated"], correctAnswer: 0, amharicHint: "Negative Continuous" },
+      { id: 7, question: "At 8 AM, the pilot will be ___ with the control tower.", options: ["communicating", "communicated"], correctAnswer: 0, amharicHint: "ወደፊት በዚያ ሰዓት የሚከናወን" },
+      { id: 8, question: "This time tomorrow, I will be ___ on my smartphone.", options: ["coding", "code"], correctAnswer: 0, amharicHint: "ከ 'will be' በኋላ 'ing'" }
     ]
-  }
-];
-
-// 4. BACKWARDS COMPATIBILITY EXPORTS
-export const staticLessonData = allGrammarLessons[0];
-export const lessonModules = [
-  {
-    id: 1,
-    title: "Present Simple",
-    questions: allGrammarLessons[0].questions
   }
 ];
