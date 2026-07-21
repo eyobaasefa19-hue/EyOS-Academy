@@ -1,34 +1,28 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "../../../lib/supabase"; 
-import { readingStories, allGrammarLessons, GrammarLesson } from "./lessonData";
+import { readingStories, allGrammarLessons, GrammarLesson, Story } from "./lessonData";
 
 export default function AdvancedLessonDashboard() {
-  // 1. ACTIVE LESSON STATE (Default: Lesson 01 Present Simple)
   const [activeLessonId, setActiveLessonId] = useState<string>("l1");
   const currentLesson: GrammarLesson = allGrammarLessons.find(l => l.id === activeLessonId) || allGrammarLessons[0];
 
   const [activeTab, setActiveTab] = useState<"overview" | "grammar" | "vocabulary" | "reading" | "speaking" | "quiz">("overview");
   
-  // Auth & User Profile Stats
   const [authUser, setAuthUser] = useState<any>(null);
   const [streak, setStreak] = useState(0); 
   const [userXp, setUserXp] = useState(0); 
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
-
-  // Completion Tracking State
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
-  // Quiz Engine States
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedQuizOption, setSelectedQuizOption] = useState<number | null>(null);
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
 
-  // AI SPEECH RECOGNITION & SHADOWING STATES
   const [selectedConvIndex, setSelectedConvIndex] = useState<number>(0);
   const [isListening, setIsListening] = useState(false);
   const [userTranscript, setUserTranscript] = useState("");
@@ -36,9 +30,7 @@ export default function AdvancedLessonDashboard() {
   const [speechError, setSpeechError] = useState<string | null>(null);
 
   const questions = currentLesson.questions;
-  const tabContainerRef = useRef<HTMLDivElement>(null);
 
-  // 1. Fetch User Data from Supabase
   useEffect(() => {
     async function loadUserData() {
       try {
@@ -65,7 +57,6 @@ export default function AdvancedLessonDashboard() {
     loadUserData();
   }, []);
 
-  // Reset Quiz & Speech State when switching Lessons
   useEffect(() => {
     restartQuiz();
     resetSpeechState();
@@ -77,25 +68,19 @@ export default function AdvancedLessonDashboard() {
     }
   };
 
-  // ----------------------------------------------------
-  // SPEECH SYNTHESIS (TEXT TO SPEECH)
-  // ----------------------------------------------------
   const handlePlayAudio = (text: string) => {
     triggerHaptic(30);
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
-      utterance.rate = 0.85; // slightly slower for language learning
+      utterance.rate = 0.85; 
       window.speechSynthesis.speak(utterance);
     } else {
       alert("Text-to-speech is not supported in this browser.");
     }
   };
 
-  // ----------------------------------------------------
-  // SPEECH RECOGNITION (VOICE TO TEXT & MATCHING)
-  // ----------------------------------------------------
   const resetSpeechState = () => {
     setIsListening(false);
     setUserTranscript("");
@@ -112,7 +97,7 @@ export default function AdvancedLessonDashboard() {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      setSpeechError("የድምፅ መቅረጫው በዚህ ብራውዘር ላይ አይሰራም። እባክዎን Chrome ወይም Edge ይጠቀሙ።");
+      setSpeechError("የድምፅ መቅረጫው በዚህ ብራውዘር ላይ አይሰራም። እባክዎን Chrome ይጠቀሙ።");
       return;
     }
 
@@ -139,12 +124,12 @@ export default function AdvancedLessonDashboard() {
       };
 
       recognition.onerror = (event: any) => {
-        console.error("Speech Recognition Error:", event.error);
+        console.error("Speech Error:", event.error);
         setIsListening(false);
         if (event.error === 'not-allowed') {
-          setSpeechError("እባክዎን የብራውዘርዎን ማይክራፎን ፈቃድ (Microphone Permission) ይፍቀዱ።");
+          setSpeechError("እባክዎን የብራውዘርዎን ማይክራፎን ፈቃድ (Permission) ይፍቀዱ።");
         } else {
-          setSpeechError("ድምፅ አልተሰማም ወይም ችግር አጋጥሟል። እባክዎን ደግመው ይሞክሩ።");
+          setSpeechError("ድምፅ አልተሰማም ወይም ችግር አጋጥሟል።");
         }
       };
 
@@ -162,7 +147,6 @@ export default function AdvancedLessonDashboard() {
 
   const calculateMatchScore = (spokenText: string) => {
     const targetText = currentLesson.conversations[selectedConvIndex]?.text || "";
-    
     const clean = (str: string) => str.toLowerCase().replace(/[^\w\s]/gi, '').trim().split(/\s+/);
     const spokenWords = clean(spokenText);
     const targetWords = clean(targetText);
@@ -171,15 +155,12 @@ export default function AdvancedLessonDashboard() {
 
     let matched = 0;
     targetWords.forEach(word => {
-      if (spokenWords.includes(word)) {
-        matched++;
-      }
+      if (spokenWords.includes(word)) matched++;
     });
 
     const calculatedPercent = Math.min(100, Math.round((matched / targetWords.length) * 100));
     setMatchScore(calculatedPercent);
 
-    // Award XP bonus for good practice (>60%)
     if (calculatedPercent >= 60) {
       const newXp = userXp + 15;
       setUserXp(newXp);
@@ -187,9 +168,6 @@ export default function AdvancedLessonDashboard() {
     }
   };
 
-  // ----------------------------------------------------
-  // QUIZ ENGINE HANDLERS
-  // ----------------------------------------------------
   const handleQuizAnswer = () => {
     triggerHaptic(60); 
     if (selectedQuizOption === questions[currentQuestionIndex].correctAnswer) {
@@ -218,12 +196,9 @@ export default function AdvancedLessonDashboard() {
       
       if (authUser) {
         try {
-          await supabase
-            .from('UserProfile')
-            .update({ xpPoints: finalXpToSave })
-            .eq('id', authUser.id);
+          await supabase.from('UserProfile').update({ xpPoints: finalXpToSave }).eq('id', authUser.id);
         } catch (error) {
-          console.error("Error updating XP in database:", error);
+          console.error("Error updating XP:", error);
         }
       }
     }
@@ -240,7 +215,7 @@ export default function AdvancedLessonDashboard() {
   return (
     <div className="min-h-screen bg-[#0b101d] text-slate-100 flex flex-col font-sans select-none">
       
-      {/* NAVBAR */}
+      {/* HEADER */}
       <div className="sticky top-0 z-50 bg-[#121b2e]/90 backdrop-blur-md border-b border-slate-800/80 px-4 py-3 flex items-center justify-between shadow-md">
         <div className="flex items-center gap-2">
           <span className="text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">EyOS</span>
@@ -269,10 +244,9 @@ export default function AdvancedLessonDashboard() {
         </div>
       </div>
 
-      {/* CORE CONTENT FRAME */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 space-y-5 pb-24">
         
-        {/* GRAMMAR MODULE SWITCHER */}
+        {/* MODULE SELECTOR */}
         <div className="space-y-1.5">
           <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 px-1">Select Grammar Module ({allGrammarLessons.length})</span>
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none snap-x">
@@ -299,7 +273,7 @@ export default function AdvancedLessonDashboard() {
           </div>
         </div>
 
-        {/* Dynamic Lesson Header */}
+        {/* LESSON TITLE BANNER */}
         <div className="bg-gradient-to-br from-[#16223f] to-[#121b2e] rounded-2xl p-5 border border-slate-800 shadow-xl relative overflow-hidden">
           {completedLessons.includes(currentLesson.id) && (
             <div className="absolute top-0 right-0 bg-emerald-600 text-white text-[9px] font-black px-3 py-1 rounded-bl-xl tracking-wider">
@@ -311,7 +285,7 @@ export default function AdvancedLessonDashboard() {
           <p className="text-slate-400 text-xs mt-1 font-light">Complete all items to earn +{currentLesson.xpReward} Completion XP</p>
         </div>
 
-        {/* TAB CONTROLS */}
+        {/* TABS MENU */}
         <div className="relative border-b border-slate-800/40">
           <div className="flex items-center gap-1.5 overflow-x-auto pb-2 px-1 scrollbar-none snap-x">
             {(["overview", "grammar", "vocabulary", "reading", "speaking", "quiz"] as const).map((tab) => {
@@ -333,7 +307,7 @@ export default function AdvancedLessonDashboard() {
           </div>
         </div>
 
-        {/* DYNAMIC TAB VIEW */}
+        {/* TAB CONTENTS */}
         <div className="mt-2">
           
           {/* TAB 1: OVERVIEW */}
@@ -367,7 +341,7 @@ export default function AdvancedLessonDashboard() {
                   <tbody className="divide-y divide-slate-800/50 bg-slate-900/20">
                     {currentLesson.grammar.rules.map((rule, idx) => (
                       <tr key={idx} className="hover:bg-slate-900/40">
-                        <td className="p-3 font-mono font-bold text-purple-400">{rule.subject}</td>
+                        <td className="p-3 font-sans font-bold text-purple-400">{rule.subject}</td>
                         <td className="p-3 font-semibold text-blue-400">{rule.verb}</td>
                         <td className="p-3 font-light text-slate-200 italic">"{rule.example}"</td>
                       </tr>
@@ -375,241 +349,216 @@ export default function AdvancedLessonDashboard() {
                   </tbody>
                 </table>
               </div>
-              <div className="p-4 bg-red-950/20 rounded-xl border border-red-900/40 text-xs whitespace-pre-line text-slate-300 font-mono">
+              <div className="p-4 bg-red-950/20 rounded-xl border border-red-900/40 text-xs whitespace-pre-line text-slate-300 font-sans">
                 {currentLesson.grammar.commonMistake}
               </div>
             </div>
           )}
 
-          {/* TAB 3: VOCABULARY */}
+          {/* TAB 3: VOCABULARY (የአነባበብ ፊደል ቅርጽ ተስተካክሏል) */}
           {activeTab === "vocabulary" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {currentLesson.vocabulary.map((vocab, index) => (
-                <div key={index} className="bg-[#121b2e] p-4 rounded-2xl border border-slate-800 flex flex-col justify-between shadow-sm">
+                <div key={index} className="bg-[#121b2e] p-4 rounded-2xl border border-slate-800 flex flex-col justify-between shadow-sm hover:border-purple-500/30 transition-all">
                   <div>
                     <div className="flex items-center justify-between">
                       <h4 className="text-base font-bold text-white tracking-wide">{vocab.word}</h4>
                       <span className="text-[10px] font-semibold bg-slate-800 px-2 py-0.5 rounded text-slate-400">{vocab.type}</span>
                     </div>
-                    <span className="text-[10px] font-mono text-slate-500 block mt-0.5">{vocab.pronunciation}</span>
-                    <p className="text-xs font-medium text-slate-300 mt-2 border-l-2 border-slate-700 pl-2">
-                      <span className="text-[10px] text-slate-500 block">ትርጉም፡</span>{vocab.amharic}
+                    {/* font-sans ይጠቀማል፣ ልዩ ፎንቶች ሳጥን እንዳያመጡ */}
+                    <span className="text-[11px] font-medium text-purple-400 block mt-1 tracking-wide">{vocab.pronunciation}</span>
+                    
+                    <p className="text-xs font-medium text-slate-300 mt-2.5 border-l-2 border-slate-700 pl-2">
+                      <span className="text-[10px] text-slate-500 block mb-0.5">ትርጉም፡</span>
+                      {vocab.amharic}
                     </p>
-                    <p className="text-[11px] text-slate-400 italic mt-1.5">Ex: "{vocab.example}"</p>
+                    <p className="text-[11px] text-slate-400 italic mt-2 bg-slate-900/50 p-2 rounded-lg">
+                      Ex: "{vocab.example}"
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
           )}
 
-          {/* TAB 4: READING */}
+          {/* TAB 4: READING (የአማርኛ ትርጉም በግልፅ ከስር ይወጣል) */}
           {activeTab === "reading" && (
             <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 space-y-4">
               <h3 className="text-base font-bold text-purple-400">📚 Practice Library ({readingStories.length} Stories)</h3>
               <div className="space-y-4 max-h-[58vh] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-800">
-                {readingStories.map((story) => (
-                  <div key={story.id} className="bg-slate-900/40 p-4 rounded-xl border border-slate-800/70 space-y-1">
+                {readingStories.map((story: Story) => (
+                  <div key={story.id} className="bg-slate-900/40 p-4 rounded-xl border border-slate-800/70 space-y-2">
                     <h4 className="text-xs font-black uppercase text-green-400 tracking-wide">● {story.title}</h4>
-                    <p className="text-slate-300 leading-relaxed text-xs md:text-sm font-light">{story.content}</p>
+                    
+                    {/* English Content */}
+                    <p className="text-slate-200 leading-relaxed text-xs md:text-sm font-medium">{story.content}</p>
+                    
+                    {/* Amharic Translation (የአማርኛ ትርጉም ክፍል) */}
+                    {story.amharicTranslation && (
+                      <div className="mt-2 pt-2 border-t border-slate-800/60">
+                        <span className="text-[10px] text-blue-400 font-bold block mb-1">ትርጉም፡</span>
+                        <p className="text-slate-400 text-[11px] leading-relaxed font-light">
+                          {story.amharicTranslation}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* TAB 5: AI SPEAKING & SHADOWING (REAL MICROPHONE ENGINE) */}
+          {/* TAB 5: SPEAKING */}
           {activeTab === "speaking" && (
-            <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 text-center space-y-5">
-              <div className="flex items-center justify-center gap-2">
-                <div className={`w-12 h-12 border rounded-full flex items-center justify-center text-xl transition-all ${
-                  isListening 
-                    ? "bg-red-500/20 border-red-500 text-red-400 animate-pulse scale-110" 
-                    : "bg-purple-600/10 border-purple-500/30 text-purple-400"
-                }`}>
-                  🎙️
+            <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 space-y-5">
+              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 className="text-sm font-bold text-slate-200">AI Roleplay Conversation</h3>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => { triggerHaptic(); setSelectedConvIndex(Math.max(0, selectedConvIndex - 1)); resetSpeechState(); }}
+                    disabled={selectedConvIndex === 0}
+                    className="p-1.5 bg-slate-800 rounded disabled:opacity-30"
+                  >
+                    ◀
+                  </button>
+                  <span className="text-xs font-bold px-2 py-1 bg-slate-900 rounded">{selectedConvIndex + 1} / {currentLesson.conversations.length}</span>
+                  <button 
+                    onClick={() => { triggerHaptic(); setSelectedConvIndex(Math.min(currentLesson.conversations.length - 1, selectedConvIndex + 1)); resetSpeechState(); }}
+                    disabled={selectedConvIndex === currentLesson.conversations.length - 1}
+                    className="p-1.5 bg-slate-800 rounded disabled:opacity-30"
+                  >
+                    ▶
+                  </button>
                 </div>
               </div>
 
-              <div>
-                <h3 className="text-base font-bold text-white">Interactive Shadowing</h3>
-                <p className="text-slate-400 text-xs mt-0.5">ዓረፍተ ነገሩን መርጠህ 🔊 ድምፁን አዳምጥ፡ ከዚያም ማይክራፎኑን ተጭነህ በድምፅ ተለማመድ።</p>
-              </div>
+              <div className="space-y-4">
+                <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 relative">
+                  <span className="text-[10px] uppercase font-black text-blue-400 block mb-1">{currentLesson.conversations[selectedConvIndex].role}</span>
+                  <p className="text-sm font-semibold text-slate-100">{currentLesson.conversations[selectedConvIndex].text}</p>
+                  <p className="text-[11px] text-slate-400 mt-2 font-light border-l border-slate-700 pl-2">{currentLesson.conversations[selectedConvIndex].translation}</p>
+                  <button 
+                    onClick={() => handlePlayAudio(currentLesson.conversations[selectedConvIndex].text)}
+                    className="absolute top-3 right-3 p-2 bg-blue-500/10 text-blue-400 rounded-lg"
+                  >
+                    🔊
+                  </button>
+                </div>
 
-              {/* Conversation Selector Box */}
-              <div className="space-y-3 text-left max-w-md mx-auto bg-slate-900/60 p-4 rounded-xl border border-slate-800">
-                {currentLesson.conversations.map((conv, index) => {
-                  const isSelected = selectedConvIndex === index;
-                  return (
-                    <div 
-                      key={index} 
-                      onClick={() => { triggerHaptic(20); setSelectedConvIndex(index); resetSpeechState(); }}
-                      className={`p-3 rounded-xl border transition-all cursor-pointer relative ${
-                        isSelected 
-                          ? "bg-purple-950/40 border-purple-500 text-white shadow-md" 
-                          : "bg-slate-900/30 border-slate-800/80 hover:bg-slate-800/40 text-slate-300"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-xs text-blue-400">{conv.role}:</span>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handlePlayAudio(conv.text); }}
-                          className="px-2 py-1 bg-slate-800 hover:bg-purple-600 hover:text-white rounded-lg text-[10px] text-slate-300 transition flex items-center gap-1"
-                        >
-                          🔊 <span>Listen</span>
-                        </button>
-                      </div>
-                      <p className="text-xs font-semibold text-slate-100">"{conv.text}"</p>
-                      <p className="text-[11px] text-slate-400 italic mt-0.5">({conv.translation})</p>
+                <div className="flex flex-col items-center space-y-4 pt-4">
+                  <button 
+                    onClick={handleStartListening}
+                    disabled={isListening}
+                    className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl shadow-lg border-2 transition-all ${
+                      isListening ? 'bg-red-500 border-red-300 animate-pulse' : 'bg-purple-600 border-purple-400 hover:scale-105'
+                    }`}
+                  >
+                    {isListening ? '🎙️' : '🎤'}
+                  </button>
+                  <p className="text-[10px] uppercase font-bold tracking-widest text-slate-500">
+                    {isListening ? "Listening... Speak now!" : "Tap to speak"}
+                  </p>
+
+                  {userTranscript && (
+                    <div className="w-full bg-slate-900/80 p-3 rounded-lg border border-slate-700 text-center">
+                      <p className="text-xs text-slate-400 font-light mb-1">You said:</p>
+                      <p className="text-sm font-medium text-slate-200">"{userTranscript}"</p>
                     </div>
-                  );
-                })}
-              </div>
+                  )}
 
-              {/* Live Speech Recognition Panel */}
-              <div className="max-w-md mx-auto space-y-3">
-                
-                {isListening && (
-                  <div className="p-3 bg-red-950/30 border border-red-800/50 rounded-xl text-red-300 text-xs animate-pulse flex items-center justify-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                    <span>ድምፅህን በማዳመጥ ላይ ነው... አሁን ተናገር!</span>
-                  </div>
-                )}
+                  {matchScore !== null && (
+                    <div className={`px-4 py-2 rounded-xl text-xs font-black border ${
+                      matchScore >= 80 ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                      matchScore >= 50 ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
+                      'bg-red-500/20 text-red-400 border-red-500/30'
+                    }`}>
+                      Match Accuracy: {matchScore}%
+                    </div>
+                  )}
 
-                {speechError && (
-                  <div className="p-3 bg-amber-950/30 border border-amber-800/50 rounded-xl text-amber-300 text-xs">
-                    {speechError}
-                  </div>
-                )}
-
-                {userTranscript && (
-                  <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-left space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">የተናገርከው ድምፅ (Transcribed):</span>
-                    <p className="text-xs font-mono text-purple-300">"{userTranscript}"</p>
-                  </div>
-                )}
-
-                {matchScore !== null && (
-                  <div className={`p-4 rounded-xl border text-center space-y-1 ${
-                    matchScore >= 80 
-                      ? "bg-emerald-950/40 border-emerald-500/50 text-emerald-300" 
-                      : matchScore >= 50 
-                      ? "bg-amber-950/40 border-amber-500/50 text-amber-300" 
-                      : "bg-red-950/40 border-red-500/50 text-red-300"
-                  }`}>
-                    <div className="text-2xl font-black">{matchScore}% Match</div>
-                    <p className="text-xs font-medium">
-                      {matchScore >= 80 
-                        ? "🔥 Excellent Pronunciation! (+15 XP)" 
-                        : matchScore >= 50 
-                        ? "👍 Good try! Keep practicing for higher accuracy." 
-                        : "💡 Try listening to the sentence audio again."}
-                    </p>
-                  </div>
-                )}
-
-                {/* Microhpone Action Button */}
-                <button 
-                  onClick={handleStartListening}
-                  disabled={isListening}
-                  className={`w-full py-3.5 px-5 font-bold text-xs rounded-xl transition shadow-lg flex items-center justify-center gap-2 ${
-                    isListening 
-                      ? "bg-red-600 text-white animate-pulse cursor-wait" 
-                      : "bg-gradient-to-r from-purple-600 to-blue-600 hover:opacity-90 text-white"
-                  }`}
-                >
-                  <span>{isListening ? "⏹️ Listening... (Speak Now)" : "🎙️ Start Microphone"}</span>
-                </button>
+                  {speechError && (
+                    <p className="text-xs text-red-400 font-bold bg-red-950/40 px-3 py-1.5 rounded">{speechError}</p>
+                  )}
+                </div>
               </div>
             </div>
           )}
 
           {/* TAB 6: QUIZ */}
           {activeTab === "quiz" && (
-            <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                <h3 className="text-base font-bold text-white">{currentLesson.title.split(":")[1]} Assessment</h3>
-                <span className="text-[10px] bg-purple-900/50 text-purple-300 font-mono px-2 py-0.5 rounded border border-purple-700/30">
-                  {!quizFinished ? `Question ${currentQuestionIndex + 1} of ${questions.length}` : "Finished"}
-                </span>
-              </div>
-
+            <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800">
               {!quizFinished ? (
-                <>
-                  <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
-                    <div 
-                      className="bg-purple-500 h-full transition-all duration-300"
-                      style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
-                    ></div>
-                  </div>
-
-                  <div className="pt-2">
-                    <p className="text-slate-200 font-semibold text-xs md:text-sm">
-                      {questions[currentQuestionIndex].question}
-                    </p>
-                    {questions[currentQuestionIndex].amharicHint && (
-                      <span className="text-[11px] text-slate-400 font-light block mt-1.5 bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/60 italic">
-                        💡 ትርጉም፦ {questions[currentQuestionIndex].amharicHint}
-                      </span>
-                    )}
+                <div className="space-y-5">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Question {currentQuestionIndex + 1} of {questions.length}</span>
+                    <span className="text-[10px] font-bold bg-slate-800 px-2 py-1 rounded text-purple-300">Score: {score}</span>
                   </div>
                   
-                  <div className="space-y-2">
-                    {questions[currentQuestionIndex].options.map((option, index) => (
-                      <button
-                        key={index}
-                        disabled={quizSubmitted}
-                        onClick={() => { triggerHaptic(30); setSelectedQuizOption(index); }}
-                        className={`w-full text-left p-3.5 rounded-xl border text-xs transition-all flex items-center justify-between ${
-                          quizSubmitted
-                            ? index === questions[currentQuestionIndex].correctAnswer
-                              ? "bg-green-950/40 border-green-500 text-green-300"
-                              : selectedQuizOption === index
-                              ? "bg-red-950/40 border-red-500 text-red-300"
-                              : "bg-slate-900/20 border-slate-800 text-slate-500"
-                            : selectedQuizOption === index
-                            ? "bg-purple-950/40 border-purple-500 text-purple-300 font-semibold"
-                            : "bg-slate-900/50 border-slate-800 text-slate-300 hover:bg-slate-800/50"
-                        }`}
-                      >
-                        <span>{String.fromCharCode(65 + index)}. {option}</span>
-                        {quizSubmitted && index === questions[currentQuestionIndex].correctAnswer && <span>✓</span>}
-                      </button>
-                    ))}
+                  <div>
+                    <h3 className="text-base font-bold text-white mb-2 leading-relaxed">{questions[currentQuestionIndex].question}</h3>
+                    {questions[currentQuestionIndex].amharicHint && (
+                      <p className="text-[11px] text-blue-300/80 font-light border-l-2 border-blue-500/30 pl-2 mb-4">
+                        💡 {questions[currentQuestionIndex].amharicHint}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {questions[currentQuestionIndex].options.map((option, index) => {
+                      const isSelected = selectedQuizOption === index;
+                      const isCorrect = index === questions[currentQuestionIndex].correctAnswer;
+                      let btnClass = "bg-slate-900 border-slate-700 text-slate-300";
+                      
+                      if (quizSubmitted) {
+                        if (isCorrect) btnClass = "bg-green-600/20 border-green-500 text-green-400";
+                        else if (isSelected && !isCorrect) btnClass = "bg-red-600/20 border-red-500 text-red-400";
+                        else btnClass = "bg-slate-900/50 border-slate-800 text-slate-500 opacity-50";
+                      } else if (isSelected) {
+                        btnClass = "bg-purple-600 border-purple-400 text-white";
+                      }
+
+                      return (
+                        <button
+                          key={index}
+                          disabled={quizSubmitted}
+                          onClick={() => { triggerHaptic(15); setSelectedQuizOption(index); }}
+                          className={`w-full p-3.5 rounded-xl border flex items-center justify-between transition-all text-sm font-semibold text-left ${btnClass}`}
+                        >
+                          <span>{option}</span>
+                          {quizSubmitted && isCorrect && <span className="text-lg">✅</span>}
+                          {quizSubmitted && isSelected && !isCorrect && <span className="text-lg">❌</span>}
+                        </button>
+                      );
+                    })}
                   </div>
 
                   {!quizSubmitted ? (
                     <button
-                      disabled={selectedQuizOption === null}
                       onClick={handleQuizAnswer}
-                      className="w-full mt-2 py-3 bg-purple-600 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed font-bold text-xs rounded-xl text-white transition hover:bg-purple-700 shadow-md"
+                      disabled={selectedQuizOption === null}
+                      className="w-full mt-4 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-500 text-white p-3.5 rounded-xl font-bold transition-all"
                     >
-                      መልስህን አስረክብ (Submit Answer)
+                      Check Answer
                     </button>
                   ) : (
                     <button
                       onClick={handleNextQuestion}
-                      className="w-full mt-2 py-3 bg-emerald-600 hover:bg-emerald-500 font-bold text-xs rounded-xl text-white transition shadow-md"
+                      className="w-full mt-4 bg-purple-600 hover:bg-purple-500 text-white p-3.5 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(147,51,234,0.3)]"
                     >
-                      {currentQuestionIndex < questions.length - 1 ? "ቀጣይ ጥያቄ ▶" : "የመጨረሻ ውጤትህን እይ ▶"}
+                      {currentQuestionIndex < questions.length - 1 ? "Next Question" : "Finish Quiz"}
                     </button>
                   )}
-                </>
+                </div>
               ) : (
-                <div className="p-5 bg-slate-900/80 rounded-xl border border-slate-800 text-center space-y-4">
-                  <h4 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-200">🎉 ሙሉ ማጠቃለያውን አጠናቀሃል!</h4>
-                  <div className="text-3xl font-black text-emerald-400 bg-emerald-500/10 py-3 rounded-xl border border-emerald-500/20 max-w-[150px] mx-auto">
-                    {score} / {questions.length}
-                  </div>
-                  <p className="text-slate-400 text-xs mt-2">
-                    +{currentLesson.xpReward} Completion XP ወደ አካውንትህ ተደምሯል!
+                <div className="text-center space-y-4 py-8">
+                  <div className="text-6xl mb-2">🎉</div>
+                  <h3 className="text-xl font-black text-white">Quiz Completed!</h3>
+                  <p className="text-slate-300 text-sm">
+                    You scored <span className="text-green-400 font-bold">{score}</span> out of <span className="text-blue-400 font-bold">{questions.length}</span>
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-2 justify-center pt-2">
-                    <button 
-                      onClick={restartQuiz}
-                      className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition"
-                    >
-                      🔄 ድጋሚ ፈትን
-                    </button>
+                  <div className="pt-4 flex gap-3 justify-center">
+                    <button onClick={restartQuiz} className="bg-slate-800 px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-700">Try Again</button>
+                    <button onClick={() => { setActiveLessonId(allGrammarLessons[0].id); setActiveTab("overview"); }} className="bg-purple-600 px-4 py-2 rounded-xl text-xs font-bold text-white shadow-lg">Back to Overview</button>
                   </div>
                 </div>
               )}
@@ -619,27 +568,27 @@ export default function AdvancedLessonDashboard() {
         </div>
       </main>
 
-      {/* FLOATING FOOTER */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-[#0b101d]/95 backdrop-blur-md border-t border-slate-800/80 px-4 py-3 z-40">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link 
-            href="/dashboard" 
-            onClick={() => triggerHaptic(20)} 
-            className="px-4 py-2 border border-slate-800 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-800/80 transition flex items-center gap-1.5"
-          >
-            <span>◀</span> ወደ ማውጫ ተመለስ
+      {/* BOTTOM NAVIGATION */}
+      <nav className="fixed bottom-0 w-full bg-[#0b101d]/95 backdrop-blur-xl border-t border-slate-800/80 pb-safe">
+        <div className="flex justify-around items-center p-3 max-w-md mx-auto">
+          <Link href="/dashboard" className="flex flex-col items-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
+            <span className="text-lg">🏠</span>
+            <span className="text-[9px] font-black tracking-widest uppercase">Home</span>
           </Link>
-          
-          {activeTab !== "quiz" && (
-            <button 
-              onClick={() => { triggerHaptic(30); setActiveTab("quiz"); }}
-              className="px-4 py-2 bg-purple-600/20 text-purple-300 border border-purple-500/30 font-bold text-xs rounded-xl transition hover:bg-purple-600 hover:text-white"
-            >
-              ወደ ኩዊዝ ሂድ 🎯
-            </button>
-          )}
+          <button className="flex flex-col items-center gap-1 opacity-100 text-purple-400">
+            <span className="text-lg">📖</span>
+            <span className="text-[9px] font-black tracking-widest uppercase">Learn</span>
+          </button>
+          <Link href="/ai-chat" className="flex flex-col items-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
+            <span className="text-lg">🤖</span>
+            <span className="text-[9px] font-black tracking-widest uppercase">AI Chat</span>
+          </Link>
+          <Link href="/profile" className="flex flex-col items-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
+            <span className="text-lg">👤</span>
+            <span className="text-[9px] font-black tracking-widest uppercase">Profile</span>
+          </Link>
         </div>
-      </footer>
+      </nav>
 
     </div>
   );
