@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
-import { dialogueScenarios } from "./lesson-four-data"; // የዳታ ፋይሉን እዚህ ጋር Import እናደርገዋለን
+// ማስተካከያ: የፋይሉ ስም ከ GitHub ጋር እንዲመሳሰል ተደርጓል 👇
+import { dialogueScenarios } from "./lessonFourData"; 
 
 interface FeedbackType {
   intro: string;
