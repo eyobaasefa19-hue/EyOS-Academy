@@ -113,4 +113,4 @@ export const dialogueScenarios = [
       { speaker: "Person B", textEng: "No, it's just a five-minute walk. You don't need a shuttle.", textAmh: "አይ፣ የአምስት ደቂቃ የእግር መንገድ ነው። ትራንስፖርት አያስፈልግዎትም።" }
     ]
   }
-];
+];.
