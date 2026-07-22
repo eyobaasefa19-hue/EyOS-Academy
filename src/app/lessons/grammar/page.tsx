@@ -355,7 +355,7 @@ export default function AdvancedLessonDashboard() {
             </div>
           )}
 
-          {/* TAB 3: VOCABULARY (የአነባበብ ፊደል ቅርጽ ተስተካክሏል) */}
+          {/* TAB 3: VOCABULARY */}
           {activeTab === "vocabulary" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {currentLesson.vocabulary.map((vocab, index) => (
@@ -365,7 +365,6 @@ export default function AdvancedLessonDashboard() {
                       <h4 className="text-base font-bold text-white tracking-wide">{vocab.word}</h4>
                       <span className="text-[10px] font-semibold bg-slate-800 px-2 py-0.5 rounded text-slate-400">{vocab.type}</span>
                     </div>
-                    {/* font-sans ይጠቀማል፣ ልዩ ፎንቶች ሳጥን እንዳያመጡ */}
                     <span className="text-[11px] font-medium text-purple-400 block mt-1 tracking-wide">{vocab.pronunciation}</span>
                     
                     <p className="text-xs font-medium text-slate-300 mt-2.5 border-l-2 border-slate-700 pl-2">
@@ -381,7 +380,7 @@ export default function AdvancedLessonDashboard() {
             </div>
           )}
 
-          {/* TAB 4: READING (የአማርኛ ትርጉም በግልፅ ከስር ይወጣል) */}
+          {/* TAB 4: READING */}
           {activeTab === "reading" && (
             <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 space-y-4">
               <h3 className="text-base font-bold text-purple-400">📚 Practice Library ({readingStories.length} Stories)</h3>
@@ -390,10 +389,8 @@ export default function AdvancedLessonDashboard() {
                   <div key={story.id} className="bg-slate-900/40 p-4 rounded-xl border border-slate-800/70 space-y-2">
                     <h4 className="text-xs font-black uppercase text-green-400 tracking-wide">● {story.title}</h4>
                     
-                    {/* English Content */}
                     <p className="text-slate-200 leading-relaxed text-xs md:text-sm font-medium">{story.content}</p>
                     
-                    {/* Amharic Translation (የአማርኛ ትርጉም ክፍል) */}
                     {story.amharicTranslation && (
                       <div className="mt-2 pt-2 border-t border-slate-800/60">
                         <span className="text-[10px] text-blue-400 font-bold block mb-1">ትርጉም፡</span>
@@ -568,8 +565,8 @@ export default function AdvancedLessonDashboard() {
         </div>
       </main>
 
-      {/* BOTTOM NAVIGATION */}
-      <nav className="fixed bottom-0 w-full bg-[#0b101d]/95 backdrop-blur-xl border-t border-slate-800/80 pb-safe">
+      {/* BOTTOM NAVIGATION - z-50 ተጨምሯል */}
+      <nav className="fixed bottom-0 z-50 w-full bg-[#0b101d]/95 backdrop-blur-xl border-t border-slate-800/80 pb-safe">
         <div className="flex justify-around items-center p-3 max-w-md mx-auto">
           <Link href="/dashboard" className="flex flex-col items-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
             <span className="text-lg">🏠</span>
