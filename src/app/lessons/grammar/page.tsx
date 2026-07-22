@@ -17,6 +17,10 @@ export default function AdvancedLessonDashboard() {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
+  // 🆕 አዲስ state: የአማርኛ ትርጉም ማሳያ/መደበቂያ እና የፍለጋ ሳጥን
+  const [showAmharic, setShowAmharic] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedQuizOption, setSelectedQuizOption] = useState<number | null>(null);
   const [quizSubmitted, setQuizSubmitted] = useState(false);
@@ -30,6 +34,9 @@ export default function AdvancedLessonDashboard() {
   const [speechError, setSpeechError] = useState<string | null>(null);
 
   const questions = currentLesson.questions;
+
+  // የትምህርት እድገት በመቶኛ (Progress calculation)
+  const progressPercent = Math.round((completedLessons.length / allGrammarLessons.length) * 100);
 
   useEffect(() => {
     async function loadUserData() {
@@ -60,6 +67,7 @@ export default function AdvancedLessonDashboard() {
   useEffect(() => {
     restartQuiz();
     resetSpeechState();
+    setSearchQuery("");
   }, [activeLessonId]);
 
   const triggerHaptic = (duration = 40) => {
@@ -212,6 +220,18 @@ export default function AdvancedLessonDashboard() {
     setQuizFinished(false);
   };
 
+  // የቃላት እና የተረኮች ፍለጋ በቅድመ-ማጣሪያ (Search Filter)
+  const filteredVocabulary = currentLesson.vocabulary.filter(v => 
+    v.word.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    v.amharic.includes(searchQuery)
+  );
+
+  const filteredStories = readingStories.filter(s => 
+    s.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    s.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.amharicTranslation.includes(searchQuery)
+  );
+
   return (
     <div className="min-h-screen bg-[#0b101d] text-slate-100 flex flex-col font-sans select-none">
       
@@ -224,7 +244,15 @@ export default function AdvancedLessonDashboard() {
           </span>
         </div>
         
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
+          {/* 🆕 አማርኛ ትርጉም ማሳያ toggle button */}
+          <button 
+            onClick={() => setShowAmharic(!showAmharic)}
+            className="text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
+          >
+            {showAmharic ? "👁️ አማርኛ" : "🙈 አማርኛ"}
+          </button>
+
           <div className="flex items-center gap-1 text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20 text-[11px] font-bold">
             🔥 <span>{streak}d</span>
           </div>
@@ -244,11 +272,22 @@ export default function AdvancedLessonDashboard() {
         </div>
       </div>
 
+      {/* 🆕 የኮርስ እድገት ባር (Progress Bar) */}
+      <div className="w-full bg-slate-900/80 h-1.5 overflow-hidden">
+        <div 
+          className="bg-gradient-to-r from-purple-500 to-blue-500 h-full transition-all duration-500" 
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
+
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 space-y-5 pb-24">
         
         {/* MODULE SELECTOR */}
         <div className="space-y-1.5">
-          <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 px-1">Select Grammar Module ({allGrammarLessons.length})</span>
+          <div className="flex justify-between items-center px-1">
+            <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">Select Grammar Module ({allGrammarLessons.length})</span>
+            <span className="text-[10px] text-purple-400 font-bold">{progressPercent}% Completed</span>
+          </div>
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none snap-x">
             {allGrammarLessons.map((lesson) => {
               const isActive = lesson.id === activeLessonId;
@@ -283,6 +322,13 @@ export default function AdvancedLessonDashboard() {
           <span className="text-[10px] font-black tracking-widest text-blue-400 uppercase">{currentLesson.category}</span>
           <h1 className="text-xl md:text-2xl font-extrabold text-white mt-0.5">{currentLesson.title}</h1>
           <p className="text-slate-400 text-xs mt-1 font-light">Complete all items to earn +{currentLesson.xpReward} Completion XP</p>
+          
+          {/* 🆕 Pro Tip Banner */}
+          {currentLesson.proTip && (
+            <div className="mt-3 p-2.5 bg-purple-950/40 border border-purple-800/50 rounded-xl text-xs text-purple-200">
+              {currentLesson.proTip}
+            </div>
+          )}
         </div>
 
         {/* TABS MENU */}
@@ -314,10 +360,12 @@ export default function AdvancedLessonDashboard() {
           {activeTab === "overview" && (
             <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 space-y-4">
               <h3 className="text-base font-bold text-slate-200">የአጠቃላይ መግለጫ (Overview)</h3>
-              <div className="p-4 bg-slate-900/40 rounded-xl border-l-4 border-l-blue-500 border-slate-800">
-                <p className="text-[10px] text-blue-400 uppercase font-black tracking-wider mb-1">Amharic Explanation</p>
-                <p className="text-slate-300 text-xs md:text-sm leading-relaxed">{currentLesson.amharicOverview}</p>
-              </div>
+              {showAmharic && (
+                <div className="p-4 bg-slate-900/40 rounded-xl border-l-4 border-l-blue-500 border-slate-800">
+                  <p className="text-[10px] text-blue-400 uppercase font-black tracking-wider mb-1">Amharic Explanation</p>
+                  <p className="text-slate-300 text-xs md:text-sm leading-relaxed">{currentLesson.amharicOverview}</p>
+                </div>
+              )}
               <div className="p-4 bg-slate-900/40 rounded-xl border-l-4 border-l-purple-500 border-slate-800">
                 <p className="text-[10px] text-purple-400 uppercase font-black tracking-wider mb-1">English Explanation</p>
                 <p className="text-slate-300 text-xs md:text-sm leading-relaxed">{currentLesson.englishOverview}</p>
@@ -357,41 +405,81 @@ export default function AdvancedLessonDashboard() {
 
           {/* TAB 3: VOCABULARY */}
           {activeTab === "vocabulary" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {currentLesson.vocabulary.map((vocab, index) => (
-                <div key={index} className="bg-[#121b2e] p-4 rounded-2xl border border-slate-800 flex flex-col justify-between shadow-sm hover:border-purple-500/30 transition-all">
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-base font-bold text-white tracking-wide">{vocab.word}</h4>
-                      <span className="text-[10px] font-semibold bg-slate-800 px-2 py-0.5 rounded text-slate-400">{vocab.type}</span>
+            <div className="space-y-3">
+              {/* 🆕 Search input */}
+              <input 
+                type="text" 
+                placeholder="🔍 Search vocabulary..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[#121b2e] border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-purple-500"
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredVocabulary.map((vocab, index) => (
+                  <div key={index} className="bg-[#121b2e] p-4 rounded-2xl border border-slate-800 flex flex-col justify-between shadow-sm hover:border-purple-500/30 transition-all">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-base font-bold text-white tracking-wide">{vocab.word}</h4>
+                        <div className="flex items-center gap-2">
+                          {/* 🆕 Audio button for words */}
+                          <button 
+                            onClick={() => handlePlayAudio(vocab.word)} 
+                            className="p-1 bg-purple-500/20 text-purple-300 rounded hover:bg-purple-500/30 text-xs"
+                          >
+                            🔊
+                          </button>
+                          <span className="text-[10px] font-semibold bg-slate-800 px-2 py-0.5 rounded text-slate-400">{vocab.type}</span>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-medium text-purple-400 block mt-1 tracking-wide">{vocab.pronunciation}</span>
+                      
+                      {showAmharic && (
+                        <p className="text-xs font-medium text-slate-300 mt-2.5 border-l-2 border-slate-700 pl-2">
+                          <span className="text-[10px] text-slate-500 block mb-0.5">ትርጉም፡</span>
+                          {vocab.amharic}
+                        </p>
+                      )}
+                      <p className="text-[11px] text-slate-400 italic mt-2 bg-slate-900/50 p-2 rounded-lg flex items-center justify-between">
+                        <span>Ex: "{vocab.example}"</span>
+                        <button onClick={() => handlePlayAudio(vocab.example)} className="text-slate-400 hover:text-white">🔊</button>
+                      </p>
                     </div>
-                    <span className="text-[11px] font-medium text-purple-400 block mt-1 tracking-wide">{vocab.pronunciation}</span>
-                    
-                    <p className="text-xs font-medium text-slate-300 mt-2.5 border-l-2 border-slate-700 pl-2">
-                      <span className="text-[10px] text-slate-500 block mb-0.5">ትርጉም፡</span>
-                      {vocab.amharic}
-                    </p>
-                    <p className="text-[11px] text-slate-400 italic mt-2 bg-slate-900/50 p-2 rounded-lg">
-                      Ex: "{vocab.example}"
-                    </p>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 
           {/* TAB 4: READING */}
           {activeTab === "reading" && (
             <div className="bg-[#121b2e] p-5 rounded-2xl border border-slate-800 space-y-4">
-              <h3 className="text-base font-bold text-purple-400">📚 Practice Library ({readingStories.length} Stories)</h3>
+              <div className="flex justify-between items-center">
+                <h3 className="text-base font-bold text-purple-400">📚 Practice Library ({readingStories.length} Stories)</h3>
+              </div>
+
+              {/* 🆕 Search input */}
+              <input 
+                type="text" 
+                placeholder="🔍 Search stories..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-purple-500"
+              />
+
               <div className="space-y-4 max-h-[58vh] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-800">
-                {readingStories.map((story: Story) => (
-                  <div key={story.id} className="bg-slate-900/40 p-4 rounded-xl border border-slate-800/70 space-y-2">
-                    <h4 className="text-xs font-black uppercase text-green-400 tracking-wide">● {story.title}</h4>
+                {filteredStories.map((story: Story) => (
+                  <div key={story.id} className="bg-slate-900/40 p-4 rounded-xl border border-slate-800/70 space-y-2 relative">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-xs font-black uppercase text-green-400 tracking-wide">● {story.title}</h4>
+                      <button onClick={() => handlePlayAudio(story.content)} className="text-blue-400 text-xs hover:underline flex items-center gap-1">
+                        🔊 Read
+                      </button>
+                    </div>
                     
                     <p className="text-slate-200 leading-relaxed text-xs md:text-sm font-medium">{story.content}</p>
                     
-                    {story.amharicTranslation && (
+                    {showAmharic && story.amharicTranslation && (
                       <div className="mt-2 pt-2 border-t border-slate-800/60">
                         <span className="text-[10px] text-blue-400 font-bold block mb-1">ትርጉም፡</span>
                         <p className="text-slate-400 text-[11px] leading-relaxed font-light">
@@ -433,7 +521,9 @@ export default function AdvancedLessonDashboard() {
                 <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 relative">
                   <span className="text-[10px] uppercase font-black text-blue-400 block mb-1">{currentLesson.conversations[selectedConvIndex].role}</span>
                   <p className="text-sm font-semibold text-slate-100">{currentLesson.conversations[selectedConvIndex].text}</p>
-                  <p className="text-[11px] text-slate-400 mt-2 font-light border-l border-slate-700 pl-2">{currentLesson.conversations[selectedConvIndex].translation}</p>
+                  {showAmharic && (
+                    <p className="text-[11px] text-slate-400 mt-2 font-light border-l border-slate-700 pl-2">{currentLesson.conversations[selectedConvIndex].translation}</p>
+                  )}
                   <button 
                     onClick={() => handlePlayAudio(currentLesson.conversations[selectedConvIndex].text)}
                     className="absolute top-3 right-3 p-2 bg-blue-500/10 text-blue-400 rounded-lg"
@@ -493,7 +583,7 @@ export default function AdvancedLessonDashboard() {
                   
                   <div>
                     <h3 className="text-base font-bold text-white mb-2 leading-relaxed">{questions[currentQuestionIndex].question}</h3>
-                    {questions[currentQuestionIndex].amharicHint && (
+                    {showAmharic && questions[currentQuestionIndex].amharicHint && (
                       <p className="text-[11px] text-blue-300/80 font-light border-l-2 border-blue-500/30 pl-2 mb-4">
                         💡 {questions[currentQuestionIndex].amharicHint}
                       </p>
@@ -565,7 +655,7 @@ export default function AdvancedLessonDashboard() {
         </div>
       </main>
 
-      {/* BOTTOM NAVIGATION - z-50 ተጨምሯል (AI Chat እና Profile ተሰርዟል) */}
+      {/* BOTTOM NAVIGATION */}
       <nav className="fixed bottom-0 z-50 w-full bg-[#0b101d]/95 backdrop-blur-xl border-t border-slate-800/80 pb-safe">
         <div className="flex justify-evenly items-center p-3 max-w-md mx-auto">
           <Link href="/dashboard" className="flex flex-col items-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
