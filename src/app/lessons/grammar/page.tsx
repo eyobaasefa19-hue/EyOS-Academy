@@ -565,9 +565,9 @@ export default function AdvancedLessonDashboard() {
         </div>
       </main>
 
-      {/* BOTTOM NAVIGATION - z-50 ተጨምሯል */}
+      {/* BOTTOM NAVIGATION - z-50 ተጨምሯል (AI Chat እና Profile ተሰርዟል) */}
       <nav className="fixed bottom-0 z-50 w-full bg-[#0b101d]/95 backdrop-blur-xl border-t border-slate-800/80 pb-safe">
-        <div className="flex justify-around items-center p-3 max-w-md mx-auto">
+        <div className="flex justify-evenly items-center p-3 max-w-md mx-auto">
           <Link href="/dashboard" className="flex flex-col items-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
             <span className="text-lg">🏠</span>
             <span className="text-[9px] font-black tracking-widest uppercase">Home</span>
@@ -576,14 +576,6 @@ export default function AdvancedLessonDashboard() {
             <span className="text-lg">📖</span>
             <span className="text-[9px] font-black tracking-widest uppercase">Learn</span>
           </button>
-          <Link href="/ai-chat" className="flex flex-col items-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-            <span className="text-lg">🤖</span>
-            <span className="text-[9px] font-black tracking-widest uppercase">AI Chat</span>
-          </Link>
-          <Link href="/profile" className="flex flex-col items-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-            <span className="text-lg">👤</span>
-            <span className="text-[9px] font-black tracking-widest uppercase">Profile</span>
-          </Link>
         </div>
       </nav>
 
