@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
-// ማስተካከያ: የፋይሉ ስም ከ GitHub ጋር እንዲመሳሰል ተደርጓል 👇
 import { dialogueScenarios } from "./lessonFourData"; 
 
 interface FeedbackType {
