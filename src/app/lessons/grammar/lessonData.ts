@@ -32,7 +32,7 @@ export interface Story {
   id: number;
   title: string;
   content: string;
-  amharicTranslation: string; // አዲስ የተጨመረ
+  amharicTranslation: string;
 }
 
 export interface GrammarLesson {
@@ -43,6 +43,7 @@ export interface GrammarLesson {
   xpReward: number;
   amharicOverview: string;
   englishOverview: string;
+  proTip?: string; // 🆕 አዲስ የተጨመረ፡ ፈጣን የትምህርቱ ማጠቃለያ ምክር
   grammar: {
     title: string;
     rules: GrammarRule[];
@@ -53,7 +54,7 @@ export interface GrammarLesson {
   questions: QuizQuestion[];
 }
 
-// 2. READING STORIES (20 Stories - ከሙሉ የአማርኛ ትርጉም ጋር)
+// 2. READING STORIES (20 Stories)
 export const readingStories: Story[] = [
   { 
     id: 1, 
@@ -177,7 +178,7 @@ export const readingStories: Story[] = [
   }
 ];
 
-// 3. MASTER GRAMMAR LESSONS ARRAY (የአነባበብ ፊደላት ተስተካክለዋል)
+// 3. MASTER GRAMMAR LESSONS ARRAY
 export const allGrammarLessons: GrammarLesson[] = [
   {
     id: "l1",
@@ -187,6 +188,7 @@ export const allGrammarLessons: GrammarLesson[] = [
     xpReward: 500,
     amharicOverview: "የአሁኑን ጊዜ (Present Simple) ዘወትር ለምናደርጋቸው ድርጊቶች፣ ልማዶች፣ የዕለት ተዕለት ውሎዎች እና ሁልጊዜም እውነት ለሆኑ እውነታዎች ለመግለፅ እንጠቀምበታለን።",
     englishOverview: "We use the Present Simple to talk about habits, permanent situations, daily routines, and general facts.",
+    proTip: "💡 Remember: Always add 's' or 'es' to the verb when using He, She, or It!",
     grammar: {
       title: "Verb 'To Be' & Sentence Structure",
       rules: [
@@ -231,6 +233,7 @@ export const allGrammarLessons: GrammarLesson[] = [
     xpReward: 500,
     amharicOverview: "Present Continuous አሁን ተናጋሪው እየተናገረ ባለበት ቅፅበት እየተከናወኑ ያሉ ድርጊቶችን ለመግለፅ ያገለግላል።",
     englishOverview: "We use the Present Continuous for actions that are happening right now at the exact moment of speaking.",
+    proTip: "💡 Look for time indicators like 'right now', 'at the moment', or 'listen!'",
     grammar: {
       title: "am/is/are + Verb(-ing)",
       rules: [
@@ -273,6 +276,7 @@ export const allGrammarLessons: GrammarLesson[] = [
     xpReward: 550,
     amharicOverview: "Past Simple ባለፈው ጊዜ ተጀምረው ሙሉ በሙሉ የተጠናቀቁ ድርጊቶችን ለመግለፅ ያገለግላል።",
     englishOverview: "Used for actions that started and completed in the past at a specific time.",
+    proTip: "💡 Negative sentences always use 'did not' + original base verb!",
     grammar: {
       title: "Regular (-ed) & Irregular Verbs (V2)",
       rules: [
@@ -315,6 +319,7 @@ export const allGrammarLessons: GrammarLesson[] = [
     xpReward: 550,
     amharicOverview: "Past Continuous ባለፈው ጊዜ ውስጥ በአንድ የተወሰነ ወቅት ሲከናወን የነበረን ድርጊት ለመግለፅ ያገለግላል።",
     englishOverview: "Used for ongoing actions that were happening at a specific continuous period in the past.",
+    proTip: "💡 Often used with 'when' (for short interrupted actions) or 'while' (for simultaneous continuous actions).",
     grammar: {
       title: "was / were + Verb(-ing)",
       rules: [
@@ -355,6 +360,7 @@ export const allGrammarLessons: GrammarLesson[] = [
     xpReward: 600,
     amharicOverview: "Present Perfect አሁን ገና የተጠናቀቀ፣ ውጤቱ አሁን ላይ የሚታይ ወይም የህይወት ልምድን (Experience) ለመግለፅ ያገለግላል።",
     englishOverview: "Used for recent events, life experiences, or past actions with a direct relevance to the present.",
+    proTip: "💡 Always pair with V3 (Past Participle) form of verbs, e.g., 'have done', 'has built'.",
     grammar: {
       title: "has / have + Past Participle (V3)",
       rules: [
@@ -394,6 +400,7 @@ export const allGrammarLessons: GrammarLesson[] = [
     xpReward: 500,
     amharicOverview: "Future Simple (will) ወደፊት ለሚደረጉ ውሳኔዎች፣ ግምቶች ወይም ድንገተኛ ውሳኔዎች (Instant decisions) ያገለግላል።",
     englishOverview: "Used for future predictions, promises, or spontaneous decisions made at the moment.",
+    proTip: "💡 'will' is always followed by the base form of the verb without 'to'.",
     grammar: {
       title: "will + Base Verb",
       rules: [
@@ -433,6 +440,7 @@ export const allGrammarLessons: GrammarLesson[] = [
     xpReward: 500,
     amharicOverview: "Be Going To ቀድመው የታቀዱ እቅዶችን (Prior Plans) ወይም አሁን ባሉ ማስረጃዎች መሰረት ወደፊት የሚሆኑ ነገሮችን ለመግለፅ ያገለግላል።",
     englishOverview: "Used for future intentions, pre-planned actions, or predictions based on current evidence.",
+    proTip: "💡 Always make sure to include am/is/are before 'going to'.",
     grammar: {
       title: "am/is/are + going to + Base Verb",
       rules: [
@@ -473,6 +481,7 @@ export const allGrammarLessons: GrammarLesson[] = [
     xpReward: 650,
     amharicOverview: "Future Continuous በወደፊት ጊዜ ውስጥ በተወሰነ ወቅት ሲከናወን የሚቆይን ወይም የሚቀጥልን ድርጊት ለመግለፅ ያገለግላል።",
     englishOverview: "Used for action that will be in progress at a specific point of time in the future.",
+    proTip: "💡 Focuses on the exact time something will be mid-progress in the future.",
     grammar: {
       title: "will be + Verb(-ing)",
       rules: [
@@ -498,6 +507,66 @@ export const allGrammarLessons: GrammarLesson[] = [
       { id: 6, question: "We will not be ___ the system during peak hours.", options: ["updating", "updated"], correctAnswer: 0, amharicHint: "Negative Continuous" },
       { id: 7, question: "At 8 AM, the pilot will be ___ with the control tower.", options: ["communicating", "communicated"], correctAnswer: 0, amharicHint: "ወደፊት በዚያ ሰዓት የሚከናወን" },
       { id: 8, question: "This time tomorrow, I will be ___ on my smartphone.", options: ["coding", "code"], correctAnswer: 0, amharicHint: "ከ 'will be' በኋላ 'ing'" }
+    ]
+  },
+
+  // 🆕 አዲስ የተጨመሩ ሌሰኖች (Lesson 09 & Lesson 10)
+  {
+    id: "l9",
+    title: "Lesson 09: Present Perfect Continuous",
+    cefrLevel: "B2",
+    category: "Grammar & Practical",
+    xpReward: 700,
+    amharicOverview: "Present Perfect Continuous ባለፈው ተጀምሮ እስከ አሁን ድረስ በተከታታይ እየተከናወነ ያለን ወይም አሁን ገና ያቆመን ድርጊት ለመግለፅ ያገለግላል።",
+    englishOverview: "Used for an action that started in the past and has continued up to the present moment.",
+    proTip: "💡 Frequently used with time markers like 'for 3 hours' or 'since morning'.",
+    grammar: {
+      title: "has/have + been + Verb(-ing)",
+      rules: [
+        { subject: "I / We / You / They", verb: "have been + verb(-ing)", amharic: "ሳደርግ ቆይቻለሁ / ሲያደርጉ ቆይተዋል", example: "I have been coding for 3 hours." },
+        { subject: "He / She / It", verb: "has been + verb(-ing)", amharic: "ሲያደርግ / ስታደርግ ቆይታለች", example: "He has been configuring the server since 9 AM." }
+      ],
+      commonMistake: "❌ Don't say: 'I have been code since morning.' \n✅ Say: 'I have been coding since morning.'"
+    },
+    vocabulary: [
+      { word: "Duration", type: "Noun", amharic: "የቆይታ ጊዜ", pronunciation: "/doo-RAY-shun/", example: "The loading duration was 2 hours." },
+      { word: "Persistent", type: "Adjective", amharic: "ጽኑ / የማያቋርጥ", pronunciation: "/pur-SIS-tunt/", example: "He showed persistent effort in coding." }
+    ],
+    conversations: [
+      { role: "Engineer", text: "How long have you been debugging this issue?", translation: "ይህንን ስህተት ስታስተካክል ምን ያህል ጊዜ ሆነህ?" },
+      { role: "You", text: "I have been debugging it for two hours.", translation: "ላፉት ሁለት ሰዓታት ስፈታው ቆይቻለሁ።" }
+    ],
+    questions: [
+      { id: 1, question: "I ___ working on this app for five hours.", options: ["have been", "has been"], correctAnswer: 0, amharicHint: "ለ 'I' 'have been + ing'" },
+      { id: 2, question: "She has been ___ the aircraft cargo since morning.", options: ["inspecting", "inspected"], correctAnswer: 0, amharicHint: "ከ 'has been' በኋላ 'ing'" }
+    ]
+  },
+  {
+    id: "l10",
+    title: "Lesson 10: Past Perfect",
+    cefrLevel: "B2",
+    category: "Grammar & Practical",
+    xpReward: 750,
+    amharicOverview: "Past Perfect ባለፈው ጊዜ ከነበሩ ሁለት ድርጊቶች ውስጥ ቀድሞ የተፈፀመውን ድርጊት (The earlier past action) ለመግለፅ ያገለግላል።",
+    englishOverview: "Used to show that one action happened before another action in the past.",
+    proTip: "💡 Formula: Earlier action = Had + V3 | Later action = Past Simple (V2).",
+    grammar: {
+      title: "had + Past Participle (V3)",
+      rules: [
+        { subject: "All Subjects", verb: "had + V3", amharic: "አድርጎ/አድርጋ ነበር", example: "The plane had taken off before I arrived." }
+      ],
+      commonMistake: "❌ Don't say: 'The plane had took off.' \n✅ Say: 'The plane had taken off.'"
+    },
+    vocabulary: [
+      { word: "Prior", type: "Adjective", amharic: "የበፊቱ / የቀደመው", pronunciation: "/PRY-ur/", example: "Prior experience is helpful." },
+      { word: "Departure", type: "Noun", amharic: "መነሳት / መውጣት", pronunciation: "/dih-PAHR-cher/", example: "The departure time was changed." }
+    ],
+    conversations: [
+      { role: "Dispatcher", text: "Had the crew checked the cargo before departure?", translation: "ቡድኑ ከመነሳቱ በፊት ጭነቱን ፈትሾ ነበር?" },
+      { role: "You", text: "Yes, they had completed all inspections.", translation: "አዎ፣ ሁሉንም ፍተሻዎች አጠናቀው ነበር።" }
+    ],
+    questions: [
+      { id: 1, question: "When I arrived, the flight ___ already taken off.", options: ["had", "has"], correctAnswer: 0, amharicHint: "ከሌላው ያለፈ ድርጊት በፊት ለተፈፀመ 'had'" }
     ]
   }
 ];
