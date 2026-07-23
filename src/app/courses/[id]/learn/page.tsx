@@ -28,7 +28,7 @@ interface CourseLearning {
 
 // --- Dynamic Classroom Database for All Courses ---
 const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
-  // 1. FLUTTER & SUPABASE
+  // 1. FLUTTER & SUPABASE (WEB TECH)
   "flutter-mobile-mastery": {
     id: "flutter-mobile-mastery",
     title: "Full-Stack Flutter & Supabase Mobile App Development",
@@ -103,14 +103,14 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "av-l-1", 
             title: "1.1 የኤርፖርት ግራውንድ ኦፕሬሽን እና የካርጎ ፍሰት (Cargo Flow)", 
             duration: "15:20", 
-            videoUrl: "https://www.youtube.com/embed/7I3T_yJk0qE", 
+            videoUrl: "https://www.youtube.com/embed/S432c2SInXk", 
             isCompleted: true 
           },
           { 
             id: "av-l-2", 
             title: "1.2 Air Waybill (AWB) እና የካርጎ ማኒፈስት (Cargo Manifest)", 
             duration: "20:40", 
-            videoUrl: "https://www.youtube.com/embed/M8Z3p4b8kHQ", 
+            videoUrl: "https://www.youtube.com/embed/5a4G3pI0kTo", 
             isCompleted: false 
           }
         ]
@@ -123,14 +123,14 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "av-l-3", 
             title: "2.1 የ ULD አይነቶች (Containers & Pallets: AKE, PAG, PMC)", 
             duration: "24:15", 
-            videoUrl: "https://www.youtube.com/embed/3yJ2qX1yK3E", 
+            videoUrl: "https://www.youtube.com/embed/S432c2SInXk", 
             isCompleted: false 
           },
           { 
             id: "av-l-4", 
             title: "2.2 የአውሮፕላን Weight & Balance እና Loading Configuration", 
             duration: "28:30", 
-            videoUrl: "https://www.youtube.com/embed/J7p3Y_k2x8M", 
+            videoUrl: "https://www.youtube.com/embed/5a4G3pI0kTo", 
             isCompleted: false 
           }
         ]
@@ -143,7 +143,7 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "av-l-5", 
             title: "3.1 የ GSE መሳሪያዎች (High Loaders, Tug Tractors) ኦፕሬሽን", 
             duration: "25:00", 
-            videoUrl: "https://www.youtube.com/embed/9X2eY4b8kHQ", 
+            videoUrl: "https://www.youtube.com/embed/S432c2SInXk", 
             isCompleted: false 
           }
         ]
