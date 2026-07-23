@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -9,10 +10,10 @@ import {
   CheckCircleIcon, 
   XCircleIcon 
 } from "@heroicons/react/24/solid";
-// ሱፓቤዝን በ Next.js standard alias (@/lib/supabase) ቀይረነዋል
+
+// ማሳሰቢያ፡ ይህ አድራሻ ኤረር ካመጣ፣ በሌሎቹ ፔጆችህ (ለምሳሌ Lesson 03) ላይ ያለውን የ Supabase import ኮፒ አድርገህ ተካው
 import { supabase } from "@/lib/supabase"; 
 
-// የምንለማመድባቸው ቃላት ዝርዝር
 const practiceWords = [
   { word: "Aviation", meaning: "ከአውሮፕላን በረራ ጋር የተያያዘ" },
   { word: "Logistics", meaning: "የቁሳቁሶች እና ጭነቶች ዝውውር" },
@@ -32,7 +33,6 @@ export default function SpeakingPractice() {
 
   const currentWord = practiceWords[currentIndex];
 
-  // 1. Text-to-Speech (ቃሉን በድምፅ ለማሰማት)
   const speakWord = () => {
     if ("speechSynthesis" in window) {
       const utterance = new SpeechSynthesisUtterance(currentWord.word);
@@ -44,12 +44,11 @@ export default function SpeakingPractice() {
     }
   };
 
-  // 2. Speech Recognition (የተጠቃሚውን ድምፅ ለማዳመጥ)
   const listenWord = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
-      alert("ይቅርታ፣ የእርስዎ ብሮውዘር ድምፅ መቀበል (Speech Recognition) አይደግፍም። (Chrome ይጠቀሙ)");
+      alert("ይቅርታ፣ የእርስዎ ብሮውዘር ድምፅ መቀበል (Speech Recognition) አይደግፍም።");
       return;
     }
 
@@ -87,7 +86,6 @@ export default function SpeakingPractice() {
     recognition.start();
   };
 
-  // ቀጣይ ቃል ለማምጣት
   const handleNext = () => {
     if (currentIndex < practiceWords.length - 1) {
       setCurrentIndex(currentIndex + 1);
@@ -98,7 +96,6 @@ export default function SpeakingPractice() {
     }
   };
 
-  // XP መዝግቦ ትምህርቱን ለመጨረስ
   const handleCompleteLesson = async () => {
     setIsClaiming(true);
     try {
@@ -133,7 +130,6 @@ export default function SpeakingPractice() {
           ← ዳሽቦርድ
         </Link>
 
-        {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex justify-between text-xs mb-2 text-gray-400">
             <span>Progress</span>
@@ -155,7 +151,6 @@ export default function SpeakingPractice() {
             </h2>
             <p className="text-sm text-gray-500 mb-8">{currentWord.meaning}</p>
 
-            {/* Action Buttons */}
             <div className="flex justify-center gap-6 mb-8">
               <button 
                 onClick={speakWord}
@@ -179,7 +174,6 @@ export default function SpeakingPractice() {
               </button>
             </div>
 
-            {/* Feedback Area */}
             <div className="h-20 flex flex-col items-center justify-center">
               {isListening && (
                 <p className="text-indigo-400 animate-pulse text-sm">እያዳመጠ ነው (Listening)... 🎙️</p>
@@ -204,7 +198,6 @@ export default function SpeakingPractice() {
               )}
             </div>
 
-            {/* Next Button */}
             {feedback === "correct" && (
               <button 
                 onClick={handleNext}
@@ -215,7 +208,6 @@ export default function SpeakingPractice() {
             )}
           </div>
         ) : (
-          // Completion State
           <div className="bg-[#161B26]/80 backdrop-blur-md border border-gray-800 rounded-3xl p-8 text-center shadow-xl animate-in fade-in zoom-in">
             <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircleIcon className="w-12 h-12 text-emerald-500" />
