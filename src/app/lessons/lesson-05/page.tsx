@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
@@ -9,9 +9,10 @@ import {
   CheckCircleIcon, 
   XCircleIcon 
 } from "@heroicons/react/24/solid";
-import { supabase } from "../../../lib/supabase"; // ሱፓቤዝ መንገድህ እንደየፕሮጀክትህ ሊለያይ ይችላል
+// ሱፓቤዝን በ Next.js standard alias (@/lib/supabase) ቀይረነዋል
+import { supabase } from "@/lib/supabase"; 
 
-// የምንለማመድባቸው ቃላት ዝርዝር (አብዛኛዎቹ አቪዬሽን እና ቴክኖሎጂ ላይ ያተኮሩ)
+// የምንለማመድባቸው ቃላት ዝርዝር
 const practiceWords = [
   { word: "Aviation", meaning: "ከአውሮፕላን በረራ ጋር የተያያዘ" },
   { word: "Logistics", meaning: "የቁሳቁሶች እና ጭነቶች ዝውውር" },
@@ -35,8 +36,8 @@ export default function SpeakingPractice() {
   const speakWord = () => {
     if ("speechSynthesis" in window) {
       const utterance = new SpeechSynthesisUtterance(currentWord.word);
-      utterance.lang = "en-US"; // በእንግሊዘኛ አክሰንት እንዲያነበው
-      utterance.rate = 0.9; // ፍጥነቱን ትንሽ ቀነስ ለማድረግ
+      utterance.lang = "en-US";
+      utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
     } else {
       alert("ይቅርታ፣ የእርስዎ ብሮውዘር ድምፅ ማሰማት አይችልም።");
@@ -45,7 +46,6 @@ export default function SpeakingPractice() {
 
   // 2. Speech Recognition (የተጠቃሚውን ድምፅ ለማዳመጥ)
   const listenWord = () => {
-    // ብሮውዘሩ SpeechRecognition እንደሚደግፍ ማረጋገጥ
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
@@ -68,7 +68,6 @@ export default function SpeakingPractice() {
       const transcript = event.results[0][0].transcript;
       setSpokenText(transcript);
       
-      // የተናገረው ቃል እና ትክክለኛው ቃል መመሳሰሉን ማረጋገጥ
       if (transcript.toLowerCase().replace(/[.,]/g, '') === currentWord.word.toLowerCase()) {
         setFeedback("correct");
       } else {
@@ -114,7 +113,7 @@ export default function SpeakingPractice() {
         const currentXP = profile?.xpPoints || 0;
         await supabase
           .from('UserProfile')
-          .update({ xpPoints: currentXP + 100 }) // ለዚህ ከባድ ልምምድ 100 XP
+          .update({ xpPoints: currentXP + 100 })
           .eq('id', user.id);
       }
       router.push("/dashboard");
