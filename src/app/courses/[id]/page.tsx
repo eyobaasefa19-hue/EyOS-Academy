@@ -50,6 +50,7 @@ interface CourseDetail {
 
 // --- Dynamic Courses Database (EyOS Academy Premium Data) ---
 const COURSES_DB: Record<string, CourseDetail> = {
+  // 1. MOBILE DEVELOPMENT COURSE
   "flutter-mobile-mastery": {
     id: "flutter-mobile-mastery",
     title: "Full-Stack Flutter & Supabase Mobile App Development",
@@ -98,40 +99,128 @@ const COURSES_DB: Record<string, CourseDetail> = {
       }
     ]
   },
-  "ai-video-editing": {
-    id: "ai-video-editing",
-    title: "Advanced AI Video Editing & Prompt Engineering",
-    subtitle: "የ 'Fidel AI' ቴክኖሎጂን በመጠቀም በ AI የታገዘ ከፍተኛ ጥራት ያለው የቪዲዮ ኤዲቲንግ ጥበብ።",
-    description: "በዘመናዊው የ AI ቴክኖሎጂ ቪዲዮዎችን እንዴት ኤዲት ማድረግ፣ አኒሜሽኖችን መፍጠር እና የ Prompt Engineering ሚስጥሮችን መጠቀም እንደሚችሉ የሚማሩበት የተሟላ ኮርስ።",
+
+  // 2. ARTIFICIAL INTELLIGENCE & PROMPT ENGINEERING
+  "ai-prompt-engineering": {
+    id: "ai-prompt-engineering",
+    title: "Advanced Prompt Engineering & AI Automation",
+    subtitle: "የ AI ኤጀንቶች እና Prompt Engineering ጥበብን በመማር በየዕለቱ የምትሰራቸውን ስራዎች አውቶሜት አድርግ",
+    description: "በዚህ ኮርስ ውስጥ የ System Prompts፣ Chain-of-Thought እና Few-Shot Prompting የላቁ ስልቶችን በመማር ከ AI ሞዴሎች ከፍተኛ ጥራት ያለው ውጤት ማግኘት ትችላለህ። በተጨማሪም OpenAI APIs እና Supabaseን በማገናኘት ብጁ የ AI አውቶሜሽን አፕሊኬሽኖችን መገንባት ታጠናለህ።",
     whatYouWillLearn: [
-      "ውስብስብ የ AI Prompts አፃፃፍ ቴክኒኮች (Prompt Engineering)",
-      "ከፅሁፍ ወደ ቪዲዮ (Text-to-Video) የመቀየር ጥበብ",
-      "የቪዲዮ ጥራት እና ቀለማትን በ AI ማስተካከል",
-      "የራስዎን የ AI ቪዲዮ ኤዲቲንግ ዎርክፍሎው መፍጠር"
+      "የ System Prompts፣ Chain-of-Thought እና Few-Shot Prompting የላቁ ስልቶች",
+      "በ AI Image & Video Generators (Midjourney, Sora, Runway) ከፍተኛ ጥራት ያላቸውን አሴቶች መፍጠር",
+      "LLM APIs (OpenAI, Claude) ከትግበራዎች ጋር ማገናኘት እና አውቶሜሽን መገንባት",
+      "ብጁ AI Video/Media Processing Workflows መፍጠር"
     ],
-    thumbnail: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1200&auto=format&fit=crop",
+    thumbnail: "https://images.unsplash.com/photo-1677442136019-21780efad99a?q=80&w=1200&auto=format&fit=crop",
     category: "Artificial Intelligence",
     price: 1200,
     discountPrice: 799,
     rating: 4.8,
-    reviewsCount: 85,
+    reviewsCount: 94,
     studentsCount: 890,
-    duration: "12h 45m",
-    lessonsCount: 30,
-    difficulty: "Advanced",
+    duration: "12h 15m",
+    lessonsCount: 28,
+    difficulty: "All Levels",
     language: "አማርኛ / English",
     instructor: {
-      name: "Eyob Asefa",
-      title: "AI Prompt Engineer",
-      avatar: "https://ui-avatars.com/api/?name=Eyob+Asefa&background=8B5CF6&color=fff"
+      name: "Sami Tech",
+      title: "AI Researcher & Prompt Engineer",
+      avatar: "https://ui-avatars.com/api/?name=Sami+Tech&background=8B5CF6&color=fff"
     },
     chapters: [
       {
-        id: "ch-1",
-        title: "ክፍል 1: የ Prompt Engineering መግቢያ",
+        id: "ai-ch-1",
+        title: "ክፍል 1: የመሰረታዊ እና የላቀ Prompt Architecture",
         lessons: [
-          { id: "l-1", title: "1.1 AI እንዴት ያስባል? የቃላት አደራደር", duration: "10:15", isFreePreview: true },
-          { id: "l-2", title: "1.2 Midjourney እና RunwayML መግቢያ", duration: "15:30", isFreePreview: true }
+          { id: "ai-l-1", title: "1.1 የ AI Prompts አወቃቀር እና System Instructions", duration: "12:30", isFreePreview: true },
+          { id: "ai-l-2", title: "1.2 Few-Shot & Chain-of-Thought Prompting", duration: "18:20", isFreePreview: true },
+          { id: "ai-l-3", title: "1.3 Multi-Modal AI (Text, Vision, Audio) መመሪያዎች", duration: "15:45", isFreePreview: false }
+        ]
+      },
+      {
+        id: "ai-ch-2",
+        title: "ክፍል 2: AI Media & Video Generation Workflows",
+        lessons: [
+          { id: "ai-l-4", title: "2.1 Midjourney & RunwayML የቪዲዮ አኒሜሽን ጥበብ", duration: "20:15", isFreePreview: false },
+          { id: "ai-l-5", title: "2.2 Text-to-Video Prompts እና Frame Rendering Optimization", duration: "24:30", isFreePreview: false }
+        ]
+      },
+      {
+        id: "ai-ch-3",
+        title: "ክፍል 3: AI Automation & API Integration",
+        lessons: [
+          { id: "ai-l-6", title: "3.1 OpenAI API እና Supabase Backend ማገናኘት", duration: "25:10", isFreePreview: false },
+          { id: "ai-l-7", title: "3.2 AI Automated Content & Video Generation Pipeline", duration: "30:00", isFreePreview: false }
+        ]
+      }
+    ]
+  },
+
+  // 3. AVIATION LOGISTICS, CARGO & GROUND OPERATIONS
+  "aviation-logistics-pro": {
+    id: "aviation-logistics-pro",
+    title: "Aviation Logistics, Cargo & Ground Operations",
+    subtitle: "የአየር መንገድ የካርጎ አሰራር፣ የ ULD አያያዝ፣ የበረራ ጭነት እና Ground Equipment (GSE) ኦፕሬሽን ጥልቅ ሙያዊ ስልጠና",
+    description: "የአየር መንገድ የካርጎ ፍሰት (Cargo Flow)፣ የ Air Waybill (AWB) እና Manifest ሰነዶች አሰራር፣ የ ULDs (AKE, PAG, PMC) አጠቃቀም፣ የአውሮፕላን Weight & Balance፣ Hazardous Materials (HAZMAT) ደንቦች እና የ Ground Support Equipment (GSE) ደህንነቱ የተጠበቀ ኦፕሬሽን ሙሉ በሙሉ የሚያስተምር ሙያዊ ኮርስ።",
+    whatYouWillLearn: [
+      "የአየር መንገድ Cargo Manifest፣ Air Waybill (AWB) እና Logistics ሰነዶች አሰራር",
+      "የ ULD (Unit Load Device) አይነቶች (AKE, PAG, PMC)፣ Contour እና የኮድ አጠራር ህጎች",
+      "የአውሮፕላን Weight & Balance፣ Loading Plans እና Trim Sheet አሰራር",
+      "የ Hazardous Materials (Dangerous Goods) ህጎች እና NOTOC አዘጋጃጀት",
+      "የ Ground Support Equipment (GSE) ደህንነቱ የተጠበቀ ኦፕሬሽን እና Ramp Safety"
+    ],
+    thumbnail: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=1200&auto=format&fit=crop",
+    category: "Aviation & Logistics",
+    price: 2000,
+    discountPrice: 1499,
+    rating: 5.0,
+    reviewsCount: 210,
+    studentsCount: 2300,
+    duration: "24h 00m",
+    lessonsCount: 35,
+    difficulty: "Beginner",
+    language: "አማርኛ / English",
+    instructor: {
+      name: "Aviation Academy Team",
+      title: "Senior Flight Operations Specialist",
+      avatar: "https://ui-avatars.com/api/?name=Aviation+Academy&background=059669&color=fff"
+    },
+    chapters: [
+      {
+        id: "av-ch-1",
+        title: "ክፍል 1: የኤርፖርት ካርጎ እና Ground Handling መግቢያ",
+        lessons: [
+          { id: "av-l-1", title: "1.1 የኤርፖርት ግራውንድ ኦፕሬሽን እና የካርጎ ፍሰት (Cargo Flow)", duration: "15:20", isFreePreview: true },
+          { id: "av-l-2", title: "1.2 Air Waybill (AWB) እና የካርጎ ማኒፈስት (Cargo Manifest)", duration: "20:40", isFreePreview: true },
+          { id: "av-l-3", title: "1.3 Cargo Acceptance and Warehouse Logistics", duration: "18:15", isFreePreview: false }
+        ]
+      },
+      {
+        id: "av-ch-2",
+        title: "ክፍል 2: ULD Naming, Contours እና Flight Loading Configurations",
+        lessons: [
+          { id: "av-l-4", title: "2.1 የ ULD አይነቶች (Containers & Pallets: AKE, PAG, PMC)", duration: "24:15", isFreePreview: false },
+          { id: "av-l-5", title: "2.2 ULD Identification Code, Contour & Maximum Gross Weight", duration: "22:00", isFreePreview: false },
+          { id: "av-l-6", title: "2.3 የአውሮፕላን Weight & Balance እና Loading Configuration", duration: "28:30", isFreePreview: false },
+          { id: "av-l-7", title: "2.4 Trim Sheet አሰራር እና የሎድ ፕላን (Loading Plan) ንባብ", duration: "26:40", isFreePreview: false }
+        ]
+      },
+      {
+        id: "av-ch-3",
+        title: "ክፍል 3: Dangerous Goods (HAZMAT) & NOTOC",
+        lessons: [
+          { id: "av-l-8", title: "3.1 የ Dangerous Goods Classifications (IATA DGR)", duration: "21:10", isFreePreview: false },
+          { id: "av-l-9", title: "3.2 NOTOC (Notice to Captain) ዝግጅት እና የካፕቴን ፈርማ", duration: "19:50", isFreePreview: false }
+        ]
+      },
+      {
+        id: "av-ch-4",
+        title: "ክፍል 4: Ground Support Equipment (GSE) & Ramp Safety",
+        lessons: [
+          { id: "av-l-10", title: "4.1 የ GSE መሳሪያዎች (High Loaders, Tug Tractors, Belt Loaders) ኦፕሬሽን", duration: "25:00", isFreePreview: false },
+          { id: "av-l-11", title: "4.2 የ Ramp Safety ደንቦች እና Aircraft Safety Zone", duration: "19:45", isFreePreview: false },
+          { id: "av-l-12", title: "4.3 FOD (Foreign Object Debris) Prevention and Aircraft Arrival/Departure", duration: "23:10", isFreePreview: false }
         ]
       }
     ]
@@ -223,7 +312,7 @@ export default function CourseDetailPage() {
               </div>
             </div>
 
-            {/* Right Video Cover (Mobile Hidden, Desktop Shows Here) */}
+            {/* Right Video Cover */}
             <div className="hidden lg:block lg:col-span-1">
               <div className="relative rounded-2xl overflow-hidden aspect-video bg-gray-900 border border-gray-700/50 shadow-2xl shadow-indigo-900/20 group cursor-pointer">
                 <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500" />
@@ -317,7 +406,7 @@ export default function CourseDetailPage() {
         <div className="lg:col-span-1">
           <div className="bg-[#101724] border border-gray-700/60 rounded-3xl p-6 sticky top-24 space-y-6 shadow-2xl shadow-black/50">
             
-            {/* Mobile Video Cover (Only shows on mobile) */}
+            {/* Mobile Video Cover */}
             <div className="lg:hidden relative rounded-2xl overflow-hidden aspect-video bg-gray-900 border border-gray-800 mb-6">
               <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover opacity-80" />
               <div className="absolute inset-0 flex items-center justify-center">
@@ -364,7 +453,7 @@ export default function CourseDetailPage() {
 
       </div>
 
-      {/* 💳 PAYMENT MODAL (Your Logic Intact, Styled Premium) */}
+      {/* 💳 PAYMENT MODAL */}
       {isPaymentModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-[#161B26] border border-gray-700/80 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative animate-in zoom-in-95 duration-200">
