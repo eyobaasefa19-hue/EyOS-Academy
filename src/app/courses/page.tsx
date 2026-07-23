@@ -65,9 +65,10 @@ const MOCK_COURSES: Course[] = [
   {
     id: "ai-prompt-engineering",
     title: "Advanced Prompt Engineering & AI Automation",
-    subtitle: "የ AI ሌቨልህን ወደ ላቀ ደረጃ በማሳደግ በየቀኑ የምትሰራቸውን ስራዎች አውቶሜት አድርግ",
-    description: "ተወሳስበው የተቀመጡ የ AI መመሪያዎችን (Prompts) በመፃፍ የቪዲዮ፣ የኢሜጅ እና የኮዲንግ ስራዎችን በፍጥነት ማጠናቀቂያ ዘዴዎች።",
-    thumbnail: "https://images.unsplash.com/photo-1677442136019-21780efad99a?q=80&w=800&auto=format&fit=crop",
+    subtitle: "የ AI ኤጀንቶች እና Prompt Engineering ጥበብን በመማር ስራዎችን አውቶሜት አድርግ",
+    description: "የ System Prompts፣ Few-Shot Prompting የላቁ ስልቶችን በመጠቀም በ AI Media (Midjourney, Sora) ከፍተኛ ጥራት ያላቸውን አሴቶች መፍጠር እና API በማገናኘት ብጁ የቪዲዮ/ምስል አውቶሜሽን መገንባት የሚያስተምር ሙሉ ኮርስ።",
+    // 🌟 የተስተካከለው የ AI ፎቶ ሊንክ (Working Thumbnail)
+    thumbnail: "https://images.unsplash.com/photo-1677442136019-21780efad99a?w=800&auto=format&fit=crop&q=80",
     category: "Artificial Intelligence",
     price: 1200,
     discountPrice: 799,
@@ -75,7 +76,7 @@ const MOCK_COURSES: Course[] = [
     reviewsCount: 94,
     studentsCount: 890,
     duration: "12h 15m",
-    lessonsCount: 28,
+    lessonsCount: 28, // Update to match detailed lessons
     difficulty: "All Levels",
     language: "አማርኛ",
     instructor: {
@@ -89,8 +90,8 @@ const MOCK_COURSES: Course[] = [
   {
     id: "aviation-logistics-pro",
     title: "Aviation Logistics, Cargo & Ground Operations",
-    subtitle: "የአየር መንገድ የካርጎ እና የምድር ላይ ኦፕሬሽኖች አሰራር ሙሉ ኮርስ",
-    description: "የካርጎ ማኒፌስት፣ ULD አጠቃቀም፣ የበረራ ደህንነት እና የመሬት ላይ ድጋፍ መስጫ መሳሪያዎች አሰራርን በዝርዝር የሚያብራራ ትምህርት።",
+    subtitle: "የአየር መንገድ የካርጎ አሰራር፣ የ ULD አያያዝ እና Ground Support (GSE) የተሟላ ስልጠና",
+    description: "የአየር መንገድ Cargo Manifest፣ የ ULD አይነቶች (AKE, PAG, PMC)፣ የአውሮፕላን Weight & Balance፣ የ Hazardous Materials (HAZMAT) ህጎች፣ እና የ GSE (High Loaders, Tug Tractors, Belt Loaders) ደህንነቱ የተጠበቀ ኦፕሬሽን ጥልቅ ሙያዊ ትምህርት።",
     thumbnail: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=800&auto=format&fit=crop",
     category: "Aviation & Logistics",
     price: 2000,
@@ -99,13 +100,13 @@ const MOCK_COURSES: Course[] = [
     reviewsCount: 210,
     studentsCount: 2300,
     duration: "24h 00m",
-    lessonsCount: 56,
+    lessonsCount: 35, // Updated to match detailed lessons
     difficulty: "Beginner",
     language: "አማርኛ / English",
     instructor: {
       id: "inst-3",
       name: "Aviation Academy Team",
-      title: "Senior Flight Operations Specialist",
+      title: "Senior Ground Logistics Specialist",
       avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop"
     }
   }
