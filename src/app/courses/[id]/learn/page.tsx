@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
@@ -20,75 +20,200 @@ interface Chapter {
   lessons: Lesson[];
 }
 
-// --- Real Classroom Data with Proper Flutter & Supabase Video Embeds ---
-const COURSE_LEARNING_DATA = {
-  id: "flutter-mobile-mastery",
-  title: "Full-Stack Flutter & Supabase Mobile App Development",
-  chapters: [
-    {
-      id: "ch-1",
-      title: "ክፍል 1: መግቢያ እና የዴቨሎፕመንት አካባቢ ማዘጋጀት",
-      lessons: [
-        { 
-          id: "l-1", 
-          title: "1.1 የኮርሱ መግቢያ እና የምንሰራቸው ፕሮጀክቶች", 
-          duration: "08:15", 
-          videoUrl: "https://www.youtube.com/embed/VPvVD8t02U8", // Real Flutter Intro
-          isCompleted: true 
-        },
-        { 
-          id: "l-2", 
-          title: "1.2 Flutter እና Dart በሞባይል ላይ መጫን", 
-          duration: "14:20", 
-          videoUrl: "https://www.youtube.com/embed/fq4N0hgOWzU", // Real Setup Video
-          isCompleted: true 
-        },
-        { 
-          id: "l-3", 
-          title: "1.3 የፕሮጀክት መዋቅር እና የመጀመሪያው App", 
-          duration: "18:45", 
-          videoUrl: "https://www.youtube.com/embed/x0uinJvhNxI", // Real Project Structure
-          isCompleted: false 
-        }
-      ]
-    },
-    {
-      id: "ch-2",
-      title: "ክፍል 2: Supabase Database Integration",
-      lessons: [
-        { 
-          id: "l-4", 
-          title: "2.1 Supabase Project መፍጠር እና Schema ዲዛይን", 
-          duration: "22:10", 
-          videoUrl: "https://www.youtube.com/embed/1xipg02Wu8s", // Real Supabase Video
-          isCompleted: false 
-        },
-        { 
-          id: "l-5", 
-          title: "2.2 Authentication እና User Profiles አሰራር", 
-          duration: "25:00", 
-          videoUrl: "https://www.youtube.com/embed/3J3mThf6k7k", // Real Supabase Auth
-          isCompleted: false 
-        },
-        { 
-          id: "l-6", 
-          title: "2.3 Realtime Data Fetching & State Management", 
-          duration: "30:15", 
-          videoUrl: "https://www.youtube.com/embed/3H_mOnI8Uas", // Real State Management
-          isCompleted: false 
-        }
-      ]
-    }
-  ]
+interface CourseLearning {
+  id: string;
+  title: string;
+  chapters: Chapter[];
+}
+
+// --- Dynamic Classroom Database for All Courses ---
+const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
+  // 1. FLUTTER & SUPABASE
+  "flutter-mobile-mastery": {
+    id: "flutter-mobile-mastery",
+    title: "Full-Stack Flutter & Supabase Mobile App Development",
+    chapters: [
+      {
+        id: "ch-1",
+        title: "ክፍል 1: መግቢያ እና የዴቨሎፕመንት አካባቢ ማዘጋጀት",
+        lessons: [
+          { 
+            id: "l-1", 
+            title: "1.1 የኮርሱ መግቢያ እና የምንሰራቸው ፕሮጀክቶች", 
+            duration: "08:15", 
+            videoUrl: "https://www.youtube.com/embed/VPvVD8t02U8", 
+            isCompleted: true 
+          },
+          { 
+            id: "l-2", 
+            title: "1.2 Flutter እና Dart በሞባይል ላይ መጫን", 
+            duration: "14:20", 
+            videoUrl: "https://www.youtube.com/embed/fq4N0hgOWzU", 
+            isCompleted: true 
+          },
+          { 
+            id: "l-3", 
+            title: "1.3 የፕሮጀክት መዋቅር እና የመጀመሪያው App", 
+            duration: "18:45", 
+            videoUrl: "https://www.youtube.com/embed/x0uinJvhNxI", 
+            isCompleted: false 
+          }
+        ]
+      },
+      {
+        id: "ch-2",
+        title: "ክፍል 2: Supabase Database Integration",
+        lessons: [
+          { 
+            id: "l-4", 
+            title: "2.1 Supabase Project መፍጠር እና Schema ዲዛይን", 
+            duration: "22:10", 
+            videoUrl: "https://www.youtube.com/embed/1xipg02Wu8s", 
+            isCompleted: false 
+          },
+          { 
+            id: "l-5", 
+            title: "2.2 Authentication እና User Profiles አሰራር", 
+            duration: "25:00", 
+            videoUrl: "https://www.youtube.com/embed/3J3mThf6k7k", 
+            isCompleted: false 
+          },
+          { 
+            id: "l-6", 
+            title: "2.3 Realtime Data Fetching & State Management", 
+            duration: "30:15", 
+            videoUrl: "https://www.youtube.com/embed/3H_mOnI8Uas", 
+            isCompleted: false 
+          }
+        ]
+      }
+    ]
+  },
+
+  // 2. AVIATION LOGISTICS, CARGO & GROUND OPERATIONS
+  "aviation-logistics-pro": {
+    id: "aviation-logistics-pro",
+    title: "Aviation Logistics, Cargo & Ground Operations",
+    chapters: [
+      {
+        id: "av-ch-1",
+        title: "ክፍል 1: የኤርፖርት ካርጎ እና Ground Handling መግቢያ",
+        lessons: [
+          { 
+            id: "av-l-1", 
+            title: "1.1 የኤርፖርት ግራውንድ ኦፕሬሽን እና የካርጎ ፍሰት (Cargo Flow)", 
+            duration: "15:20", 
+            videoUrl: "https://www.youtube.com/embed/7I3T_yJk0qE", 
+            isCompleted: true 
+          },
+          { 
+            id: "av-l-2", 
+            title: "1.2 Air Waybill (AWB) እና የካርጎ ማኒፈስት (Cargo Manifest)", 
+            duration: "20:40", 
+            videoUrl: "https://www.youtube.com/embed/M8Z3p4b8kHQ", 
+            isCompleted: false 
+          }
+        ]
+      },
+      {
+        id: "av-ch-2",
+        title: "ክፍል 2: ULD Naming, Contours እና Flight Loading Configurations",
+        lessons: [
+          { 
+            id: "av-l-3", 
+            title: "2.1 የ ULD አይነቶች (Containers & Pallets: AKE, PAG, PMC)", 
+            duration: "24:15", 
+            videoUrl: "https://www.youtube.com/embed/3yJ2qX1yK3E", 
+            isCompleted: false 
+          },
+          { 
+            id: "av-l-4", 
+            title: "2.2 የአውሮፕላን Weight & Balance እና Loading Configuration", 
+            duration: "28:30", 
+            videoUrl: "https://www.youtube.com/embed/J7p3Y_k2x8M", 
+            isCompleted: false 
+          }
+        ]
+      },
+      {
+        id: "av-ch-3",
+        title: "ክፍል 3: Ground Support Equipment (GSE) & Ramp Safety",
+        lessons: [
+          { 
+            id: "av-l-5", 
+            title: "3.1 የ GSE መሳሪያዎች (High Loaders, Tug Tractors) ኦፕሬሽን", 
+            duration: "25:00", 
+            videoUrl: "https://www.youtube.com/embed/9X2eY4b8kHQ", 
+            isCompleted: false 
+          }
+        ]
+      }
+    ]
+  },
+
+  // 3. ARTIFICIAL INTELLIGENCE & PROMPT ENGINEERING
+  "ai-prompt-engineering": {
+    id: "ai-prompt-engineering",
+    title: "Advanced Prompt Engineering & AI Automation",
+    chapters: [
+      {
+        id: "ai-ch-1",
+        title: "ክፍል 1: የመሰረታዊ እና የላቀ Prompt Architecture",
+        lessons: [
+          { 
+            id: "ai-l-1", 
+            title: "1.1 የ AI Prompts አወቃቀር እና System Instructions", 
+            duration: "12:30", 
+            videoUrl: "https://www.youtube.com/embed/jC4v5AS4RIM", 
+            isCompleted: true 
+          },
+          { 
+            id: "ai-l-2", 
+            title: "1.2 Few-Shot & Chain-of-Thought Prompting", 
+            duration: "18:20", 
+            videoUrl: "https://www.youtube.com/embed/_ZvnD733f0U", 
+            isCompleted: false 
+          }
+        ]
+      },
+      {
+        id: "ai-ch-2",
+        title: "ክፍል 2: AI Media & Video Generation Workflows",
+        lessons: [
+          { 
+            id: "ai-l-3", 
+            title: "2.1 Midjourney & RunwayML የቪዲዮ አኒሜሽን ጥበብ", 
+            duration: "20:15", 
+            videoUrl: "https://www.youtube.com/embed/2vI_J2886wQ", 
+            isCompleted: false 
+          }
+        ]
+      }
+    ]
+  }
 };
 
 export default function VideoLearningRoomPage() {
   const params = useParams();
-  const [courseData, setCourseData] = useState(COURSE_LEARNING_DATA);
-  const [activeLesson, setActiveLesson] = useState<Lesson>(COURSE_LEARNING_DATA.chapters[0].lessons[0]);
+  const courseId = params?.id as string;
+
+  // Determine current course data based on URL parameter (Fallback to Flutter)
+  const initialCourse = COURSES_LEARNING_DB[courseId] || COURSES_LEARNING_DB["flutter-mobile-mastery"];
+
+  const [courseData, setCourseData] = useState<CourseLearning>(initialCourse);
+  const [activeLesson, setActiveLesson] = useState<Lesson>(initialCourse.chapters[0].lessons[0]);
   const [activeTab, setActiveTab] = useState<"overview" | "notes" | "resources">("overview");
   const [userNote, setUserNote] = useState("");
   const [savedNotes, setSavedNotes] = useState<string[]>([]);
+
+  // Update learning room content dynamically whenever URL courseId changes
+  useEffect(() => {
+    const selectedCourse = COURSES_LEARNING_DB[courseId] || COURSES_LEARNING_DB["flutter-mobile-mastery"];
+    setCourseData(selectedCourse);
+    if (selectedCourse.chapters[0]?.lessons[0]) {
+      setActiveLesson(selectedCourse.chapters[0].lessons[0]);
+    }
+  }, [courseId]);
 
   // Toggle completion status of lesson
   const toggleComplete = (lessonId: string) => {
@@ -116,10 +241,10 @@ export default function VideoLearningRoomPage() {
     (acc, ch) => acc + ch.lessons.filter((l) => l.isCompleted).length,
     0
   );
-  const progressPercent = Math.round((completedLessons / totalLessons) * 100);
+  const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-white flex flex-col">
+    <div className="min-h-screen bg-[#0B0F19] text-white flex flex-col font-sans">
       
       {/* Top Header Navigation */}
       <header className="bg-[#161B26] border-b border-gray-800 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
@@ -211,7 +336,7 @@ export default function VideoLearningRoomPage() {
             {/* Tab Content */}
             {activeTab === "overview" && (
               <div className="text-xs text-gray-300 leading-relaxed space-y-2">
-                <p>በዚህ ትምህርት ውስጥ ስለ ሞባይል መተግበሪያ ግንባታ፣ የፋይል መዋቅር እና አስፈላጊ ኮዶችን በዝርዝር እንመለከታለን።</p>
+                <p>በዚህ ትምህርት ውስጥ ስለ {courseData.title} ዋና ዋና ነጥቦች፣ የቪዲዮ ትንታኔዎች እና ተግባራዊ ማብራሪያዎችን በዝርዝር እንመለከታለን።</p>
                 <p className="text-gray-500">ማንኛውም ጥያቄ ካለዎት በማስታወሻ ሳጥኑ ውስጥ ማስቀመጥ ይችላሉ።</p>
               </div>
             )}
@@ -251,7 +376,7 @@ export default function VideoLearningRoomPage() {
             {activeTab === "resources" && (
               <div className="space-y-2 text-xs">
                 <div className="p-3 bg-gray-900 rounded-xl border border-gray-800 flex justify-between items-center">
-                  <span className="text-gray-300">📄 Source Code Files (.zip)</span>
+                  <span className="text-gray-300">📄 Course Resource Materials (.pdf / .zip)</span>
                   <button className="text-indigo-400 font-bold hover:underline">Download</button>
                 </div>
               </div>
