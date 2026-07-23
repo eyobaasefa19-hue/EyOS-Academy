@@ -1,8 +1,39 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
-import { Course } from "@/types/course";
+
+// --- TYPES (ለብቻው ፋይል እንዳይፈልግ እዚሁ አካትተነዋል) ---
+export type DifficultyLevel = "Beginner" | "Intermediate" | "Advanced" | "All Levels";
+
+export interface Instructor {
+  id: string;
+  name: string;
+  title: string;
+  avatar: string;
+}
+
+export interface Course {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  thumbnail: string;
+  category: string;
+  price: number;
+  discountPrice?: number;
+  rating: number;
+  reviewsCount: number;
+  studentsCount: number;
+  duration: string;
+  lessonsCount: number;
+  difficulty: DifficultyLevel;
+  language: string;
+  instructor: Instructor;
+  isFeatured?: boolean;
+  isTrending?: boolean;
+}
 
 // ሞክ ኮርሶች (Mock Course Data)
 const MOCK_COURSES: Course[] = [
