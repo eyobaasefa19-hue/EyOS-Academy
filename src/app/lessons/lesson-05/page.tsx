@@ -4,15 +4,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { 
-  MicrophoneIcon, 
-  SpeakerWaveIcon, 
-  CheckCircleIcon, 
-  XCircleIcon 
-} from "@heroicons/react/24/solid";
+// Heroicons ፓኬጅ ስላልተጫነ አጥፍተነዋል፣ በምትኩ ቀጥታ SVG እንጠቀማለን።
 
-// ማሳሰቢያ፡ ይህ አድራሻ ኤረር ካመጣ፣ በሌሎቹ ፔጆችህ (ለምሳሌ Lesson 03) ላይ ያለውን የ Supabase import ኮፒ አድርገህ ተካው
-import { supabase } from "@/lib/supabase"; 
+// ማሳሰቢያ፡ ይህ የ Supabase አድራሻ ከሌሎች ሌሰኖች (Lesson 02/04) ጋር ተመሳሳይ መሆን አለበት። 
+// ካልሰራ '../' እየጨመርክ ወይም እየቀነስክ አስተካክለው።
+import { supabase } from "../../../lib/supabase"; 
 
 const practiceWords = [
   { word: "Aviation", meaning: "ከአውሮፕላን በረራ ጋር የተያያዘ" },
@@ -48,7 +44,7 @@ export default function SpeakingPractice() {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
-      alert("ይቅርታ፣ የእርስዎ ብሮውዘር ድምፅ መቀበል (Speech Recognition) አይደግፍም።");
+      alert("ይቅርታ፣ የእርስዎ ብሮውዘር ድምፅ መቀበል (Speech Recognition) አይደግፍም። (Chrome ይጠቀሙ)");
       return;
     }
 
@@ -157,7 +153,11 @@ export default function SpeakingPractice() {
                 className="w-14 h-14 bg-gray-800 hover:bg-gray-700 rounded-full flex items-center justify-center transition-all border border-gray-700 hover:border-indigo-500 group"
                 title="Listen to the word"
               >
-                <SpeakerWaveIcon className="w-6 h-6 text-indigo-400 group-hover:scale-110 transition-transform" />
+                {/* Speaker Icon SVG */}
+                <svg className="w-6 h-6 text-indigo-400 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06zM18.584 5.106a.75.75 0 011.06 0c3.808 3.807 3.808 9.98 0 13.788a.75.75 0 11-1.06-1.06 8.25 8.25 0 000-11.668.75.75 0 010-1.06z" />
+                  <path d="M15.932 7.757a.75.75 0 011.061 0 6 6 0 010 8.486.75.75 0 01-1.06-1.061 4.5 4.5 0 000-6.364.75.75 0 010-1.06z" />
+                </svg>
               </button>
 
               <button 
@@ -170,7 +170,10 @@ export default function SpeakingPractice() {
                 }`}
                 title="Tap and Speak"
               >
-                <MicrophoneIcon className={`w-8 h-8 ${isListening ? "text-rose-500" : "text-white"}`} />
+                {/* Microphone Icon SVG */}
+                <svg className={`w-8 h-8 ${isListening ? "text-rose-500" : "text-white"}`} fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 14a3 3 0 003-3V6a3 3 0 00-6 0v5a3 3 0 003 3zm5-3a1 1 0 012 0 7 7 0 01-14 0 1 1 0 012 0 5 5 0 0010 0zm-6 8v3h2v-3h-2z" />
+                </svg>
               </button>
             </div>
 
@@ -185,12 +188,18 @@ export default function SpeakingPractice() {
                   
                   {feedback === "correct" ? (
                     <div className="flex items-center gap-1.5 text-emerald-400 bg-emerald-400/10 px-3 py-1.5 rounded-lg text-sm">
-                      <CheckCircleIcon className="w-5 h-5" />
+                      {/* Check Icon SVG */}
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 11.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
+                      </svg>
                       <span>ትክክል ነው! (Perfect)</span>
                     </div>
                   ) : feedback === "incorrect" ? (
                     <div className="flex items-center gap-1.5 text-rose-400 bg-rose-400/10 px-3 py-1.5 rounded-lg text-sm">
-                      <XCircleIcon className="w-5 h-5" />
+                      {/* X Icon SVG */}
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clipRule="evenodd" />
+                      </svg>
                       <span>አልተመሳሰለም፣ ድጋሚ ሞክር!</span>
                     </div>
                   ) : null}
@@ -210,7 +219,10 @@ export default function SpeakingPractice() {
         ) : (
           <div className="bg-[#161B26]/80 backdrop-blur-md border border-gray-800 rounded-3xl p-8 text-center shadow-xl animate-in fade-in zoom-in">
             <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircleIcon className="w-12 h-12 text-emerald-500" />
+              {/* Large Check Icon SVG */}
+              <svg className="w-12 h-12 text-emerald-500" fill="currentColor" viewBox="0 0 24 24">
+                <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 11.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
+              </svg>
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">ድንቅ ስራ! (Excellent)</h2>
             <p className="text-gray-400 mb-8">የንግግር ልምምድህን በሚገባ አጠናቀሃል።</p>
