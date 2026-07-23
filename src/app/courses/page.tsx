@@ -43,7 +43,7 @@ const MOCK_COURSES: Course[] = [
     subtitle: "ከስልክህ ላይ ሆነህ ፕሮፌሽናል ሞባይል አፕሊኬሽኖችን መገንባት ተማር",
     description: "በአንድ ስማርት ስልክ ብቻ Flutter እና Supabaseን በመጠቀም የራስህን አፕሊኬሽኖች ገንብተህ Vercel እና Stores ላይ የመልቀቅ ሙሉ ሂደት።",
     thumbnail: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=800&auto=format&fit=crop",
-    category: "Mobile Development",
+    category: "Web Tech", // 🌟 የተስተካከለ: ከ "Mobile Development" ወደ "Web Tech" ተቀይሯል
     price: 1500,
     discountPrice: 999,
     rating: 4.9,
@@ -112,7 +112,8 @@ const MOCK_COURSES: Course[] = [
   }
 ];
 
-const CATEGORIES = ["All", "Mobile Development", "Artificial Intelligence", "Aviation & Logistics", "Web Tech"];
+// 🌟 የተስተካከለ: "Mobile Development" የሚለውን አውጥተን ቀጥታ "Web Tech" አድርገነዋል
+const CATEGORIES = ["All", "Web Tech", "Artificial Intelligence", "Aviation & Logistics"];
 
 export default function CourseCatalogPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -184,105 +185,111 @@ export default function CourseCatalogPage() {
 
         {/* Course Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCourses.map((course) => {
-            const isBookmarked = bookmarkedIds.includes(course.id);
-            return (
-              <div
-                key={course.id}
-                className="bg-[#161B26]/80 border border-gray-800/80 hover:border-indigo-500/50 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 flex flex-col group shadow-xl"
-              >
-                {/* Thumbnail Header */}
-                <div className="relative h-48 w-full overflow-hidden bg-gray-900">
-                  <img
-                    src={course.thumbnail}
-                    alt={course.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#161B26] via-transparent to-transparent" />
-                  
-                  {/* Category Badge */}
-                  <span className="absolute top-3 left-3 bg-black/60 backdrop-blur-md border border-white/10 text-emerald-400 text-xs font-semibold px-2.5 py-1 rounded-lg">
-                    {course.category}
-                  </span>
-
-                  {/* Bookmark Button */}
-                  <button
-                    onClick={() => toggleBookmark(course.id)}
-                    className="absolute top-3 right-3 p-2 bg-black/60 backdrop-blur-md rounded-full text-white hover:text-indigo-400 transition-colors"
-                  >
-                    <svg
-                      className={`w-4 h-4 ${isBookmarked ? "fill-indigo-500 text-indigo-500" : "fill-none stroke-currentColor"}`}
-                      viewBox="0 0 24 24"
-                      strokeWidth="2"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Course Details */}
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
-                      <span className="flex items-center gap-1 text-amber-400 font-semibold">
-                        ★ {course.rating} <span className="text-gray-500">({course.reviewsCount})</span>
-                      </span>
-                      <span>{course.difficulty}</span>
-                    </div>
-
-                    <h3 className="font-bold text-lg text-white group-hover:text-indigo-400 transition-colors line-clamp-2">
-                      {course.title}
-                    </h3>
-                    <p className="text-xs text-gray-400 mt-2 line-clamp-2 leading-relaxed">
-                      {course.subtitle}
-                    </p>
-                  </div>
-
-                  {/* Stats Meta */}
-                  <div className="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-gray-800/80">
-                    <span className="flex items-center gap-1">
-                      ⏱️ {course.duration}
+          {filteredCourses.length > 0 ? (
+            filteredCourses.map((course) => {
+              const isBookmarked = bookmarkedIds.includes(course.id);
+              return (
+                <div
+                  key={course.id}
+                  className="bg-[#161B26]/80 border border-gray-800/80 hover:border-indigo-500/50 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 flex flex-col group shadow-xl"
+                >
+                  {/* Thumbnail Header */}
+                  <div className="relative h-48 w-full overflow-hidden bg-gray-900">
+                    <img
+                      src={course.thumbnail}
+                      alt={course.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#161B26] via-transparent to-transparent" />
+                    
+                    {/* Category Badge */}
+                    <span className="absolute top-3 left-3 bg-black/60 backdrop-blur-md border border-white/10 text-emerald-400 text-xs font-semibold px-2.5 py-1 rounded-lg">
+                      {course.category}
                     </span>
-                    <span>📚 {course.lessonsCount} Lessons</span>
-                    <span>👥 {course.studentsCount} Students</span>
+
+                    {/* Bookmark Button */}
+                    <button
+                      onClick={() => toggleBookmark(course.id)}
+                      className="absolute top-3 right-3 p-2 bg-black/60 backdrop-blur-md rounded-full text-white hover:text-indigo-400 transition-colors"
+                    >
+                      <svg
+                        className={`w-4 h-4 ${isBookmarked ? "fill-indigo-500 text-indigo-500" : "fill-none stroke-currentColor"}`}
+                        viewBox="0 0 24 24"
+                        strokeWidth="2"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+                      </svg>
+                    </button>
                   </div>
 
-                  {/* Instructor & Pricing Footer */}
-                  <div className="pt-3 flex items-center justify-between gap-2 border-t border-gray-800/80">
-                    <div className="flex items-center gap-2">
-                      <img
-                        src={course.instructor.avatar}
-                        alt={course.instructor.name}
-                        className="w-7 h-7 rounded-full object-cover border border-indigo-500/30"
-                      />
-                      <span className="text-xs text-gray-300 truncate max-w-[90px]">
-                        {course.instructor.name}
+                  {/* Course Details */}
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div>
+                      <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
+                        <span className="flex items-center gap-1 text-amber-400 font-semibold">
+                          ★ {course.rating} <span className="text-gray-500">({course.reviewsCount})</span>
+                        </span>
+                        <span>{course.difficulty}</span>
+                      </div>
+
+                      <h3 className="font-bold text-lg text-white group-hover:text-indigo-400 transition-colors line-clamp-2">
+                        {course.title}
+                      </h3>
+                      <p className="text-xs text-gray-400 mt-2 line-clamp-2 leading-relaxed">
+                        {course.subtitle}
+                      </p>
+                    </div>
+
+                    {/* Stats Meta */}
+                    <div className="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-gray-800/80">
+                      <span className="flex items-center gap-1">
+                        ⏱️ {course.duration}
                       </span>
+                      <span>📚 {course.lessonsCount} Lessons</span>
+                      <span>👥 {course.studentsCount} Students</span>
                     </div>
 
-                    <div className="text-right">
-                      {course.discountPrice ? (
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs text-gray-500 line-through">{course.price} ETB</span>
-                          <span className="text-sm font-extrabold text-emerald-400">{course.discountPrice} ETB</span>
-                        </div>
-                      ) : (
-                        <span className="text-sm font-extrabold text-white">{course.price} ETB</span>
-                      )}
+                    {/* Instructor & Pricing Footer */}
+                    <div className="pt-3 flex items-center justify-between gap-2 border-t border-gray-800/80">
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={course.instructor.avatar}
+                          alt={course.instructor.name}
+                          className="w-7 h-7 rounded-full object-cover border border-indigo-500/30"
+                        />
+                        <span className="text-xs text-gray-300 truncate max-w-[90px]">
+                          {course.instructor.name}
+                        </span>
+                      </div>
+
+                      <div className="text-right">
+                        {course.discountPrice ? (
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-gray-500 line-through">{course.price} ETB</span>
+                            <span className="text-sm font-extrabold text-emerald-400">{course.discountPrice} ETB</span>
+                          </div>
+                        ) : (
+                          <span className="text-sm font-extrabold text-white">{course.price} ETB</span>
+                        )}
+                      </div>
                     </div>
+
+                    {/* Action Link */}
+                    <Link
+                      href={`/courses/${course.id}`}
+                      className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl text-center transition-all block shadow-md shadow-indigo-600/20"
+                    >
+                      ኮርሱን ይመልከቱ (View Course)
+                    </Link>
                   </div>
-
-                  {/* Action Link */}
-                  <Link
-                    href={`/courses/${course.id}`}
-                    className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl text-center transition-all block shadow-md shadow-indigo-600/20"
-                  >
-                    ኮርሱን ይመልከቱ (View Course)
-                  </Link>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          ) : (
+            <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12 text-gray-400">
+              በዚህ ካቴጎሪ ውስጥ እስካሁን የተመዘገበ ኮርስ የለም።
+            </div>
+          )}
         </div>
 
       </div>
