@@ -26,9 +26,14 @@ interface CourseLearning {
   chapters: Chapter[];
 }
 
+interface NoteItem {
+  id: string;
+  text: string;
+  timestamp: string;
+}
+
 // --- Dynamic Classroom Database for All Courses ---
 const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
-  // 1. FLUTTER & SUPABASE (WEB TECH)
   "flutter-mobile-mastery": {
     id: "flutter-mobile-mastery",
     title: "Full-Stack Flutter & Supabase Mobile App Development",
@@ -89,8 +94,6 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
       }
     ]
   },
-
-  // 2. AVIATION LOGISTICS, CARGO & GROUND OPERATIONS
   "aviation-logistics-pro": {
     id: "aviation-logistics-pro",
     title: "Aviation Logistics, Cargo & Ground Operations",
@@ -150,8 +153,6 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
       }
     ]
   },
-
-  // 3. ARTIFICIAL INTELLIGENCE & PROMPT ENGINEERING
   "ai-prompt-engineering": {
     id: "ai-prompt-engineering",
     title: "Advanced Prompt Engineering & AI Automation",
@@ -197,25 +198,32 @@ export default function VideoLearningRoomPage() {
   const params = useParams();
   const courseId = params?.id as string;
 
-  // Determine current course data based on URL parameter (Fallback to Flutter)
   const initialCourse = COURSES_LEARNING_DB[courseId] || COURSES_LEARNING_DB["flutter-mobile-mastery"];
 
   const [courseData, setCourseData] = useState<CourseLearning>(initialCourse);
   const [activeLesson, setActiveLesson] = useState<Lesson>(initialCourse.chapters[0].lessons[0]);
   const [activeTab, setActiveTab] = useState<"overview" | "notes" | "resources">("overview");
   const [userNote, setUserNote] = useState("");
-  const [savedNotes, setSavedNotes] = useState<string[]>([]);
+  const [savedNotes, setSavedNotes] = useState<NoteItem[]>([]);
 
-  // Update learning room content dynamically whenever URL courseId changes
   useEffect(() => {
     const selectedCourse = COURSES_LEARNING_DB[courseId] || COURSES_LEARNING_DB["flutter-mobile-mastery"];
     setCourseData(selectedCourse);
     if (selectedCourse.chapters[0]?.lessons[0]) {
       setActiveLesson(selectedCourse.chapters[0].lessons[0]);
     }
+
+    // Load saved notes from LocalStorage if available
+    const localNotes = localStorage.getItem(`notes_${courseId}`);
+    if (localNotes) {
+      try {
+        setSavedNotes(JSON.parse(localNotes));
+      } catch (e) {
+        console.error("Failed to parse saved notes", e);
+      }
+    }
   }, [courseId]);
 
-  // Toggle completion status of lesson
   const toggleComplete = (lessonId: string) => {
     setCourseData((prev) => ({
       ...prev,
@@ -228,14 +236,19 @@ export default function VideoLearningRoomPage() {
     }));
   };
 
-  // Save note
   const handleAddNote = () => {
     if (!userNote.trim()) return;
-    setSavedNotes((prev) => [userNote, ...prev]);
+    const newNote: NoteItem = {
+      id: Date.now().toString(),
+      text: userNote.trim(),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    const updated = [newNote, ...savedNotes];
+    setSavedNotes(updated);
+    localStorage.setItem(`notes_${courseId}`, JSON.stringify(updated));
     setUserNote("");
   };
 
-  // Calculate overall course progress percentage
   const totalLessons = courseData.chapters.reduce((acc, ch) => acc + ch.lessons.length, 0);
   const completedLessons = courseData.chapters.reduce(
     (acc, ch) => acc + ch.lessons.filter((l) => l.isCompleted).length,
@@ -276,10 +289,9 @@ export default function VideoLearningRoomPage() {
       {/* Main Classroom Layout */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-3">
         
-        {/* Left/Center: Video Player & Tabs (2 Columns) */}
+        {/* Left/Center: Video Player & Tabs */}
         <div className="lg:col-span-2 p-4 sm:p-6 space-y-6 flex flex-col">
           
-          {/* Responsive Video Container */}
           <div className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-gray-800 shadow-2xl">
             <iframe
               src={activeLesson.videoUrl}
@@ -290,7 +302,6 @@ export default function VideoLearningRoomPage() {
             />
           </div>
 
-          {/* Active Lesson Header & Complete Action */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#161B26] p-5 rounded-2xl border border-gray-800">
             <div>
               <span className="text-xs text-indigo-400 font-semibold">አሁን እየተመለከቱት ያለው፡</span>
@@ -309,7 +320,6 @@ export default function VideoLearningRoomPage() {
             </button>
           </div>
 
-          {/* Classroom Tabs */}
           <div className="bg-[#161B26] border border-gray-800 rounded-2xl p-4 flex-1 space-y-4">
             
             <div className="flex border-b border-gray-800 gap-4 text-xs font-bold pb-2">
@@ -333,7 +343,6 @@ export default function VideoLearningRoomPage() {
               </button>
             </div>
 
-            {/* Tab Content */}
             {activeTab === "overview" && (
               <div className="text-xs text-gray-300 leading-relaxed space-y-2">
                 <p>በዚህ ትምህርት ውስጥ ስለ {courseData.title} ዋና ዋና ነጥቦች፣ የቪዲዮ ትንታኔዎች እና ተግባራዊ ማብራሪያዎችን በዝርዝር እንመለከታለን።</p>
@@ -349,6 +358,7 @@ export default function VideoLearningRoomPage() {
                     placeholder="እዚህ ላይ ማስታወሻ ይጻፉ..."
                     value={userNote}
                     onChange={(e) => setUserNote(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleAddNote()}
                     className="flex-1 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                   />
                   <button
@@ -360,10 +370,10 @@ export default function VideoLearningRoomPage() {
                 </div>
 
                 <div className="space-y-2">
-                  {savedNotes.map((note, idx) => (
-                    <div key={idx} className="bg-gray-900/80 p-3 rounded-xl border border-gray-800 text-xs text-gray-300 flex justify-between">
-                      <span>• {note}</span>
-                      <span className="text-[10px] text-gray-500">አሁን</span>
+                  {savedNotes.map((note) => (
+                    <div key={note.id} className="bg-gray-900/80 p-3 rounded-xl border border-gray-800 text-xs text-gray-300 flex justify-between">
+                      <span>• {note.text}</span>
+                      <span className="text-[10px] text-gray-500">{note.timestamp}</span>
                     </div>
                   ))}
                   {savedNotes.length === 0 && (
@@ -386,7 +396,7 @@ export default function VideoLearningRoomPage() {
 
         </div>
 
-        {/* Right Column: Playlist / Curriculum Sidebar */}
+        {/* Right Column: Playlist Sidebar */}
         <div className="bg-[#161B26] border-t lg:border-t-0 lg:border-l border-gray-800 p-4 space-y-4">
           <h3 className="font-bold text-sm text-white border-b border-gray-800 pb-3">
             የትምህርቱ ማውጫ (Curriculum)
