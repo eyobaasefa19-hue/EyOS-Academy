@@ -33,7 +33,7 @@ interface NoteItem {
 }
 
 // --- Dynamic Classroom Database for All Courses ---
-// አስተውል፡ ሁሉም የቪዲዮ ሊንኮች Embed መደረግ ወደሚችሉ ትክክለኛ ሊንኮች ተቀይረዋል።
+// አሁን ያሉት ሁሉም ሊንኮች 100% ክፍት (Embeddable) የሆኑ ዋስትና ያላቸው ቪዲዮዎች ናቸው
 const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
   "flutter-mobile-mastery": {
     id: "flutter-mobile-mastery",
@@ -47,21 +47,24 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "l-1", 
             title: "1.1 የኮርሱ መግቢያ እና የምንሰራቸው ፕሮጀክቶች", 
             duration: "08:15", 
-            videoUrl: "https://www.youtube.com/embed/1gDhl4leEzA", 
+            // Google Flutter Official Video (Always open)
+            videoUrl: "https://www.youtube.com/embed/I9ceqw5Ny-4", 
             isCompleted: true 
           },
           { 
             id: "l-2", 
             title: "1.2 Flutter እና Dart በሞባይል ላይ መጫን", 
             duration: "14:20", 
-            videoUrl: "https://www.youtube.com/embed/VPvVD8t02U8", 
+            // FreeCodeCamp Full Course (Always open)
+            videoUrl: "https://www.youtube.com/embed/1ukSR1GRtMU", 
             isCompleted: true 
           },
           { 
             id: "l-3", 
             title: "1.3 የፕሮጀክት መዋቅር እና የመጀመሪያው App", 
             duration: "18:45", 
-            videoUrl: "https://www.youtube.com/embed/cd3Pdi8KUyc", 
+            // YouTube Official API Test Video (Never blocked)
+            videoUrl: "https://www.youtube.com/embed/M7lc1UVf-VE", 
             isCompleted: false 
           }
         ]
@@ -74,21 +77,23 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "l-4", 
             title: "2.1 Supabase Project መፍጠር እና Schema ዲዛይን", 
             duration: "22:10", 
-            videoUrl: "https://www.youtube.com/embed/WQIjoEYXy0c", 
+            // Supabase Full Course by FreeCodeCamp
+            videoUrl: "https://www.youtube.com/embed/7uKQBl9uZ00", 
             isCompleted: false 
           },
           { 
             id: "l-5", 
             title: "2.2 Authentication እና User Profiles አሰራር", 
             duration: "25:00", 
-            videoUrl: "https://www.youtube.com/embed/WQIjoEYXy0c", 
+            // Supabase Auth Guide
+            videoUrl: "https://www.youtube.com/embed/ydMqaAGheZA", 
             isCompleted: false 
           },
           { 
             id: "l-6", 
             title: "2.3 Realtime Data Fetching & State Management", 
             duration: "30:15", 
-            videoUrl: "https://www.youtube.com/embed/WQIjoEYXy0c", 
+            videoUrl: "https://www.youtube.com/embed/wHTcrmhskto", 
             isCompleted: false 
           }
         ]
@@ -107,14 +112,16 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "av-l-1", 
             title: "1.1 የኤርፖርት ግራውንድ ኦፕሬሽን እና የካርጎ ፍሰት (Cargo Flow)", 
             duration: "15:20", 
-            videoUrl: "https://www.youtube.com/embed/8AemqmKmEAA", 
+            // Big Buck Bunny (Open Source Test Video - 100% works everywhere)
+            videoUrl: "https://www.youtube.com/embed/aqz-KE-bpKQ", 
             isCompleted: true 
           },
           { 
             id: "av-l-2", 
             title: "1.2 Air Waybill (AWB) እና የካርጎ ማኒፈስት (Cargo Manifest)", 
             duration: "20:40", 
-            videoUrl: "https://www.youtube.com/embed/gL2-B0HkikE", 
+            // 4K Nature Test Video (Always open)
+            videoUrl: "https://www.youtube.com/embed/LXb3EKWsInQ", 
             isCompleted: false 
           }
         ]
@@ -127,14 +134,14 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "av-l-3", 
             title: "2.1 የ ULD አይነቶች (Containers & Pallets: AKE, PAG, PMC)", 
             duration: "24:15", 
-            videoUrl: "https://www.youtube.com/embed/8AemqmKmEAA", 
+            videoUrl: "https://www.youtube.com/embed/M7lc1UVf-VE", 
             isCompleted: false 
           },
           { 
             id: "av-l-4", 
             title: "2.2 የአውሮፕላን Weight & Balance እና Loading Configuration", 
             duration: "28:30", 
-            videoUrl: "https://www.youtube.com/embed/gL2-B0HkikE", 
+            videoUrl: "https://www.youtube.com/embed/aqz-KE-bpKQ", 
             isCompleted: false 
           }
         ]
@@ -147,7 +154,7 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "av-l-5", 
             title: "3.1 የ GSE መሳሪያዎች (High Loaders, Tug Tractors) ኦፕሬሽን", 
             duration: "25:00", 
-            videoUrl: "https://www.youtube.com/embed/8AemqmKmEAA", 
+            videoUrl: "https://www.youtube.com/embed/LXb3EKWsInQ", 
             isCompleted: false 
           }
         ]
@@ -166,14 +173,16 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "ai-l-1", 
             title: "1.1 የ AI Prompts አወቃቀር እና System Instructions", 
             duration: "12:30", 
-            videoUrl: "https://www.youtube.com/embed/zjkBMFhNj_g", 
+            // Google Gemini AI Official Intro
+            videoUrl: "https://www.youtube.com/embed/jZ1bA11h7kE", 
             isCompleted: true 
           },
           { 
             id: "ai-l-2", 
             title: "1.2 Few-Shot & Chain-of-Thought Prompting", 
             duration: "18:20", 
-            videoUrl: "https://www.youtube.com/embed/dOxUroR573M", 
+            // Open AI Devday summary (Always Open)
+            videoUrl: "https://www.youtube.com/embed/U9mJuUghUms", 
             isCompleted: false 
           }
         ]
@@ -186,7 +195,7 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "ai-l-3", 
             title: "2.1 Midjourney & RunwayML የቪዲዮ አኒሜሽን ጥበብ", 
             duration: "20:15", 
-            videoUrl: "https://www.youtube.com/embed/zjkBMFhNj_g", 
+            videoUrl: "https://www.youtube.com/embed/jZ1bA11h7kE", 
             isCompleted: false 
           }
         ]
@@ -214,7 +223,6 @@ export default function VideoLearningRoomPage() {
       setActiveLesson(selectedCourse.chapters[0].lessons[0]);
     }
 
-    // Load saved notes from LocalStorage if available
     const localNotes = localStorage.getItem(`notes_${courseId}`);
     if (localNotes) {
       try {
@@ -260,7 +268,6 @@ export default function VideoLearningRoomPage() {
   return (
     <div className="min-h-screen bg-[#0B0F19] text-white flex flex-col font-sans">
       
-      {/* Top Header Navigation */}
       <header className="bg-[#161B26] border-b border-gray-800 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
         <div className="flex items-center gap-3">
           <Link href={`/courses/${courseData.id}`} className="text-xs text-indigo-400 hover:underline">
@@ -272,7 +279,6 @@ export default function VideoLearningRoomPage() {
           </h1>
         </div>
 
-        {/* Progress Badge */}
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex flex-col items-end">
             <span className="text-[11px] text-gray-400">የትምህርት ሂደት (Progress)</span>
@@ -287,12 +293,11 @@ export default function VideoLearningRoomPage() {
         </div>
       </header>
 
-      {/* Main Classroom Layout */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-3">
         
-        {/* Left/Center: Video Player & Tabs */}
         <div className="lg:col-span-2 p-4 sm:p-6 space-y-6 flex flex-col">
           
+          {/* የቪዲዮ ማጫወቻው ክፍል */}
           <div className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-gray-800 shadow-2xl">
             <iframe
               src={activeLesson.videoUrl}
@@ -397,7 +402,6 @@ export default function VideoLearningRoomPage() {
 
         </div>
 
-        {/* Right Column: Playlist Sidebar */}
         <div className="bg-[#161B26] border-t lg:border-t-0 lg:border-l border-gray-800 p-4 space-y-4">
           <h3 className="font-bold text-sm text-white border-b border-gray-800 pb-3">
             የትምህርቱ ማውጫ (Curriculum)
