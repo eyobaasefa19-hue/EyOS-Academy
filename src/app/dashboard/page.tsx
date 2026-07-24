@@ -1,289 +1,399 @@
-'use client';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { BookOpen, BrainCircuit, Bot, GraduationCap, LayoutGrid, User, Flame, Zap, Trophy } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
+import { useState } from "react";
+import Link from "next/link";
 
-export default function DashboardHub() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [leaders, setLeaders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+// --- Types ---
+interface UserStats {
+  xp: number;
+  coins: number;
+  gems: number;
+  streakDays: number;
+  currentLevel: number;
+  dailyGoalPercent: number;
+}
 
-  useEffect(() => {
-    let isMounted = true;
+interface CourseItem {
+  id: string;
+  title: string;
+  category: string;
+  progress: number;
+  lastLesson: string;
+  thumbnail: string;
+}
 
-    async function getDashboardData() {
-      if (!supabase || !supabase.auth) {
-        if (isMounted) setLoading(false);
-        return;
-      }
-      try {
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        if (authUser && isMounted) {
-          setUser(authUser);
-          
-          const { data: profileData } = await supabase
-            .from('UserProfile')
-            .select('xpPoints, streak, fullName, lastActive')
-            .eq('id', authUser.id)
-            .single();
+interface Achievement {
+  id: string;
+  title: string;
+  icon: string;
+  unlocked: boolean;
+  desc: string;
+}
 
-          if (profileData) {
-            let currentStreak = profileData.streak ?? 0;
-            const todayStr = new Date().toISOString().split('T')[0]; 
-            
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toISOString().split('T')[0]; 
-            
-            let newStreak = currentStreak;
-            let shouldUpdate = false;
-            
-            if (!profileData.lastActive) {
-              newStreak = 1;
-              shouldUpdate = true;
-            } else {
-              const lastActiveStr = profileData.lastActive.split('T')[0];
-              
-              if (lastActiveStr === yesterdayStr) {
-                newStreak = currentStreak + 1;
-                shouldUpdate = true;
-              } else if (lastActiveStr !== todayStr) {
-                newStreak = 1;
-                shouldUpdate = true;
-              }
-            }
-            
-            if (shouldUpdate) {
-              // Streak update in Supabase
-              await supabase
-                .from('UserProfile')
-                .update({ streak: newStreak, lastActive: todayStr })
-                .eq('id', authUser.id);
-                
-              profileData.streak = newStreak;
-              profileData.lastActive = todayStr;
-            }
-            
-            if (isMounted) setProfile(profileData);
-          }
-        }
+interface LeaderboardUser {
+  rank: number;
+  name: string;
+  xp: number;
+  avatar: string;
+  isCurrentUser?: boolean;
+}
 
-        // Fetch Top 5 Leaders
-        const { data: topUsers } = await supabase
-          .from('UserProfile')
-          .select('fullName, xpPoints, email')
-          .order('xpPoints', { ascending: false })
-          .limit(5);
+// --- Mock Data (API-Ready) ---
+const INITIAL_STATS: UserStats = {
+  xp: 4250,
+  coins: 850,
+  gems: 45,
+  streakDays: 7,
+  currentLevel: 12,
+  dailyGoalPercent: 75,
+};
 
-        if (topUsers && isMounted) {
-          setLeaders(topUsers);
-        }
+const IN_PROGRESS_COURSES: CourseItem[] = [
+  {
+    id: "flutter-mobile-mastery",
+    title: "Full-Stack Flutter & Supabase Mobile App",
+    category: "Mobile Dev",
+    progress: 68,
+    lastLesson: "2.2 Authentication & User Profiles",
+    thumbnail: "📱",
+  },
+  {
+    id: "aviation-logistics-pro",
+    title: "Aviation Logistics, Cargo & Ground Ops",
+    category: "Aviation",
+    progress: 40,
+    lastLesson: "1.2 Air Waybill (AWB) & Cargo Manifest",
+    thumbnail: "✈️",
+  },
+  {
+    id: "ai-prompt-engineering",
+    title: "Advanced Prompt Engineering & Automation",
+    category: "AI & Data",
+    progress: 85,
+    lastLesson: "1.2 Few-Shot Prompt Architecture",
+    thumbnail: "🤖",
+  },
+];
 
-      } catch (e) {
-        console.error('Error fetching dashboard data:', e);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
+const ACHIEVEMENTS_LIST: Achievement[] = [
+  { id: "1", title: "Early Bird", icon: "🌅", unlocked: true, desc: "Completed a lesson before 8 AM" },
+  { id: "2", title: "7-Day Streak", icon: "🔥", unlocked: true, desc: "Learned 7 consecutive days" },
+  { id: "3", title: "Flutter Master", icon: "⚡", unlocked: false, desc: "Finish Full-Stack Flutter Course" },
+];
 
-    getDashboardData();
+const LEADERBOARD: LeaderboardUser[] = [
+  { rank: 1, name: "Abebe K.", xp: 9400, avatar: "👨‍💻" },
+  { rank: 2, name: "Eyob Tech (You)", xp: 4250, avatar: "🚀", isCurrentUser: true },
+  { rank: 3, name: "Saron M.", xp: 3900, avatar: "👩‍💻" },
+  { rank: 4, name: "Dawit L.", xp: 3100, avatar: "👨‍🎓" },
+];
 
-    return () => {
-      isMounted = false; // Cleanup to prevent memory leaks if component unmounts quickly
-    };
-  }, []);
+// --- Reusable Glassmorphism Card Component ---
+const GlassCard = ({
+  children,
+  className = "",
+  hover = true,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  hover?: boolean;
+}) => (
+  <div
+    className={`bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-5 text-white shadow-2xl transition-all duration-300 ${
+      hover ? "hover:scale-[1.01] hover:-translate-y-0.5 hover:border-slate-700/80 hover:shadow-indigo-500/10" : ""
+    } ${className}`}
+  >
+    {children}
+  </div>
+);
 
-  const menuItems = [
-    {
-      id: '01',
-      title: 'Syllabus Modules',
-      description: 'በሙያዎ እና በዕለት ተዕለት ሕይወትዎ የሚጠቅሙትን የእንግሊዘኛ ትምህርቶች ይማሩ።',
-      icon: <BookOpen className="w-5 h-5" />,
-      color: 'bg-indigo-600',
-      route: '/lessons/grammar'
-    },
-    {
-      id: '02',
-      title: 'Vocabulary Builder',
-      description: 'ቃላትን በፍጥነት የሚያጠኑበት እና አጠቃቀማቸውን የሚለማመዱበት ልዩ ክፍል::',
-      icon: <BrainCircuit className="w-5 h-5" />,
-      color: 'bg-fuchsia-600',
-      route: '/lessons/vocabulary'
-    },
-    {
-      id: '03',
-      title: 'AI Chat Tutor',
-      description: 'ከአርቲፊሻል ኢንተለጀንስ አስተማሪ ጋር በቀጥታ በድምፅ እና በፅሁፍ ይለማመዱ::',
-      icon: <Bot className="w-5 h-5" />,
-      color: 'bg-emerald-600',
-      route: '/lessons/ai-chat'
-    },
-    {
-      id: '04',
-      title: 'Practical English Hub',
-      description: 'ማንበብ፣ የዕለት ተዕለት ውይይቶችን መለማመድ እና የፅሁፍ ብቃትዎን ያሳድጉ::',
-      icon: <GraduationCap className="w-5 h-5" />,
-      color: 'bg-blue-600',
-      route: '/lessons/practical-hub'
-    }
-  ];
+export default function EyOSWorldClassDashboard() {
+  const [stats, setStats] = useState<UserStats>(INITIAL_STATS);
+  const [activeTab, setActiveTab] = useState<"overview" | "analytics" | "achievements">("overview");
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-sans antialiased">
-      <div className="max-w-5xl mx-auto space-y-6">
-        
-        {/* Header Section */}
-        <header className="border-b border-slate-900 pb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl font-black tracking-tight text-white">
-              ሰላም፣ <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">{profile?.fullName || user?.email?.split('@')[0] || 'ተማሪ'}</span> 👋
-            </h1>
-            <p className="text-slate-400 text-xs mt-1 font-medium">የዛሬውን የእንግሊዘኛ ትምህርቶን እዚህ ይጀምሩ</p>
-          </div>
-          {user && (
-            <div className="bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800 text-[11px] text-slate-400 flex items-center gap-2 shadow-sm">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>አካውንት: <span className="text-blue-400 font-mono">{user.email}</span></span>
+    <div className="min-h-screen bg-[#0B0F19] text-slate-100 font-sans pb-16">
+      
+      {/* 1. TOP GAMIFICATION NAVBAR / BAR */}
+      <div className="sticky top-0 z-40 bg-[#0B0F19]/80 backdrop-blur-md border-b border-slate-800/80 px-4 py-3">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+          
+          {/* Search & Brand Quick Info */}
+          <div className="flex items-center gap-4 flex-1 min-w-[240px]">
+            <div className="relative w-full max-w-xs">
+              <input
+                type="text"
+                placeholder="search courses, skills, topics..."
+                className="w-full bg-slate-900/80 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
+              />
+              <span className="absolute right-3 top-2.5 text-xs text-slate-500">⌘K</span>
             </div>
-          )}
-        </header>
-
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
-        ) : user && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            {/* Left Column */}
-            <div className="lg:col-span-2 space-y-6">
-              
-              {/* Quick Stats */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 shadow-xl flex items-center gap-3 transition-transform hover:scale-[1.02]">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 shrink-0">
-                    <Zap className="w-5 h-5 text-amber-400 animate-pulse" />
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-slate-500 font-medium">ያገኙት ነጥብ</p>
-                    <p className="text-lg font-black text-amber-400 tracking-tight">{profile?.xpPoints ?? 0} <span className="text-xs font-normal text-amber-500/80">XP</span></p>
-                  </div>
-                </div>
 
-                <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 shadow-xl flex items-center gap-3 transition-transform hover:scale-[1.02]">
-                  <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20 shrink-0">
-                    <Flame className="w-5 h-5 text-rose-400" />
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-slate-500 font-medium">ተከታታይነት</p>
-                    <p className="text-lg font-black text-rose-400 tracking-tight">{profile?.streak ?? 0} <span className="text-xs font-normal text-rose-500/80">ቀናት</span></p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Learning Hub */}
-              <div className="space-y-4">
-                <h2 className="text-sm font-bold text-slate-400 flex items-center gap-2 uppercase tracking-wider">
-                  <LayoutGrid className="w-4 h-4 text-blue-400" /> የመማሪያ ክፍሎች (Learning Hub)
-                </h2>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {menuItems.map((item) => (
-                    <div key={item.id} className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between hover:border-blue-500/30 transition-all duration-300 group cursor-pointer">
-                      <div>
-                        <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center text-white mb-3 shadow-md group-hover:scale-110 transition-transform`}>
-                          {item.icon}
-                        </div>
-                        <h3 className="text-base font-bold text-white mb-1.5 group-hover:text-blue-400 transition-colors">{item.title}</h3>
-                        <p className="text-xs text-slate-400 mb-4 leading-relaxed font-normal line-clamp-2">{item.description}</p>
-                      </div>
-                      <button 
-                        onClick={() => router.push(item.route)}
-                        className="w-full py-2.5 rounded-xl bg-slate-800 group-hover:bg-blue-600 text-white font-semibold text-xs transition-all shadow-md active:scale-[0.98]"
-                      >
-                        ትምህርቱን ጀምር
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
+          {/* Gamification Counters (XP, Coins, Gems, Streak) */}
+          <div className="flex items-center gap-3 text-xs font-bold">
+            <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl text-amber-400">
+              <span>🔥</span>
+              <span>{stats.streakDays} Day Streak</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1.5 rounded-xl text-indigo-400">
+              <span>⚡</span>
+              <span>{stats.xp} XP</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-yellow-500/10 border border-yellow-500/20 px-3 py-1.5 rounded-xl text-yellow-300">
+              <span>🪙</span>
+              <span>{stats.coins}</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 rounded-xl text-cyan-300">
+              <span>💎</span>
+              <span>{stats.gems}</span>
             </div>
 
-            {/* Right Column */}
-            <div className="space-y-6">
-              
-              {/* Profile Card */}
-              <div className="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 shadow-xl flex flex-col items-center justify-center text-center">
-                <div className="w-16 h-16 rounded-full bg-blue-600/10 flex items-center justify-center border-2 border-blue-500/30 mb-3 relative">
-                  <User className="w-7 h-7 text-blue-400" />
-                  <div className="absolute bottom-0 right-0 bg-slate-950 p-1 rounded-full border border-slate-800">
-                    <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                  </div>
-                </div>
-                <h3 className="text-base font-bold text-white tracking-tight">
-                  {profile?.fullName || user?.email?.split('@')[0]}
-                </h3>
-                <p className="text-[11px] text-slate-500 font-mono mb-4">{user.email}</p>
-                
-                <div className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-1.5">
-                  <div className="flex justify-between text-[10px] font-medium text-slate-400">
-                     <span>የደረጃዎ ፕሮግረስ</span>
-                     <span className="text-blue-400 font-bold">{Math.min(((profile?.xpPoints || 0) / 100) * 100, 100).toFixed(0)}%</span>
-                  </div>
-                  <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${Math.min(((profile?.xpPoints || 0) / 100) * 100, 100)}%` }}></div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Leaderboard Card */}
-              <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 shadow-xl">
-                <h2 className="text-sm font-bold text-slate-300 flex items-center gap-2 mb-3.5">
-                  <Trophy className="w-4 h-4 text-yellow-500" /> ከፍተኛ ተማሪዎች
-                </h2>
-                <div className="space-y-2">
-                  {leaders.length > 0 ? (
-                    leaders.map((leader, index) => (
-                      <div key={index} className={`flex items-center justify-between p-2.5 rounded-xl border transition-all ${
-                        user.email === leader.email 
-                          ? 'bg-blue-600/10 border-blue-500/30' 
-                          : 'bg-slate-950/40 border-slate-800 hover:bg-slate-900'
-                      }`}>
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-[11px] shadow-sm shrink-0 ${
-                            index === 0 ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 
-                            index === 1 ? 'bg-slate-400/10 text-slate-300 border border-slate-400/30' : 
-                            index === 2 ? 'bg-orange-600/10 text-orange-400 border border-orange-600/30' : 
-                            'bg-slate-800 text-slate-400 border border-slate-700'
-                          }`}>
-                            {index + 1}
-                          </div>
-                          <span className="text-xs font-semibold text-slate-300 truncate max-w-[110px]">
-                            {leader.fullName || leader.email?.split('@')[0]}
-                          </span>
-                          {user.email === leader.email && (
-                            <span className="text-[9px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-md border border-blue-500/20 font-medium shrink-0">እርስዎ</span>
-                          )}
-                        </div>
-                        <span className="text-xs font-bold text-amber-400 font-mono shrink-0">{leader.xpPoints || 0} XP</span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-slate-500 text-center py-3">ምንም መረጃ አልተገኘም...</p>
-                  )}
-                </div>
-              </div>
-
+            {/* Profile Avatar Quick-link */}
+            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-xs ring-2 ring-indigo-500/30 cursor-pointer">
+              EY
             </div>
-
           </div>
-        )}
+
+        </div>
       </div>
+
+      {/* MAIN CONTAINER */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 space-y-6">
+
+        {/* 2. WELCOME BANNER & DAILY MISSION */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <GlassCard className="lg:col-span-2 relative overflow-hidden bg-gradient-to-br from-indigo-950/40 via-slate-900/60 to-purple-950/30 border-indigo-500/20 flex flex-col justify-between">
+            <div className="absolute top-0 right-0 -mt-8 -mr-8 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="space-y-2 z-10">
+              <div className="flex items-center gap-2">
+                <span className="bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                  LEVEL {stats.currentLevel} SCHOLAR
+                </span>
+                <span className="text-xs text-slate-400">• Today's Mission Active</span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black text-white">
+                Welcome back, Eyob! 🚀
+              </h1>
+              <p className="text-xs text-slate-300 max-w-lg leading-relaxed">
+                You're on a <strong className="text-amber-400">{stats.streakDays}-day learning streak</strong>. Finish today's mission to unlock <span className="text-indigo-400 font-semibold">+150 XP</span> and maintain your leaderboard rank!
+              </p>
+            </div>
+
+            <div className="pt-6 flex flex-wrap items-center justify-between gap-4 z-10">
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/courses/flutter-mobile-mastery/learn"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2"
+                >
+                  <span>▶</span> Continue Flutter App Dev
+                </Link>
+                <button className="bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-700 transition-all">
+                  View Daily Goals
+                </button>
+              </div>
+            </div>
+          </GlassCard>
+
+          {/* Daily Goal & Progress Widget */}
+          <GlassCard className="flex flex-col justify-between space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-xs text-slate-400 font-medium">Daily Goal</span>
+                <h3 className="text-sm font-bold text-white">45 / 60 Mins Studied</h3>
+              </div>
+              <span className="text-2xl">🎯</span>
+            </div>
+
+            {/* Circular Progress / Bar */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-bold">
+                <span className="text-indigo-400">{stats.dailyGoalPercent}% Complete</span>
+                <span className="text-slate-400">15 mins left</span>
+              </div>
+              <div className="w-full bg-slate-800 h-3 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                <div
+                  className="bg-gradient-to-r from-indigo-500 to-purple-500 h-full rounded-full transition-all duration-1000"
+                  style={{ width: `${stats.dailyGoalPercent}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-800/40 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
+              <span className="text-slate-300">Reward upon completion:</span>
+              <span className="text-amber-400 font-bold">+50 Coins 🪙</span>
+            </div>
+          </GlassCard>
+
+        </div>
+
+        {/* 3. MAIN DASHBOARD CONTENT GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* LEFT 2 COLUMNS: Courses & Analytics */}
+          <div className="lg:col-span-2 space-y-6">
+            
+            {/* CONTINUE LEARNING SECTION */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-base font-bold text-white flex items-center gap-2">
+                    <span>📚</span> Continue Learning
+                  </h2>
+                  <p className="text-xs text-slate-400">Pick up right where you left off</p>
+                </div>
+                <Link href="/courses" className="text-xs text-indigo-400 font-bold hover:underline">
+                  View All Courses →
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {IN_PROGRESS_COURSES.map((course) => (
+                  <GlassCard key={course.id} className="flex flex-col justify-between space-y-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-xl shrink-0">
+                        {course.thumbnail}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] text-indigo-400 font-semibold uppercase tracking-wider">
+                          {course.category}
+                        </span>
+                        <h3 className="text-xs font-bold text-white truncate">{course.title}</h3>
+                        <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                          Next: {course.lastLesson}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 pt-2 border-t border-slate-800/80">
+                      <div className="flex justify-between text-[11px] font-bold">
+                        <span className="text-slate-400">Progress</span>
+                        <span className="text-emerald-400">{course.progress}%</span>
+                      </div>
+                      <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div
+                          className="bg-emerald-500 h-full transition-all duration-700"
+                          style={{ width: `${course.progress}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <Link
+                      href={`/courses/${course.id}/learn`}
+                      className="w-full bg-slate-800 hover:bg-indigo-600 hover:text-white text-slate-300 text-xs font-bold py-2 rounded-xl text-center transition-all border border-slate-700 hover:border-indigo-500 block"
+                    >
+                      Resume Lesson
+                    </Link>
+                  </GlassCard>
+                ))}
+              </div>
+            </div>
+
+            {/* AI RECOMMENDATION & QUICK ANALYTICS */}
+            <GlassCard className="bg-gradient-to-r from-slate-900 via-indigo-950/20 to-slate-900 border-indigo-500/30 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold text-sm">
+                  🤖
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-white">AI Learning Recommendation</h3>
+                  <p className="text-[11px] text-slate-400">Based on your recent Flutter & Supabase progress</p>
+                </div>
+              </div>
+
+              <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 text-xs text-slate-300 leading-relaxed">
+                "You mastered Supabase Schema Design rapidly! We recommend jumping straight to <strong>Lesson 2.3: Realtime Data Fetching</strong> to finish your app state architecture."
+              </div>
+            </GlassCard>
+
+          </div>
+
+          {/* RIGHT COLUMN: Gamification Sidebar (Leaderboard, Achievements, Quick Actions) */}
+          <div className="space-y-6">
+            
+            {/* LEADERBOARD CARD */}
+            <GlassCard className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-white flex items-center gap-2">
+                  <span>🏆</span> Weekly Leaderboard
+                </h3>
+                <span className="text-[10px] text-indigo-400 font-semibold bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+                  Top 5 League
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                {LEADERBOARD.map((user) => (
+                  <div
+                    key={user.rank}
+                    className={`p-2.5 rounded-xl border flex items-center justify-between text-xs transition-all ${
+                      user.isCurrentUser
+                        ? "bg-indigo-600/20 border-indigo-500 text-white font-bold"
+                        : "bg-slate-800/40 border-slate-800 text-slate-300"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className={`w-5 text-center font-extrabold text-[11px] ${user.rank === 1 ? "text-amber-400" : "text-slate-500"}`}>
+                        #{user.rank}
+                      </span>
+                      <span className="text-base">{user.avatar}</span>
+                      <span className="truncate max-w-[110px]">{user.name}</span>
+                    </div>
+                    <span className="text-indigo-400 font-bold">{user.xp} XP</span>
+                  </div>
+                ))}
+              </div>
+            </GlassCard>
+
+            {/* ACHIEVEMENTS BADGES */}
+            <GlassCard className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-white flex items-center gap-2">
+                  <span>🎖️</span> Achievements
+                </h3>
+                <span className="text-[10px] text-slate-400">2 / 3 Unlocked</span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                {ACHIEVEMENTS_LIST.map((ach) => (
+                  <div
+                    key={ach.id}
+                    title={`${ach.title}: ${ach.desc}`}
+                    className={`p-3 rounded-xl border text-center flex flex-col items-center gap-1 transition-all ${
+                      ach.unlocked
+                        ? "bg-slate-800/80 border-indigo-500/40 text-white"
+                        : "bg-slate-950/40 border-slate-800 text-slate-600 grayscale opacity-50"
+                    }`}
+                  >
+                    <span className="text-2xl">{ach.icon}</span>
+                    <span className="text-[10px] font-bold truncate w-full">{ach.title}</span>
+                  </div>
+                ))}
+              </div>
+            </GlassCard>
+
+            {/* PREMIUM UPGRADE PROMO */}
+            <GlassCard className="bg-gradient-to-br from-amber-950/30 via-slate-900 to-indigo-950/40 border-amber-500/30 text-center space-y-3">
+              <span className="text-2xl">👑</span>
+              <h3 className="text-xs font-bold text-amber-300">Upgrade to EyOS Pro</h3>
+              <p className="text-[11px] text-slate-400 leading-normal">
+                Unlock offline downloads, unlimited AI recommendations, and verified Certificates.
+              </p>
+              <button className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs py-2 rounded-xl shadow-lg shadow-amber-500/20 transition-all">
+                Get Pro Access
+              </button>
+            </GlassCard>
+
+          </div>
+
+        </div>
+
+      </main>
+
     </div>
   );
 }
