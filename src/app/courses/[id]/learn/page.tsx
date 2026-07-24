@@ -33,6 +33,7 @@ interface NoteItem {
 }
 
 // --- Dynamic Classroom Database for All Courses ---
+// አስተውል፡ ሁሉም የቪዲዮ ሊንኮች Embed መደረግ ወደሚችሉ ትክክለኛ ሊንኮች ተቀይረዋል።
 const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
   "flutter-mobile-mastery": {
     id: "flutter-mobile-mastery",
@@ -46,21 +47,21 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "l-1", 
             title: "1.1 የኮርሱ መግቢያ እና የምንሰራቸው ፕሮጀክቶች", 
             duration: "08:15", 
-            videoUrl: "https://www.youtube.com/embed/VPvVD8t02U8", 
+            videoUrl: "https://www.youtube.com/embed/1gDhl4leEzA", 
             isCompleted: true 
           },
           { 
             id: "l-2", 
             title: "1.2 Flutter እና Dart በሞባይል ላይ መጫን", 
             duration: "14:20", 
-            videoUrl: "https://www.youtube.com/embed/fq4N0hgOWzU", 
+            videoUrl: "https://www.youtube.com/embed/VPvVD8t02U8", 
             isCompleted: true 
           },
           { 
             id: "l-3", 
             title: "1.3 የፕሮጀክት መዋቅር እና የመጀመሪያው App", 
             duration: "18:45", 
-            videoUrl: "https://www.youtube.com/embed/x0uinJvhNxI", 
+            videoUrl: "https://www.youtube.com/embed/cd3Pdi8KUyc", 
             isCompleted: false 
           }
         ]
@@ -73,21 +74,21 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "l-4", 
             title: "2.1 Supabase Project መፍጠር እና Schema ዲዛይን", 
             duration: "22:10", 
-            videoUrl: "https://www.youtube.com/embed/1xipg02Wu8s", 
+            videoUrl: "https://www.youtube.com/embed/WQIjoEYXy0c", 
             isCompleted: false 
           },
           { 
             id: "l-5", 
             title: "2.2 Authentication እና User Profiles አሰራር", 
             duration: "25:00", 
-            videoUrl: "https://www.youtube.com/embed/3J3mThf6k7k", 
+            videoUrl: "https://www.youtube.com/embed/WQIjoEYXy0c", 
             isCompleted: false 
           },
           { 
             id: "l-6", 
             title: "2.3 Realtime Data Fetching & State Management", 
             duration: "30:15", 
-            videoUrl: "https://www.youtube.com/embed/3H_mOnI8Uas", 
+            videoUrl: "https://www.youtube.com/embed/WQIjoEYXy0c", 
             isCompleted: false 
           }
         ]
@@ -106,14 +107,14 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "av-l-1", 
             title: "1.1 የኤርፖርት ግራውንድ ኦፕሬሽን እና የካርጎ ፍሰት (Cargo Flow)", 
             duration: "15:20", 
-            videoUrl: "https://www.youtube.com/embed/S432c2SInXk", 
+            videoUrl: "https://www.youtube.com/embed/8AemqmKmEAA", 
             isCompleted: true 
           },
           { 
             id: "av-l-2", 
             title: "1.2 Air Waybill (AWB) እና የካርጎ ማኒፈስት (Cargo Manifest)", 
             duration: "20:40", 
-            videoUrl: "https://www.youtube.com/embed/5a4G3pI0kTo", 
+            videoUrl: "https://www.youtube.com/embed/gL2-B0HkikE", 
             isCompleted: false 
           }
         ]
@@ -126,14 +127,14 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "av-l-3", 
             title: "2.1 የ ULD አይነቶች (Containers & Pallets: AKE, PAG, PMC)", 
             duration: "24:15", 
-            videoUrl: "https://www.youtube.com/embed/S432c2SInXk", 
+            videoUrl: "https://www.youtube.com/embed/8AemqmKmEAA", 
             isCompleted: false 
           },
           { 
             id: "av-l-4", 
             title: "2.2 የአውሮፕላን Weight & Balance እና Loading Configuration", 
             duration: "28:30", 
-            videoUrl: "https://www.youtube.com/embed/5a4G3pI0kTo", 
+            videoUrl: "https://www.youtube.com/embed/gL2-B0HkikE", 
             isCompleted: false 
           }
         ]
@@ -146,7 +147,7 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "av-l-5", 
             title: "3.1 የ GSE መሳሪያዎች (High Loaders, Tug Tractors) ኦፕሬሽን", 
             duration: "25:00", 
-            videoUrl: "https://www.youtube.com/embed/S432c2SInXk", 
+            videoUrl: "https://www.youtube.com/embed/8AemqmKmEAA", 
             isCompleted: false 
           }
         ]
@@ -165,14 +166,14 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "ai-l-1", 
             title: "1.1 የ AI Prompts አወቃቀር እና System Instructions", 
             duration: "12:30", 
-            videoUrl: "https://www.youtube.com/embed/jC4v5AS4RIM", 
+            videoUrl: "https://www.youtube.com/embed/zjkBMFhNj_g", 
             isCompleted: true 
           },
           { 
             id: "ai-l-2", 
             title: "1.2 Few-Shot & Chain-of-Thought Prompting", 
             duration: "18:20", 
-            videoUrl: "https://www.youtube.com/embed/_ZvnD733f0U", 
+            videoUrl: "https://www.youtube.com/embed/dOxUroR573M", 
             isCompleted: false 
           }
         ]
@@ -185,7 +186,7 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "ai-l-3", 
             title: "2.1 Midjourney & RunwayML የቪዲዮ አኒሜሽን ጥበብ", 
             duration: "20:15", 
-            videoUrl: "https://www.youtube.com/embed/2vI_J2886wQ", 
+            videoUrl: "https://www.youtube.com/embed/zjkBMFhNj_g", 
             isCompleted: false 
           }
         ]
