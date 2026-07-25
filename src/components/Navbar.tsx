@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { 
   LogOut, 
@@ -13,36 +14,69 @@ import {
   X 
 } from 'lucide-react';
 
+// Declared outside component scope to prevent memory re-allocation on re-renders
+const NAV_LINKS = [
+  { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+  { name: 'Courses', path: '/courses', icon: BookOpen },
+  { name: 'Profile & Certs', path: '/profile', icon: UserIcon },
+  { name: 'Admin Panel', path: '/admin', icon: ShieldCheck },
+] as const;
+
 export default function Navbar() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
+    let isMounted = true;
+
     async function checkUser() {
       if (!supabase) return;
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      setUser(authUser);
+      try {
+        const { data: { user: authUser }, error } = await supabase.auth.getUser();
+        if (error) {
+          console.error('Error fetching auth user:', error.message);
+        }
+        if (isMounted) {
+          setUser(authUser ?? null);
+        }
+      } catch (err) {
+        console.error('Unexpected error checking auth status:', err);
+      }
     }
+
     checkUser();
 
     if (supabase) {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        setUser(session?.user ?? null);
+        if (isMounted) {
+          setUser(session?.user ?? null);
+        }
       });
-      return () => subscription.unsubscribe();
+
+      return () => {
+        isMounted = false;
+        subscription.unsubscribe();
+      };
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleSignOut = async () => {
     if (supabase) {
-      await supabase.auth.signOut();
-      router.push('/');
+      try {
+        await supabase.auth.signOut();
+        router.push('/');
+      } catch (err) {
+        console.error('Error signing out:', err);
+      }
     }
   };
 
-  // 🌟 እጅግ ዘመናዊ የዳሽቦርድ በተን መቆጣጠሪያ
   const handleDashboardNavigation = (e: React.MouseEvent) => {
     e.preventDefault();
     if (pathname === '/dashboard') {
@@ -53,14 +87,6 @@ export default function Navbar() {
   };
 
   const isActive = (path: string) => pathname === path;
-
-  // የገፆች ዝርዝር
-  const navLinks = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Courses', path: '/courses', icon: BookOpen },
-    { name: 'Profile & Certs', path: '/profile', icon: UserIcon },
-    { name: 'Admin Panel', path: '/admin', icon: ShieldCheck },
-  ];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-gray-800 bg-[#090d16]/90 backdrop-blur-md px-4 py-3 sm:px-6 select-none">
@@ -75,10 +101,10 @@ export default function Navbar() {
           <span className="text-[11px] sm:text-xs font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">Academy</span>
         </div>
         
-        {/* Desktop Navigation Links (ተጠቃሚው ሲገባ የሚታዩ) */}
+        {/* Desktop Navigation Links */}
         {user && (
           <div className="hidden md:flex items-center space-x-1 bg-gray-900/80 border border-gray-800 p-1 rounded-2xl">
-            {navLinks.map((link) => {
+            {NAV_LINKS.map((link) => {
               const Icon = link.icon;
               const active = isActive(link.path);
               return (
@@ -117,7 +143,7 @@ export default function Navbar() {
                 <span className="sm:hidden text-[11px]">Exit</span>
               </button>
 
-              {/* Mobile Menu Toggle Button (ለስልክ) */}
+              {/* Mobile Menu Toggle Button */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="md:hidden p-2 text-gray-300 hover:text-white bg-slate-900 border border-slate-800 rounded-xl"
@@ -139,10 +165,10 @@ export default function Navbar() {
 
       </div>
 
-      {/* Mobile Navigation Dropdown Menu (በስልክ ላይ ሜኑውን ሲነኩ የሚከፈት) */}
+      {/* Mobile Navigation Dropdown Menu */}
       {user && isMobileMenuOpen && (
         <div className="md:hidden mt-3 border-t border-gray-800 pt-3 pb-2 space-y-1 bg-[#090d16] rounded-b-2xl animate-in slide-in-from-top-2">
-          {navLinks.map((link) => {
+          {NAV_LINKS.map((link) => {
             const Icon = link.icon;
             const active = isActive(link.path);
             return (
