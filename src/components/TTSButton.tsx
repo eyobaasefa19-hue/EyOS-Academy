@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface TTSButtonProps {
   text: string;
@@ -12,31 +12,27 @@ export default function TTSButton({ text, lang = 'en-US', className = '' }: TTSB
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
 
+  // V8 / Safari Garbage Collection ንቁውን Utterance እንዳያጠፋው በ useRef እንይዘዋለን
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
   useEffect(() => {
     return () => {
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
+      utteranceRef.current = null;
     };
   }, []);
 
-  const handlePlay = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
+  // ድምፁን ቀጥታ ለማጫወት የሚረዳ Synchronous የጋራ ፍንክሽን
+  const speakText = () => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      alert("Text-to-speech is not supported in this browser.");
+      alert('Text-to-speech is not supported in this browser.');
       return;
     }
 
     const synth = window.speechSynthesis;
-
-    if (isPaused) {
-      synth.resume();
-      setIsPaused(false);
-      setIsPlaying(true);
-      return;
-    }
-
-    synth.cancel();
+    synth.cancel(); // ማንኛውንም ቀደም ሲል የነበረ ድምፅ በቅጽበት ያቆማል
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
@@ -50,14 +46,38 @@ export default function TTSButton({ text, lang = 'en-US', className = '' }: TTSB
     utterance.onend = () => {
       setIsPlaying(false);
       setIsPaused(false);
+      utteranceRef.current = null;
     };
 
     utterance.onerror = () => {
       setIsPlaying(false);
       setIsPaused(false);
+      utteranceRef.current = null;
     };
 
+    // Utterance በ Garbage Collection እንዳይወገድ Reference እንይዛለን
+    utteranceRef.current = utterance;
     synth.speak(utterance);
+  };
+
+  const handlePlay = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      alert('Text-to-speech is not supported in this browser.');
+      return;
+    }
+
+    const synth = window.speechSynthesis;
+
+    if (isPaused) {
+      synth.resume();
+      setIsPaused(false);
+      setIsPlaying(true);
+      return;
+    }
+
+    speakText();
   };
 
   const handleStop = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -66,15 +86,14 @@ export default function TTSButton({ text, lang = 'en-US', className = '' }: TTSB
       window.speechSynthesis.cancel();
       setIsPlaying(false);
       setIsPaused(false);
+      utteranceRef.current = null;
     }
   };
 
   const handleReplay = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    handleStop(e);
-    setTimeout(() => {
-      handlePlay(e);
-    }, 100);
+    // በ gesture context ውስጥ synchronously እንደገና ያጫውታል (setTimeout ሳይፈልግ)
+    speakText();
   };
 
   return (
