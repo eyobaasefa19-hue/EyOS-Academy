@@ -6,6 +6,7 @@ export interface Lesson {
   duration: string; // e.g., "12:45"
   videoUrl?: string;
   isFreePreview: boolean;
+  isCompleted?: boolean;
 }
 
 export interface Chapter {
