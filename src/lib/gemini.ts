@@ -25,9 +25,9 @@ export async function getAiResponse(userMessage: string): Promise<string> {
   }
 
   try {
-    // TypeScript type error እንዳይፈጥር `as any` ተጨምሮበታል
+    // gemini-2.5-flash እና systemInstruction በ TypeScript እንዳይከለከሉ `as any` ተጨምሯል
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       systemInstruction: SYSTEM_INSTRUCTION,
     } as any);
 
