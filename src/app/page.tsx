@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import Link from 'next/link';
 
@@ -29,13 +27,19 @@ export default function Home() {
         EyOS Academy ለአማርኛ ተናጋሪዎች ተብሎ የተሰራ፣ በAI የታገዘ የግል የእንግሊዝኛ ቋንቋ ማስተማሪያ መድረክ ነው። ንግግርዎን፣ አጻጻፍዎን እና ሰዋስውዎን በተግባር ያሳድጉ።
       </p>
 
-      {/* Action Buttons connected to /login */}
+      {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none sm:justify-center items-center z-10">
-        <Link href="/login" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/35 flex items-center justify-center gap-2 text-sm transform hover:-translate-y-0.5 active:translate-y-0 text-center">
+        <Link 
+          href="/login" 
+          className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/35 flex items-center justify-center gap-2 text-sm transform hover:-translate-y-0.5 active:translate-y-0 text-center"
+        >
           ነጻ የ AI Tutor ይጀምሩ 🧠
         </Link>
         
-        <Link href="/login" className="w-full sm:w-auto bg-[#0f172a]/60 hover:bg-[#0f172a] border border-gray-800 hover:border-gray-700 text-gray-300 hover:text-white font-medium px-8 py-4 rounded-2xl transition-all duration-300 backdrop-blur-md flex items-center justify-center text-sm text-center">
+        <Link 
+          href="/login" 
+          className="w-full sm:w-auto bg-[#0f172a]/60 hover:bg-[#0f172a] border border-gray-800 hover:border-gray-700 text-gray-300 hover:text-white font-medium px-8 py-4 rounded-2xl transition-all duration-300 backdrop-blur-md flex items-center justify-center text-sm text-center"
+        >
           ባህሪያትን ይመልከቱ
         </Link>
       </div>
