@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
-import { supabase } from "../../../lib/supabase";
+import { supabase } from "../../../lib/supabase"; // መንገድህን (path) እንዳለ ተውኩት
 import { Send, Bot, User, ArrowLeft, Loader2 } from "lucide-react";
 
 export default function AIChatLesson() {
@@ -14,7 +14,6 @@ export default function AIChatLesson() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   
-  // የባለቤትነት እና የ XP መረጃዎች
   const [user, setUser] = useState<any>(null);
   const [showXpAlert, setShowXpAlert] = useState(false); 
   
@@ -24,7 +23,6 @@ export default function AIChatLesson() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // ተጠቃሚውን ከ Supabase ማረጋገጥ
   useEffect(() => {
     async function getUser() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -68,24 +66,18 @@ export default function AIChatLesson() {
       };
       setMessages((prev) => [...prev, aiMessage]);
 
-      // 🌟 የ Supabase XP ነጥብ መጨመሪያ ሎጂክ 🌟
+      // 🌟 አዲሱ የተስተካከለው እና ደህንነቱ የተጠበቀው የ XP መጨመሪያ ሎጂክ 🌟
       if (user) {
-        const { data: profile } = await supabase
-          .from('UserProfile')
-          .select('xpPoints')
-          .eq('id', user.id)
-          .single();
+        const xpResponse = await fetch('/api/update-xp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id }),
+        });
 
-        const currentXP = profile?.xpPoints || 0;
-        const newXP = currentXP + 10; // ለእያንዳንዱ ቻት 10 XP
-
-        await supabase
-          .from('UserProfile')
-          .update({ xpPoints: newXP })
-          .eq('id', user.id);
-
-        setShowXpAlert(true);
-        setTimeout(() => setShowXpAlert(false), 3000);
+        if (xpResponse.ok) {
+          setShowXpAlert(true);
+          setTimeout(() => setShowXpAlert(false), 3000);
+        }
       }
 
     } catch (error) {
@@ -101,7 +93,6 @@ export default function AIChatLesson() {
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col font-sans relative text-white">
-      
       {/* 🌟 የ XP መጨመሩን የሚያሳውቅ ባውንሲንግ አኒሜሽን 🌟 */}
       {showXpAlert && (
         <div className="fixed top-20 right-1/2 translate-x-1/2 z-50 bg-amber-500 text-white text-sm font-bold px-5 py-2 rounded-full animate-bounce shadow-lg shadow-amber-500/50">
@@ -141,7 +132,6 @@ export default function AIChatLesson() {
                 ? 'bg-blue-600 text-white rounded-tr-sm' 
                 : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-sm'
             }`}>
-              {/* ያንተ ውብ ማርክዳውን ፓርሰር */}
               <ReactMarkdown 
                 className="text-sm space-y-2 text-gray-200 break-words"
                 components={{
@@ -163,7 +153,6 @@ export default function AIChatLesson() {
           </div>
         ))}
         
-        {/* AI በሚያስብበት ጊዜ የሚታይ የጭነት አኒሜሽን */}
         {isTyping && (
           <div className="flex gap-3 justify-start">
             <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shrink-0">
