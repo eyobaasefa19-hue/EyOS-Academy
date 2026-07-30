@@ -1,0 +1,29 @@
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const { userId } = body;
+
+    if (!userId) {
+      return NextResponse.json({ error: 'የተጠቃሚ መለያ (User ID) ያስፈልጋል' }, { status: 400 });
+    }
+
+    // 10 XP ደህንነቱ በተጠበቀ መልኩ በ Server በኩል መጨመር
+    const updatedUser = await prisma.userProfile.update({
+      where: { id: userId },
+      data: { 
+        xpPoints: { increment: 10 } 
+      },
+    });
+
+    return NextResponse.json({ success: true, newXp: updatedUser.xpPoints });
+    
+  } catch (error) {
+    console.error('XP Update Error:', error);
+    return NextResponse.json({ error: 'XP መጨመር አልተቻለም' }, { status: 500 });
+  }
+}
