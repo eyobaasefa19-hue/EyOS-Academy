@@ -9,14 +9,49 @@ datasource db {
 }
 
 model UserProfile {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  fullName  String?
-  xpPoints  Int      @default(0)
-  streak    Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  progress  LessonProgress[]
+  id          String   @id @default(uuid())
+  email       String   @unique
+  fullName    String?
+  xpPoints    Int      @default(0)
+  streak      Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // ግንኙነቶች (Relations)
+  progress    LessonProgress[]
+  enrollments Enrollment[]
+  payments    Payment[]
+}
+
+model Course {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  price       Float    @default(0.0) // 0 ከሆነ ነፃ (Free) ነው ማለት ነው
+  thumbnail   String?
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lessons     Lesson[]
+  enrollments Enrollment[]
+  payments    Payment[]
+}
+
+model Lesson {
+  id          String   @id @default(uuid())
+  title       String
+  content     String?  // ጽሁፍ ወይም ዝርዝር ማብራሪያ
+  videoUrl    String?  // ቪዲዮ ካለው
+  order       Int      // የትምህርቱ ቅደም ተከተል (1, 2, 3...)
+  courseId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress    LessonProgress[]
+
+  @@index([courseId])
 }
 
 model LessonProgress {
@@ -28,7 +63,41 @@ model LessonProgress {
   lastPlayed  DateTime @default(now()) @updatedAt
 
   user        UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson      @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lessonId])
   @@index([userId])
+  @@index([lessonId])
+}
+
+model Enrollment {
+  id          String   @id @default(uuid())
+  userId      String
+  courseId    String
+  enrolledAt  DateTime @default(now())
+
+  user        UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course      Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+}
+
+model Payment {
+  id          String   @id @default(uuid())
+  userId      String
+  courseId    String
+  amount      Float
+  currency    String   @default("ETB")
+  status      String   @default("PENDING") // PENDING, COMPLETED, FAILED
+  txRef       String   @unique // የ Chapa ወይም Telebirr መለያ ቁጥር
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course      Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([courseId])
 }
