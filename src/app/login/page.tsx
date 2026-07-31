@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { supabase } from "../../lib/supabase";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 
@@ -13,7 +12,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,8 +36,9 @@ export default function Login() {
       } else {
         setSuccessMsg("በተሳካ ሁኔታ ገብተዋል! ወደ ዳሽቦርድ በመጓዝ ላይ...");
         setTimeout(() => {
-          router.push("/dashboard");
-        }, 1500);
+          // window.location.href ሴሽኑን አድሶ በሙሉ ገጽ ወደ ዳሽቦርድ ያሸጋግራል
+          window.location.href = "/dashboard";
+        }, 1000);
       }
     } catch (err) {
       setErrorMsg("ያልተጠበቀ ስህተት አጋጥሟል። እባክዎ እንደገና ይሞክሩ።");
