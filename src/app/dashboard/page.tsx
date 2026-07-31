@@ -136,7 +136,7 @@ export default function ProDashboard() {
         }
       } catch (err) {
         console.error("Failed to fetch profile:", err);
-      } font-medium {
+      } finally {
         setLoading(false);
       }
     };
