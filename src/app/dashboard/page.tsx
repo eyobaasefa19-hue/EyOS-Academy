@@ -7,10 +7,9 @@ import { supabase } from "../../lib/supabase";
 import { 
   LayoutDashboard, BookOpen, User, ShieldAlert, 
   Menu, X, Flame, Zap, CheckCircle, Clock, 
-  PenTool, MessageSquare, Mic, PlayCircle, ChevronRight, LogOut
+  PenTool, MessageSquare, Mic, PlayCircle, ChevronRight, LogOut, Coins
 } from "lucide-react";
 
-// --- Types ---
 interface UserStats {
   username: string;
   xp: number;
@@ -30,24 +29,7 @@ interface CoreModule {
   color: string;
 }
 
-interface CourseItem {
-  id: string;
-  title: string;
-  category: string;
-  progress: number;
-}
-
-// --- Dynamic Profile Data ---
-const INITIAL_STATS: UserStats = {
-  username: "eyob19",
-  xp: 6390,
-  coins: 1250,
-  streakDays: 8,
-  currentLevel: 14,
-  dailyGoalPercent: 75,
-};
-
-const IN_PROGRESS_COURSES: CourseItem[] = [
+const IN_PROGRESS_COURSES = [
   {
     id: "flutter-mobile-mastery",
     title: "Full-Stack Flutter & Supabase App",
@@ -64,13 +46,19 @@ const IN_PROGRESS_COURSES: CourseItem[] = [
 
 export default function ProDashboard() {
   const router = useRouter();
-  const [stats, setStats] = useState<UserStats>(INITIAL_STATS);
+  const [stats, setStats] = useState<UserStats>({
+    username: "Scholar",
+    xp: 0,
+    coins: 0,
+    streakDays: 0,
+    currentLevel: 1,
+    dailyGoalPercent: 0,
+  });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState<string>("");
 
-  // 1. Client-Side Authentication Check & Date Formatting
   useEffect(() => {
     setMounted(true);
 
@@ -79,26 +67,44 @@ export default function ProDashboard() {
     };
     setCurrentDate(new Date().toLocaleDateString('en-US', options));
 
-    const checkAuth = async () => {
+    const checkAuthAndFetchProfile = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
-      // ተማሪው/ተጠቃሚው ካልገባ በቀጥታ ወደ /login ይመልሰዋል
       if (!session) {
         router.push("/login");
-      } else {
-        // ገብቶ ከሆነ የኢሜይሉን መጀመሪያ ወይም username ስሙን ማቀናጀት ይቻላል
-        if (session.user?.email) {
-          const userEmailName = session.user.email.split('@')[0];
-          setStats((prev) => ({ ...prev, username: userEmailName }));
+        return;
+      }
+
+      try {
+        // እውነተኛውን የ Profile መረጃ ከ API መጥራት
+        const res = await fetch("/api/user/profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: session.user.email }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.user) {
+          setStats({
+            username: data.user.username || session.user.email?.split("@")[0],
+            xp: data.user.xpPoints,
+            coins: data.user.coins,
+            streakDays: data.user.streak,
+            currentLevel: data.user.currentLevel,
+            dailyGoalPercent: data.user.dailyGoalPercent,
+          });
         }
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+      } finally {
         setLoading(false);
       }
     };
 
-    checkAuth();
+    checkAuthAndFetchProfile();
   }, [router]);
 
-  // Log Out Handling Function
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push("/login");
@@ -143,12 +149,11 @@ export default function ProDashboard() {
     },
   ];
 
-  // Prevent Hydration Flash & Loading Screen while Auth is checking
   if (!mounted || loading) {
     return (
       <div className="min-h-screen bg-[#050b14] flex flex-col items-center justify-center text-slate-200 font-sans">
         <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-sm font-medium text-slate-400">ማረጋገጫ በመፈተሽ ላይ...</p>
+        <p className="text-sm font-medium text-slate-400">የተማሪ መረጃ ከዳታቤዝ በመጫን ላይ...</p>
       </div>
     );
   }
@@ -170,14 +175,18 @@ export default function ProDashboard() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-3">
-              <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-lg text-amber-500 font-bold text-xs">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-lg text-amber-500 font-bold text-xs">
                 <Flame className="w-4 h-4" /> 
                 <span>{stats.streakDays}</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1.5 rounded-lg text-indigo-400 font-bold text-xs">
+              <div className="flex items-center gap-1.5 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1.5 rounded-lg text-indigo-400 font-bold text-xs">
                 <Zap className="w-4 h-4" />
                 <span>{stats.xp}</span>
+              </div>
+              <div className="hidden sm:flex items-center gap-1.5 bg-yellow-500/10 border border-yellow-500/20 px-2.5 py-1.5 rounded-lg text-yellow-400 font-bold text-xs">
+                <Coins className="w-4 h-4" />
+                <span>{stats.coins}</span>
               </div>
             </div>
 
@@ -212,7 +221,6 @@ export default function ProDashboard() {
                 Admin Panel
               </Link>
 
-              {/* Log Out Button */}
               <button 
                 onClick={handleSignOut}
                 className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-rose-500/10 text-rose-400 font-medium text-sm transition-colors w-full text-left mt-1"
@@ -253,11 +261,11 @@ export default function ProDashboard() {
             <div className="w-full md:w-72 bg-[#050b14]/60 rounded-2xl p-5 border border-white/10 backdrop-blur-xl shadow-lg">
                <div className="flex justify-between items-center mb-4">
                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Level {stats.currentLevel} Scholar</span>
-                 <span className="text-xs font-black text-indigo-300 bg-indigo-500/20 px-3 py-1 rounded-lg">45 / 60 Min</span>
+                 <span className="text-xs font-black text-indigo-300 bg-indigo-500/20 px-3 py-1 rounded-lg">{stats.dailyGoalPercent}% Goal</span>
                </div>
                <div className="space-y-2.5">
                  <div className="flex justify-between text-[11px] font-medium text-slate-400">
-                   <span>Daily Goal</span>
+                   <span>Daily Progress</span>
                    <span className="text-indigo-400">{stats.dailyGoalPercent}%</span>
                  </div>
                  <div className="w-full bg-slate-800/80 h-3 rounded-full overflow-hidden border border-white/5">
