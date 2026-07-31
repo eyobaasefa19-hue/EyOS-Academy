@@ -9,13 +9,18 @@ datasource db {
 }
 
 model UserProfile {
-  id          String   @id @default(uuid())
-  email       String   @unique
-  fullName    String?
-  xpPoints    Int      @default(0)
-  streak      Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String   @id @default(uuid())
+  email            String   @unique
+  username         String?  // 🌟 ለ UI Dashboard የተጨመረ
+  fullName         String?
+  xpPoints         Int      @default(0)
+  coins            Int      @default(100) // 🌟 ለተማሪዎች ሽልማት/ኮይንስ
+  streak           Int      @default(0)
+  currentLevel     Int      @default(1)   // 🌟 የተማሪው ደረጃ (Level)
+  dailyGoalPercent Int      @default(0)   // 🌟 የቀን ግብ (Daily Goal %)
+  lastActive       DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   // ግንኙነቶች (Relations)
   progress    LessonProgress[]
