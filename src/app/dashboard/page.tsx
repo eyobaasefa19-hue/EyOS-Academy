@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import { 
   LayoutDashboard, BookOpen, User, ShieldAlert, 
-  Menu, X, Flame, Zap, CheckCircle, Clock, 
+  Menu, X, Flame, Zap, Clock, 
   PenTool, MessageSquare, Mic, PlayCircle, ChevronRight, LogOut, Coins
 } from "lucide-react";
 
@@ -29,20 +29,13 @@ interface CoreModule {
   color: string;
 }
 
-const IN_PROGRESS_COURSES = [
-  {
-    id: "flutter-mobile-mastery",
-    title: "Full-Stack Flutter & Supabase App",
-    category: "Mobile Dev",
-    progress: 68,
-  },
-  {
-    id: "ai-prompt-engineering",
-    title: "Advanced AI Prompt Engineering",
-    category: "AI & Tech",
-    progress: 34,
-  }
-];
+interface CourseItem {
+  id: string;
+  title: string;
+  category: string;
+  totalLessons: number;
+  progressPercent: number;
+}
 
 export default function ProDashboard() {
   const router = useRouter();
@@ -54,6 +47,31 @@ export default function ProDashboard() {
     currentLevel: 1,
     dailyGoalPercent: 0,
   });
+
+  const [inProgressCourses, setInProgressCourses] = useState<CourseItem[]>([
+    {
+      id: "flutter-mobile-mastery",
+      title: "Full-Stack Flutter & Supabase App",
+      category: "Mobile Dev",
+      totalLessons: 6,
+      progressPercent: 0,
+    },
+    {
+      id: "aviation-logistics-pro",
+      title: "Aviation Logistics & Ground Operations",
+      category: "Aviation & Logistics",
+      totalLessons: 5,
+      progressPercent: 0,
+    },
+    {
+      id: "ai-prompt-engineering",
+      title: "Advanced AI Prompt Engineering",
+      category: "AI & Tech",
+      totalLessons: 3,
+      progressPercent: 0,
+    }
+  ]);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -67,15 +85,35 @@ export default function ProDashboard() {
     };
     setCurrentDate(new Date().toLocaleDateString('en-US', options));
 
-    const checkAuthAndFetchProfile = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        router.push("/login");
-        return;
-      }
+    // የኮርሶችን Progress ከ localStorage አንብቦ ማስላት
+    setInProgressCourses((prevCourses) =>
+      prevCourses.map((course) => {
+        const localData = localStorage.getItem(`progress_${course.id}`);
+        if (localData) {
+          try {
+            const completedIds: string[] = JSON.parse(localData);
+            const calculatedPercent = Math.round((completedIds.length / course.totalLessons) * 100);
+            return {
+              ...course,
+              progressPercent: Math.min(calculatedPercent, 100),
+            };
+          } catch (e) {
+            console.error("Failed to parse progress for course:", course.id, e);
+          }
+        }
+        return course;
+      })
+    );
 
+    const checkAuthAndFetchProfile = async () => {
       try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          router.push("/login");
+          return;
+        }
+
         // እውነተኛውን የ Profile መረጃ ከ API መጥራት
         const res = await fetch("/api/user/profile", {
           method: "POST",
@@ -83,21 +121,22 @@ export default function ProDashboard() {
           body: JSON.stringify({ email: session.user.email }),
         });
 
-        const data = await res.json();
-
-        if (res.ok && data.user) {
-          setStats({
-            username: data.user.username || session.user.email?.split("@")[0],
-            xp: data.user.xpPoints,
-            coins: data.user.coins,
-            streakDays: data.user.streak,
-            currentLevel: data.user.currentLevel,
-            dailyGoalPercent: data.user.dailyGoalPercent,
-          });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user) {
+            setStats({
+              username: data.user.username || session.user.email?.split("@")[0] || "Scholar",
+              xp: data.user.xpPoints || 0,
+              coins: data.user.coins || 0,
+              streakDays: data.user.streak || 0,
+              currentLevel: data.user.currentLevel || 1,
+              dailyGoalPercent: data.user.dailyGoalPercent || 0,
+            });
+          }
         }
       } catch (err) {
         console.error("Failed to fetch profile:", err);
-      } finally {
+      } font-medium {
         setLoading(false);
       }
     };
@@ -192,7 +231,7 @@ export default function ProDashboard() {
 
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-slate-300 focus:outline-none"
+              className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-slate-300 focus:outline-none cursor-pointer"
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -223,7 +262,7 @@ export default function ProDashboard() {
 
               <button 
                 onClick={handleSignOut}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-rose-500/10 text-rose-400 font-medium text-sm transition-colors w-full text-left mt-1"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-rose-500/10 text-rose-400 font-medium text-sm transition-colors w-full text-left mt-1 cursor-pointer"
               >
                 <LogOut className="w-5 h-5" />
                 ይውጡ (Log Out)
@@ -327,7 +366,7 @@ export default function ProDashboard() {
           </div>
           
           <div className="grid gap-4">
-            {IN_PROGRESS_COURSES.map((course) => (
+            {inProgressCourses.map((course) => (
               <div key={course.id} className="bg-[#0f172a]/60 hover:bg-[#1e293b]/80 backdrop-blur-sm transition-all duration-300 border border-white/5 hover:border-white/10 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 group shadow-lg">
                 <div className="flex-1 w-full">
                   <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest mb-1.5 block">
@@ -339,13 +378,13 @@ export default function ProDashboard() {
                   <div className="flex items-center gap-4">
                      <div className="flex-1 bg-slate-800/80 h-2.5 rounded-full overflow-hidden border border-white/5">
                        <div 
-                         className="bg-emerald-500 h-full rounded-full relative" 
-                         style={{ width: `${course.progress}%` }} 
+                         className="bg-emerald-500 h-full rounded-full relative transition-all duration-500" 
+                         style={{ width: `${course.progressPercent}%` }} 
                        >
                          <div className="absolute top-0 right-0 bottom-0 w-4 bg-white/30 blur-[2px]" />
                        </div>
                      </div>
-                     <span className="text-xs text-emerald-400 font-black w-10">{course.progress}%</span>
+                     <span className="text-xs text-emerald-400 font-black w-10">{course.progressPercent}%</span>
                   </div>
                 </div>
                 <Link
