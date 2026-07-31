@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase"; // ወይም የ supabase.ts መንገድህ እንደ አደረጃጀትህ
+import { supabase } from "../../lib/supabase";
 import { 
   LayoutDashboard, BookOpen, User, ShieldAlert, 
   Menu, X, Flame, Zap, CheckCircle, Clock, 
