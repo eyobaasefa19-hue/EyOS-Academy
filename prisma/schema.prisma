@@ -24,32 +24,38 @@ model UserProfile {
 }
 
 model Course {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  price       Float    @default(0.0) // 0 ከሆነ ነፃ (Free) ነው ማለት ነው
-  thumbnail   String?
-  isPublished Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(uuid())
+  title         String
+  subtitle      String?  // 🌟 ለ UI የተጨመረ
+  description   String
+  category      String?  // 🌟 ለ UI የተጨመረ
+  price         Float    @default(0.0) 
+  discountPrice Float?   // 🌟 ለ UI የተጨመረ
+  thumbnail     String?
+  isPublished   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  lessons     Lesson[]
-  enrollments Enrollment[]
-  payments    Payment[]
+  lessons       Lesson[]
+  enrollments   Enrollment[]
+  payments      Payment[]
 }
 
 model Lesson {
-  id          String   @id @default(uuid())
-  title       String
-  content     String?  // ጽሁፍ ወይም ዝርዝር ማብራሪያ
-  videoUrl    String?  // ቪዲዮ ካለው
-  order       Int      // የትምህርቱ ቅደም ተከተል (1, 2, 3...)
-  courseId    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(uuid())
+  title         String
+  chapterTitle  String?  // 🌟 ትምህርቶችን በክፍል ለመለየት (ለምሳሌ "ክፍል 1: መግቢያ")
+  duration      String?  // 🌟 የቪዲዮ ርዝመት (ለምሳሌ "15:20")
+  content       String?  
+  videoUrl      String?  
+  order         Int      
+  isFreePreview Boolean  @default(false) // 🌟 ተማሪዎች ሳይከፍሉ እንዲሞክሩት
+  courseId      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  progress    LessonProgress[]
+  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress      LessonProgress[]
 
   @@index([courseId])
 }
@@ -91,7 +97,7 @@ model Payment {
   amount      Float
   currency    String   @default("ETB")
   status      String   @default("PENDING") // PENDING, COMPLETED, FAILED
-  txRef       String   @unique // የ Chapa ወይም Telebirr መለያ ቁጥር
+  txRef       String   @unique 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
