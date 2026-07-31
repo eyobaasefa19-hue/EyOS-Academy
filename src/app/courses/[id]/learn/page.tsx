@@ -3,7 +3,22 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Lesson, Chapter } from "@/types/course";
+
+// --- Types (Self-contained to prevent path-alias build issues on Vercel) ---
+export interface Lesson {
+  id: string;
+  title: string;
+  duration: string;
+  videoUrl?: string;
+  isFreePreview: boolean;
+  isCompleted?: boolean;
+}
+
+export interface Chapter {
+  id: string;
+  title: string;
+  lessons: Lesson[];
+}
 
 interface CourseLearning {
   id: string;
