@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase"; // ወይም የ supabase.ts መንገድህ እንደ አደረጃጀትህ
 import { 
   LayoutDashboard, BookOpen, User, ShieldAlert, 
   Menu, X, Flame, Zap, CheckCircle, Clock, 
-  PenTool, MessageSquare, Mic, PlayCircle, ChevronRight
+  PenTool, MessageSquare, Mic, PlayCircle, ChevronRight, LogOut
 } from "lucide-react";
 
 // --- Types ---
@@ -61,19 +63,46 @@ const IN_PROGRESS_COURSES: CourseItem[] = [
 ];
 
 export default function ProDashboard() {
-  const [stats] = useState<UserStats>(INITIAL_STATS);
+  const router = useRouter();
+  const [stats, setStats] = useState<UserStats>(INITIAL_STATS);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState<string>("");
 
-  // Fix Hydration mismatch & format date safely
+  // 1. Client-Side Authentication Check & Date Formatting
   useEffect(() => {
     setMounted(true);
+
     const options: Intl.DateTimeFormatOptions = { 
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
     };
     setCurrentDate(new Date().toLocaleDateString('en-US', options));
-  }, []);
+
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // ተማሪው/ተጠቃሚው ካልገባ በቀጥታ ወደ /login ይመልሰዋል
+      if (!session) {
+        router.push("/login");
+      } else {
+        // ገብቶ ከሆነ የኢሜይሉን መጀመሪያ ወይም username ስሙን ማቀናጀት ይቻላል
+        if (session.user?.email) {
+          const userEmailName = session.user.email.split('@')[0];
+          setStats((prev) => ({ ...prev, username: userEmailName }));
+        }
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
+
+  // Log Out Handling Function
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
 
   const CORE_HUB_MODULES: CoreModule[] = [
     {
@@ -114,7 +143,15 @@ export default function ProDashboard() {
     },
   ];
 
-  if (!mounted) return null; // Prevent hydration flash
+  // Prevent Hydration Flash & Loading Screen while Auth is checking
+  if (!mounted || loading) {
+    return (
+      <div className="min-h-screen bg-[#050b14] flex flex-col items-center justify-center text-slate-200 font-sans">
+        <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-sm font-medium text-slate-400">ማረጋገጫ በመፈተሽ ላይ...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#050b14] text-slate-200 font-sans pb-24 selection:bg-indigo-500/30">
@@ -174,6 +211,15 @@ export default function ProDashboard() {
                 <ShieldAlert className="w-5 h-5 text-rose-400" />
                 Admin Panel
               </Link>
+
+              {/* Log Out Button */}
+              <button 
+                onClick={handleSignOut}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-rose-500/10 text-rose-400 font-medium text-sm transition-colors w-full text-left mt-1"
+              >
+                <LogOut className="w-5 h-5" />
+                ይውጡ (Log Out)
+              </button>
             </div>
           </div>
         )}
