@@ -1,24 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-
-// --- Types ---
-interface Lesson {
-  id: string;
-  title: string;
-  duration: string;
-  videoUrl: string;
-  isCompleted?: boolean;
-}
-
-interface Chapter {
-  id: string;
-  title: string;
-  lessons: Lesson[];
-}
+import { Lesson, Chapter } from "@/types/course";
 
 interface CourseLearning {
   id: string;
@@ -33,7 +18,6 @@ interface NoteItem {
 }
 
 // --- Dynamic Classroom Database for All Courses ---
-// 100% ከይዘቱ ጋር የሚሄዱ እና Embed መደረግ የሚችሉ ቪዲዮዎች ተካትተዋል
 const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
   "flutter-mobile-mastery": {
     id: "flutter-mobile-mastery",
@@ -47,24 +31,24 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "l-1", 
             title: "1.1 የኮርሱ መግቢያ እና የምንሰራቸው ፕሮጀክቶች", 
             duration: "02:15", 
-            // Fireship - Flutter in 100 Seconds
             videoUrl: "https://www.youtube.com/embed/I9ceqw5Ny-4", 
-            isCompleted: true 
+            isFreePreview: true,
+            isCompleted: false 
           },
           { 
             id: "l-2", 
             title: "1.2 Flutter እና Dart በሞባይል ላይ መጫን", 
             duration: "14:20", 
-            // FreeCodeCamp - Flutter Course Intro
             videoUrl: "https://www.youtube.com/embed/1ukSR1GRtMU", 
-            isCompleted: true 
+            isFreePreview: true,
+            isCompleted: false 
           },
           { 
             id: "l-3", 
             title: "1.3 የፕሮጀክት መዋቅር እና የመጀመሪያው App", 
             duration: "18:45", 
-            // Net Ninja - Flutter Basics
             videoUrl: "https://www.youtube.com/embed/pTJJsmejUOQ", 
+            isFreePreview: false,
             isCompleted: false 
           }
         ]
@@ -77,24 +61,24 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "l-4", 
             title: "2.1 Supabase Project መፍጠር እና Schema ዲዛይን", 
             duration: "02:10", 
-            // Fireship - Supabase in 100 Seconds
             videoUrl: "https://www.youtube.com/embed/WQIjoEYXy0c", 
+            isFreePreview: false,
             isCompleted: false 
           },
           { 
             id: "l-5", 
             title: "2.2 Authentication እና User Profiles አሰራር", 
             duration: "25:00", 
-            // Supabase Official Auth Guide
             videoUrl: "https://www.youtube.com/embed/ydMqaAGheZA", 
+            isFreePreview: false,
             isCompleted: false 
           },
           { 
             id: "l-6", 
             title: "2.3 Realtime Data Fetching & State Management", 
             duration: "30:15", 
-            // FreeCodeCamp - Supabase Full Course Chapter
             videoUrl: "https://www.youtube.com/embed/7uKQBl9uZ00", 
+            isFreePreview: false,
             isCompleted: false 
           }
         ]
@@ -113,16 +97,16 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "av-l-1", 
             title: "1.1 የኤርፖርት ግራውንድ ኦፕሬሽን እና የካርጎ ፍሰት (Cargo Flow)", 
             duration: "15:20", 
-            // Wendover Productions - The Economics of Freight Airlines
             videoUrl: "https://www.youtube.com/embed/M4_dE2_fXgQ", 
-            isCompleted: true 
+            isFreePreview: true,
+            isCompleted: false 
           },
           { 
             id: "av-l-2", 
             title: "1.2 Air Waybill (AWB) እና የካርጎ ማኒፈስት (Cargo Manifest)", 
             duration: "20:40", 
-            // Aviation Logistics & Air Freight Basics
             videoUrl: "https://www.youtube.com/embed/9Z44ZtE9b2Q", 
+            isFreePreview: false,
             isCompleted: false 
           }
         ]
@@ -135,16 +119,16 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "av-l-3", 
             title: "2.1 የ ULD አይነቶች (Containers & Pallets: AKE, PAG, PMC)", 
             duration: "24:15", 
-            // Aviation ULD and Cargo Loading
             videoUrl: "https://www.youtube.com/embed/y_b1D3KkR2c", 
+            isFreePreview: false,
             isCompleted: false 
           },
           { 
             id: "av-l-4", 
             title: "2.2 የአውሮፕላን Weight & Balance እና Loading Configuration", 
             duration: "28:30", 
-            // Aircraft Weight and Balance Tutorial
             videoUrl: "https://www.youtube.com/embed/6B0n2K_Qz5c", 
+            isFreePreview: false,
             isCompleted: false 
           }
         ]
@@ -157,8 +141,8 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "av-l-5", 
             title: "3.1 የ GSE መሳሪያዎች (High Loaders, Tug Tractors) ኦፕሬሽን", 
             duration: "25:00", 
-            // Airport Ground Handling Turnaround
             videoUrl: "https://www.youtube.com/embed/21Zz1A00r0A", 
+            isFreePreview: false,
             isCompleted: false 
           }
         ]
@@ -177,16 +161,16 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "ai-l-1", 
             title: "1.1 የ AI Prompts አወቃቀር እና System Instructions", 
             duration: "12:30", 
-            // Jeff Su - ChatGPT Prompt Engineering
             videoUrl: "https://www.youtube.com/embed/jC4v5AS4RIM", 
-            isCompleted: true 
+            isFreePreview: true,
+            isCompleted: false 
           },
           { 
             id: "ai-l-2", 
             title: "1.2 Few-Shot & Chain-of-Thought Prompting", 
             duration: "18:20", 
-            // Advanced Prompting Techniques
             videoUrl: "https://www.youtube.com/embed/_ZvnD733f0U", 
+            isFreePreview: false,
             isCompleted: false 
           }
         ]
@@ -199,8 +183,8 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
             id: "ai-l-3", 
             title: "2.1 Midjourney & RunwayML የቪዲዮ አኒሜሽን ጥበብ", 
             duration: "20:15", 
-            // Midjourney & AI Video Workflow
             videoUrl: "https://www.youtube.com/embed/2vI_J2886wQ", 
+            isFreePreview: false,
             isCompleted: false 
           }
         ]
@@ -211,23 +195,58 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
 
 export default function VideoLearningRoomPage() {
   const params = useParams();
-  const courseId = params?.id as string;
+  const rawId = params?.id;
+  const courseId = typeof rawId === "string" ? rawId : "flutter-mobile-mastery";
 
-  const initialCourse = COURSES_LEARNING_DB[courseId] || COURSES_LEARNING_DB["flutter-mobile-mastery"];
+  const defaultCourse = COURSES_LEARNING_DB[courseId] || COURSES_LEARNING_DB["flutter-mobile-mastery"];
 
-  const [courseData, setCourseData] = useState<CourseLearning>(initialCourse);
-  const [activeLesson, setActiveLesson] = useState<Lesson>(initialCourse.chapters[0].lessons[0]);
+  const [courseData, setCourseData] = useState<CourseLearning>(defaultCourse);
+  const [activeLesson, setActiveLesson] = useState<Lesson>(
+    defaultCourse.chapters[0]?.lessons[0] || {
+      id: "fallback",
+      title: "መግቢያ",
+      duration: "00:00",
+      videoUrl: "",
+      isFreePreview: true,
+      isCompleted: false,
+    }
+  );
+
   const [activeTab, setActiveTab] = useState<"overview" | "notes" | "resources">("overview");
   const [userNote, setUserNote] = useState("");
   const [savedNotes, setSavedNotes] = useState<NoteItem[]>([]);
 
+  // መረጃዎችን ከ localStorage እና ከ DB መጫን
   useEffect(() => {
     const selectedCourse = COURSES_LEARNING_DB[courseId] || COURSES_LEARNING_DB["flutter-mobile-mastery"];
-    setCourseData(selectedCourse);
-    if (selectedCourse.chapters[0]?.lessons[0]) {
-      setActiveLesson(selectedCourse.chapters[0].lessons[0]);
+    
+    // የተቀመጠ Progress ካለ መጫን
+    let completedLessonIds: string[] = [];
+    const localProgress = localStorage.getItem(`progress_${courseId}`);
+    if (localProgress) {
+      try {
+        completedLessonIds = JSON.parse(localProgress);
+      } catch (e) {
+        console.error("Failed to parse local progress", e);
+      }
     }
 
+    const updatedChapters = selectedCourse.chapters.map((ch) => ({
+      ...ch,
+      lessons: ch.lessons.map((l) => ({
+        ...l,
+        isCompleted: completedLessonIds.includes(l.id),
+      })),
+    }));
+
+    const updatedCourse = { ...selectedCourse, chapters: updatedChapters };
+    setCourseData(updatedCourse);
+
+    if (updatedChapters[0]?.lessons[0]) {
+      setActiveLesson(updatedChapters[0].lessons[0]);
+    }
+
+    // የተቀመጡ ማስታወሻዎችን መጫን
     const localNotes = localStorage.getItem(`notes_${courseId}`);
     if (localNotes) {
       try {
@@ -238,24 +257,40 @@ export default function VideoLearningRoomPage() {
     }
   }, [courseId]);
 
-  const toggleComplete = (lessonId: string) => {
-    setCourseData((prev) => ({
-      ...prev,
-      chapters: prev.chapters.map((ch) => ({
+  // ትምህርት ማጠናቀቅን መቀያየር (Toggle Completion)
+  const toggleComplete = useCallback((lessonId: string) => {
+    setCourseData((prev) => {
+      const updatedChapters = prev.chapters.map((ch) => ({
         ...ch,
         lessons: ch.lessons.map((l) =>
           l.id === lessonId ? { ...l, isCompleted: !l.isCompleted } : l
-        )
-      }))
-    }));
-  };
+        ),
+      }));
 
+      // በ localStorage ውስጥ መዝግቦ ማስቀመጥ
+      const completedIds: string[] = [];
+      updatedChapters.forEach((ch) =>
+        ch.lessons.forEach((l) => {
+          if (l.isCompleted) completedIds.push(l.id);
+        })
+      );
+      localStorage.setItem(`progress_${courseId}`, JSON.stringify(completedIds));
+
+      return { ...prev, chapters: updatedChapters };
+    });
+
+    setActiveLesson((prev) =>
+      prev.id === lessonId ? { ...prev, isCompleted: !prev.isCompleted } : prev
+    );
+  }, [courseId]);
+
+  // ማስታወሻ መጨመር
   const handleAddNote = () => {
     if (!userNote.trim()) return;
     const newNote: NoteItem = {
       id: Date.now().toString(),
       text: userNote.trim(),
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
     const updated = [newNote, ...savedNotes];
     setSavedNotes(updated);
@@ -263,22 +298,37 @@ export default function VideoLearningRoomPage() {
     setUserNote("");
   };
 
-  const totalLessons = courseData.chapters.reduce((acc, ch) => acc + ch.lessons.length, 0);
-  const completedLessons = courseData.chapters.reduce(
-    (acc, ch) => acc + ch.lessons.filter((l) => l.isCompleted).length,
-    0
-  );
+  // ማስታወሻ መሰረዝ
+  const handleDeleteNote = (id: string) => {
+    const updated = savedNotes.filter((n) => n.id !== id);
+    setSavedNotes(updated);
+    localStorage.setItem(`notes_${courseId}`, JSON.stringify(updated));
+  };
+
+  // የትምህርቶች ዝርዝር ፍላት አድርጎ ቀጣይ/ቀደመ ትምህርት ማግኘት
+  const allLessons = courseData.chapters.flatMap((ch) => ch.lessons);
+  const currentLessonIndex = allLessons.findIndex((l) => l.id === activeLesson.id);
+
+  const prevLesson = currentLessonIndex > 0 ? allLessons[currentLessonIndex - 1] : null;
+  const nextLesson = currentLessonIndex < allLessons.length - 1 ? allLessons[currentLessonIndex + 1] : null;
+
+  // ፐርሰንቴጅ ማስላት
+  const totalLessons = allLessons.length;
+  const completedLessons = allLessons.filter((l) => l.isCompleted).length;
   const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-white flex flex-col font-sans">
-      
-      <header className="bg-[#161B26] border-b border-gray-800 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+    <div className="min-h-screen bg-[#0B0F19] text-white flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+      {/* Top Header Navigation */}
+      <header className="bg-[#161B26] border-b border-gray-800 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-md">
         <div className="flex items-center gap-3">
-          <Link href={`/courses/${courseData.id}`} className="text-xs text-indigo-400 hover:underline">
+          <Link
+            href={`/courses/${courseData.id}`}
+            className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1 font-semibold"
+          >
             ← ወደ ኮርሱ ገፅ
           </Link>
-          <span className="text-gray-600">|</span>
+          <span className="text-gray-700">|</span>
           <h1 className="text-sm font-bold text-white truncate max-w-xs sm:max-w-md">
             {courseData.title}
           </h1>
@@ -298,68 +348,117 @@ export default function VideoLearningRoomPage() {
         </div>
       </header>
 
+      {/* Main Content Area */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-3">
-        
+        {/* Left Video Player & Tabs Section */}
         <div className="lg:col-span-2 p-4 sm:p-6 space-y-6 flex flex-col">
-          
+          {/* Video Player */}
           <div className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-gray-800 shadow-2xl">
-            <iframe
-              src={activeLesson.videoUrl}
-              title={activeLesson.title}
-              className="w-full h-full border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+            {activeLesson.videoUrl ? (
+              <iframe
+                src={activeLesson.videoUrl}
+                title={activeLesson.title}
+                className="w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">
+                ቪዲዮው አልተገኘም
+              </div>
+            )}
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#161B26] p-5 rounded-2xl border border-gray-800">
+          {/* Video Controls & Title */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#161B26] p-5 rounded-2xl border border-gray-800 shadow-sm">
             <div>
               <span className="text-xs text-indigo-400 font-semibold">አሁን እየተመለከቱት ያለው፡</span>
               <h2 className="text-lg font-bold text-white mt-0.5">{activeLesson.title}</h2>
             </div>
 
-            <button
-              onClick={() => toggleComplete(activeLesson.id)}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
-                activeLesson.isCompleted
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
-                  : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20"
-              }`}
-            >
-              {activeLesson.isCompleted ? "✓ ተጠናቋል (Completed)" : "ትምህርቱን ጨርሻለሁ (Mark as Done)"}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => toggleComplete(activeLesson.id)}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer ${
+                  activeLesson.isCompleted
+                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/30"
+                    : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20"
+                }`}
+              >
+                {activeLesson.isCompleted ? "✓ ተጠናቋል (Completed)" : "ትምህርቱን ጨርሻለሁ (Mark as Done)"}
+              </button>
+            </div>
           </div>
 
-          <div className="bg-[#161B26] border border-gray-800 rounded-2xl p-4 flex-1 space-y-4">
-            
+          {/* Next / Prev Quick Navigation */}
+          <div className="flex items-center justify-between gap-2 text-xs">
+            {prevLesson ? (
+              <button
+                onClick={() => setActiveLesson(prevLesson)}
+                className="px-3 py-2 bg-[#161B26] border border-gray-800 rounded-xl text-gray-300 hover:text-white hover:border-indigo-500 transition-all flex items-center gap-1.5"
+              >
+                ← የቀደመ ትምህርት
+              </button>
+            ) : <div />}
+
+            {nextLesson && (
+              <button
+                onClick={() => setActiveLesson(nextLesson)}
+                className="px-3 py-2 bg-[#161B26] border border-gray-800 rounded-xl text-indigo-400 hover:text-indigo-300 hover:border-indigo-500 transition-all flex items-center gap-1.5 ml-auto font-semibold"
+              >
+                ቀጣይ ትምህርት ➔
+              </button>
+            )}
+          </div>
+
+          {/* Content Tabs (Overview / Notes / Downloads) */}
+          <div className="bg-[#161B26] border border-gray-800 rounded-2xl p-4 flex-1 space-y-4 shadow-sm">
             <div className="flex border-b border-gray-800 gap-4 text-xs font-bold pb-2">
               <button
                 onClick={() => setActiveTab("overview")}
-                className={`pb-2 transition-colors ${activeTab === "overview" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-gray-400"}`}
+                className={`pb-2 transition-colors ${
+                  activeTab === "overview"
+                    ? "text-indigo-400 border-b-2 border-indigo-500"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
               >
                 መግለጫ (Overview)
               </button>
               <button
                 onClick={() => setActiveTab("notes")}
-                className={`pb-2 transition-colors ${activeTab === "notes" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-gray-400"}`}
+                className={`pb-2 transition-colors ${
+                  activeTab === "notes"
+                    ? "text-indigo-400 border-b-2 border-indigo-500"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
               >
-                ማስታወሻዎቼ (Notes)
+                ማስታወሻዎቼ ({savedNotes.length})
               </button>
               <button
                 onClick={() => setActiveTab("resources")}
-                className={`pb-2 transition-colors ${activeTab === "resources" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-gray-400"}`}
+                className={`pb-2 transition-colors ${
+                  activeTab === "resources"
+                    ? "text-indigo-400 border-b-2 border-indigo-500"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
               >
                 ፋይሎች (Downloads)
               </button>
             </div>
 
+            {/* Overview Tab Content */}
             {activeTab === "overview" && (
               <div className="text-xs text-gray-300 leading-relaxed space-y-2">
-                <p>በዚህ ትምህርት ውስጥ ስለ {courseData.title} ዋና ዋና ነጥቦች፣ የቪዲዮ ትንታኔዎች እና ተግባራዊ ማብራሪያዎችን በዝርዝር እንመለከታለን።</p>
-                <p className="text-gray-500">ማንኛውም ጥያቄ ካለዎት በማስታወሻ ሳጥኑ ውስጥ ማስቀመጥ ይችላሉ።</p>
+                <p>
+                  በዚህ ትምህርት ውስጥ ስለ <strong className="text-indigo-300">{courseData.title}</strong> ዋና ዋና ነጥቦች፣ የቪዲዮ ትንታኔዎች እና ተግባራዊ ማብራሪያዎችን በዝርዝር እንመለከታለን።
+                </p>
+                <p className="text-gray-400">
+                  ማንኛውም ጥያቄ ወይም ሊያስታውሱት የሚፈልጉትን ነጥብ በማስታወሻ ሳጥኑ ውስጥ ማስቀመጥ ይችላሉ።
+                </p>
               </div>
             )}
 
+            {/* Notes Tab Content */}
             {activeTab === "notes" && (
               <div className="space-y-4">
                 <div className="flex gap-2">
@@ -369,7 +468,7 @@ export default function VideoLearningRoomPage() {
                     value={userNote}
                     onChange={(e) => setUserNote(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAddNote()}
-                    className="flex-1 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    className="flex-1 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
                   />
                   <button
                     onClick={handleAddNote}
@@ -379,42 +478,59 @@ export default function VideoLearningRoomPage() {
                   </button>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                   {savedNotes.map((note) => (
-                    <div key={note.id} className="bg-gray-900/80 p-3 rounded-xl border border-gray-800 text-xs text-gray-300 flex justify-between">
-                      <span>• {note.text}</span>
-                      <span className="text-[10px] text-gray-500">{note.timestamp}</span>
+                    <div
+                      key={note.id}
+                      className="bg-gray-900/80 p-3 rounded-xl border border-gray-800 text-xs text-gray-300 flex justify-between items-center gap-2"
+                    >
+                      <span className="flex-1">• {note.text}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-gray-500">{note.timestamp}</span>
+                        <button
+                          onClick={() => handleDeleteNote(note.id)}
+                          className="text-rose-400 hover:text-rose-300 text-[10px] font-bold"
+                          title="ሰርዝ"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
                   ))}
                   {savedNotes.length === 0 && (
-                    <p className="text-xs text-gray-500 text-center py-4">ምንም የተቀመጠ ማስታወሻ የለም።</p>
+                    <p className="text-xs text-gray-500 text-center py-4">
+                      ምንም የተቀመጠ ማስታወሻ የለም።
+                    </p>
                   )}
                 </div>
               </div>
             )}
 
+            {/* Resources Tab Content */}
             {activeTab === "resources" && (
               <div className="space-y-2 text-xs">
                 <div className="p-3 bg-gray-900 rounded-xl border border-gray-800 flex justify-between items-center">
-                  <span className="text-gray-300">📄 Course Resource Materials (.pdf / .zip)</span>
+                  <span className="text-gray-300">📄 የኮርሱ ማጠቃለያ ፋይሎች (.pdf / .zip)</span>
                   <button className="text-indigo-400 font-bold hover:underline">Download</button>
                 </div>
               </div>
             )}
-
           </div>
-
         </div>
 
+        {/* Right Curriculum Sidebar */}
         <div className="bg-[#161B26] border-t lg:border-t-0 lg:border-l border-gray-800 p-4 space-y-4">
-          <h3 className="font-bold text-sm text-white border-b border-gray-800 pb-3">
-            የትምህርቱ ማውጫ (Curriculum)
+          <h3 className="font-bold text-sm text-white border-b border-gray-800 pb-3 flex items-center justify-between">
+            <span>የትምህርቱ ማውጫ (Curriculum)</span>
+            <span className="text-xs text-indigo-400 font-normal">
+              {completedLessons}/{totalLessons} ተጠናቋል
+            </span>
           </h3>
 
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[calc(100vh-140px)] overflow-y-auto pr-1">
             {courseData.chapters.map((chapter) => (
               <div key={chapter.id} className="space-y-1">
-                <div className="text-xs font-semibold text-indigo-400 py-1 px-2 bg-gray-800/40 rounded-lg">
+                <div className="text-xs font-semibold text-indigo-400 py-1.5 px-2 bg-gray-800/40 rounded-lg">
                   {chapter.title}
                 </div>
 
@@ -425,10 +541,10 @@ export default function VideoLearningRoomPage() {
                       <button
                         key={lesson.id}
                         onClick={() => setActiveLesson(lesson)}
-                        className={`w-full p-3 rounded-xl text-left text-xs transition-all flex items-center justify-between gap-2 ${
+                        className={`w-full p-3 rounded-xl text-left text-xs transition-all flex items-center justify-between gap-2 cursor-pointer ${
                           isActive
-                            ? "bg-indigo-600/20 border border-indigo-500 text-indigo-300 font-bold"
-                            : "hover:bg-gray-800/40 text-gray-400 border border-transparent"
+                            ? "bg-indigo-600/20 border border-indigo-500 text-indigo-300 font-bold shadow-sm"
+                            : "hover:bg-gray-800/40 text-gray-400 border border-transparent hover:text-gray-200"
                         }`}
                       >
                         <div className="flex items-center gap-2 truncate">
@@ -438,7 +554,9 @@ export default function VideoLearningRoomPage() {
 
                         <div className="flex items-center gap-1.5 shrink-0">
                           {lesson.isCompleted && (
-                            <span className="text-emerald-400 text-xs font-bold">✓</span>
+                            <span className="text-emerald-400 text-xs font-bold" title="ተጠናቋል">
+                              ✓
+                            </span>
                           )}
                           <span className="text-[10px] text-gray-500">{lesson.duration}</span>
                         </div>
@@ -449,11 +567,8 @@ export default function VideoLearningRoomPage() {
               </div>
             ))}
           </div>
-
         </div>
-
       </div>
-
     </div>
   );
 }
