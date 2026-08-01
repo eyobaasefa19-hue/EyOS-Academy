@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+// 100% Build ስህተት እንዳይፈጠር Safe Relative Path ተጠቅመናል
+import { prisma } from "../../../../lib/prisma";
 
 export async function POST(req: Request) {
   try {
