@@ -1,30 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-
-// --- Types (Self-contained to prevent path-alias build issues on Vercel) ---
-export interface Lesson {
-  id: string;
-  title: string;
-  duration: string;
-  videoUrl?: string;
-  isFreePreview: boolean;
-  isCompleted?: boolean;
-}
-
-export interface Chapter {
-  id: string;
-  title: string;
-  lessons: Lesson[];
-}
-
-interface CourseLearning {
-  id: string;
-  title: string;
-  chapters: Chapter[];
-}
+import { Lesson, Chapter } from "@/types/course";
 
 interface NoteItem {
   id: string;
@@ -32,8 +11,27 @@ interface NoteItem {
   timestamp: string;
 }
 
-// --- Dynamic Classroom Database for All Courses ---
-const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
+interface CourseLearningData {
+  id: string;
+  title: string;
+  chapters: Chapter[];
+}
+
+// --- 🌟 Helper Function: Standard YouTube URL to Embed Formatter ---
+function getYouTubeEmbedUrl(url?: string): string {
+  if (!url) return "";
+  if (url.includes("embed/")) return url;
+  
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  
+  return match && match[2].length === 11
+    ? `https://www.youtube.com/embed/${match[2]}?autoplay=1&rel=0`
+    : url;
+}
+
+// --- 🌟 Dynamic Database Mock for EyOS Academy Courses ---
+const COURSES_LEARNING_DB: Record<string, CourseLearningData> = {
   "flutter-mobile-mastery": {
     id: "flutter-mobile-mastery",
     title: "Full-Stack Flutter & Supabase Mobile App Development",
@@ -208,14 +206,17 @@ const COURSES_LEARNING_DB: Record<string, CourseLearning> = {
   }
 };
 
-export default function VideoLearningRoomPage() {
+export default function CourseLearningPage() {
   const params = useParams();
   const rawId = params?.id;
-  const courseId = typeof rawId === "string" ? rawId : "flutter-mobile-mastery";
+  const courseId = typeof rawId === "string" ? rawId : Array.isArray(rawId) ? rawId[0] : "flutter-mobile-mastery";
 
-  const defaultCourse = COURSES_LEARNING_DB[courseId] || COURSES_LEARNING_DB["flutter-mobile-mastery"];
+  // የዲሲፕሊን መረጃ መምረጫ
+  const defaultCourse = useMemo(() => {
+    return COURSES_LEARNING_DB[courseId] || COURSES_LEARNING_DB["flutter-mobile-mastery"];
+  }, [courseId]);
 
-  const [courseData, setCourseData] = useState<CourseLearning>(defaultCourse);
+  const [courseData, setCourseData] = useState<CourseLearningData>(defaultCourse);
   const [activeLesson, setActiveLesson] = useState<Lesson>(
     defaultCourse.chapters[0]?.lessons[0] || {
       id: "fallback",
@@ -230,12 +231,13 @@ export default function VideoLearningRoomPage() {
   const [activeTab, setActiveTab] = useState<"overview" | "notes" | "resources">("overview");
   const [userNote, setUserNote] = useState("");
   const [savedNotes, setSavedNotes] = useState<NoteItem[]>([]);
+  const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
+  const [showSidebarMobile, setShowSidebarMobile] = useState(false);
 
-  // መረጃዎችን ከ localStorage እና ከ DB መጫን
+  // መረጃዎችን ከ localStorage መጫን
   useEffect(() => {
     const selectedCourse = COURSES_LEARNING_DB[courseId] || COURSES_LEARNING_DB["flutter-mobile-mastery"];
     
-    // የተቀመጠ Progress ካለ መጫን
     let completedLessonIds: string[] = [];
     const localProgress = localStorage.getItem(`progress_${courseId}`);
     if (localProgress) {
@@ -261,6 +263,13 @@ export default function VideoLearningRoomPage() {
       setActiveLesson(updatedChapters[0].lessons[0]);
     }
 
+    // Chapters accordion default setup (open all)
+    const initialAccordionState: Record<string, boolean> = {};
+    updatedChapters.forEach((ch) => {
+      initialAccordionState[ch.id] = true;
+    });
+    setOpenChapters(initialAccordionState);
+
     // የተቀመጡ ማስታወሻዎችን መጫን
     const localNotes = localStorage.getItem(`notes_${courseId}`);
     if (localNotes) {
@@ -272,17 +281,22 @@ export default function VideoLearningRoomPage() {
     }
   }, [courseId]);
 
-  // ትምህርት ማጠናቀቅን መቀያየር (Toggle Completion)
-  const toggleComplete = useCallback((lessonId: string) => {
+  // ትምህርት ማጠናቀቅን መቀያየር እና XP በ API ማደስ
+  const toggleComplete = useCallback(async (lessonId: string) => {
+    let wasCompletedPreviously = false;
+
     setCourseData((prev) => {
       const updatedChapters = prev.chapters.map((ch) => ({
         ...ch,
-        lessons: ch.lessons.map((l) =>
-          l.id === lessonId ? { ...l, isCompleted: !l.isCompleted } : l
-        ),
+        lessons: ch.lessons.map((l) => {
+          if (l.id === lessonId) {
+            wasCompletedPreviously = !!l.isCompleted;
+            return { ...l, isCompleted: !l.isCompleted };
+          }
+          return l;
+        }),
       }));
 
-      // በ localStorage ውስጥ መዝግቦ ማስቀመጥ
       const completedIds: string[] = [];
       updatedChapters.forEach((ch) =>
         ch.lessons.forEach((l) => {
@@ -297,7 +311,28 @@ export default function VideoLearningRoomPage() {
     setActiveLesson((prev) =>
       prev.id === lessonId ? { ...prev, isCompleted: !prev.isCompleted } : prev
     );
+
+    // አዲስ የተጠናቀቀ ከሆነ XP ለመጨመር API ጥሪ ማድረግ
+    if (!wasCompletedPreviously) {
+      try {
+        await fetch("/api/update-xp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ xpToAdd: 15, source: "lesson_completion" }),
+        });
+      } catch (err) {
+        console.log("XP update silent failover to offline mode", err);
+      }
+    }
   }, [courseId]);
+
+  // Accordion ከፍቶ መዝጊያ
+  const toggleChapterAccordion = (chapterId: string) => {
+    setOpenChapters((prev) => ({
+      ...prev,
+      [chapterId]: !prev[chapterId],
+    }));
+  };
 
   // ማስታወሻ መጨመር
   const handleAddNote = () => {
@@ -320,8 +355,8 @@ export default function VideoLearningRoomPage() {
     localStorage.setItem(`notes_${courseId}`, JSON.stringify(updated));
   };
 
-  // የትምህርቶች ዝርዝር ፍላት አድርጎ ቀጣይ/ቀደመ ትምህርት ማግኘት
-  const allLessons = courseData.chapters.flatMap((ch) => ch.lessons);
+  // የቀደመ/ቀጣይ ትምህርት ስሌት
+  const allLessons = useMemo(() => courseData.chapters.flatMap((ch) => ch.lessons), [courseData]);
   const currentLessonIndex = allLessons.findIndex((l) => l.id === activeLesson.id);
 
   const prevLesson = currentLessonIndex > 0 ? allLessons[currentLessonIndex - 1] : null;
@@ -331,6 +366,8 @@ export default function VideoLearningRoomPage() {
   const totalLessons = allLessons.length;
   const completedLessons = allLessons.filter((l) => l.isCompleted).length;
   const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+
+  const formattedVideoUrl = getYouTubeEmbedUrl(activeLesson.videoUrl);
 
   return (
     <div className="min-h-screen bg-[#0B0F19] text-white flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
@@ -343,58 +380,68 @@ export default function VideoLearningRoomPage() {
           >
             ← ወደ ኮርሱ ገፅ
           </Link>
-          <span className="text-gray-700">|</span>
-          <h1 className="text-sm font-bold text-white truncate max-w-xs sm:max-w-md">
+          <span className="text-gray-700 hidden sm:inline">|</span>
+          <h1 className="text-xs sm:text-sm font-bold text-white truncate max-w-[180px] sm:max-w-md">
             {courseData.title}
           </h1>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex flex-col items-end">
-            <span className="text-[11px] text-gray-400">የትምህርት ሂደት (Progress)</span>
+            <span className="text-[11px] text-gray-400">የትምህርት ሂደት</span>
             <span className="text-xs font-bold text-emerald-400">{progressPercent}% ተጠናቋል</span>
           </div>
-          <div className="w-20 sm:w-28 bg-gray-800 h-2 rounded-full overflow-hidden border border-gray-700">
+          <div className="w-16 sm:w-28 bg-gray-800 h-2 rounded-full overflow-hidden border border-gray-700">
             <div
               className="bg-emerald-500 h-full transition-all duration-500"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
+
+          {/* Mobile Drawer Toggle */}
+          <button
+            onClick={() => setShowSidebarMobile(!showSidebarMobile)}
+            className="lg:hidden bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 px-2.5 py-1.5 rounded-lg text-xs font-bold"
+          >
+            {showSidebarMobile ? "ቪዲዮ አሳይ" : "ማውጫ አሳይ"}
+          </button>
         </div>
       </header>
 
       {/* Main Content Area */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-3">
-        {/* Left Video Player & Tabs Section */}
-        <div className="lg:col-span-2 p-4 sm:p-6 space-y-6 flex flex-col">
-          {/* Video Player */}
+        {/* Left Section: Video Player & Tabs */}
+        <div className={`lg:col-span-2 p-4 sm:p-6 space-y-6 flex flex-col ${showSidebarMobile ? "hidden lg:flex" : "flex"}`}>
+          {/* Video Player Box */}
           <div className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-gray-800 shadow-2xl">
-            {activeLesson.videoUrl ? (
+            {formattedVideoUrl ? (
               <iframe
-                src={activeLesson.videoUrl}
+                src={formattedVideoUrl}
                 title={activeLesson.title}
                 className="w-full h-full border-0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">
-                ቪዲዮው አልተገኘም
+              <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 text-xs p-6 text-center space-y-2">
+                <span className="text-2xl">📖</span>
+                <p className="font-semibold text-white">{activeLesson.title}</p>
+                <p className="text-gray-500 max-w-sm">ይህ ትምህርት የቪዲዮ ፋይል የለውም። ከታች ያለውን የትምህርት ፅሁፍ ያንብቡ።</p>
               </div>
             )}
           </div>
 
-          {/* Video Controls & Title */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#161B26] p-5 rounded-2xl border border-gray-800 shadow-sm">
+          {/* Video Controls & Title Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#161B26] p-4 sm:p-5 rounded-2xl border border-gray-800 shadow-sm">
             <div>
-              <span className="text-xs text-indigo-400 font-semibold">አሁን እየተመለከቱት ያለው፡</span>
-              <h2 className="text-lg font-bold text-white mt-0.5">{activeLesson.title}</h2>
+              <span className="text-[11px] text-indigo-400 font-semibold tracking-wide">አሁን እየተመለከቱት ያለው፡</span>
+              <h2 className="text-base sm:text-lg font-bold text-white mt-0.5">{activeLesson.title}</h2>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={() => toggleComplete(activeLesson.id)}
-                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer ${
+                className={`w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer ${
                   activeLesson.isCompleted
                     ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/30"
                     : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20"
@@ -405,12 +452,15 @@ export default function VideoLearningRoomPage() {
             </div>
           </div>
 
-          {/* Next / Prev Quick Navigation */}
+          {/* Next / Prev Fast Navigation */}
           <div className="flex items-center justify-between gap-2 text-xs">
             {prevLesson ? (
               <button
-                onClick={() => setActiveLesson(prevLesson)}
-                className="px-3 py-2 bg-[#161B26] border border-gray-800 rounded-xl text-gray-300 hover:text-white hover:border-indigo-500 transition-all flex items-center gap-1.5"
+                onClick={() => {
+                  setActiveLesson(prevLesson);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="px-3 py-2 bg-[#161B26] border border-gray-800 rounded-xl text-gray-300 hover:text-white hover:border-indigo-500 transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 ← የቀደመ ትምህርት
               </button>
@@ -418,20 +468,23 @@ export default function VideoLearningRoomPage() {
 
             {nextLesson && (
               <button
-                onClick={() => setActiveLesson(nextLesson)}
-                className="px-3 py-2 bg-[#161B26] border border-gray-800 rounded-xl text-indigo-400 hover:text-indigo-300 hover:border-indigo-500 transition-all flex items-center gap-1.5 ml-auto font-semibold"
+                onClick={() => {
+                  setActiveLesson(nextLesson);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="px-3 py-2 bg-[#161B26] border border-gray-800 rounded-xl text-indigo-400 hover:text-indigo-300 hover:border-indigo-500 transition-all flex items-center gap-1.5 ml-auto font-semibold cursor-pointer"
               >
                 ቀጣይ ትምህርት ➔
               </button>
             )}
           </div>
 
-          {/* Content Tabs (Overview / Notes / Downloads) */}
+          {/* Interactive Content Tabs (Overview / Notes / Downloads) */}
           <div className="bg-[#161B26] border border-gray-800 rounded-2xl p-4 flex-1 space-y-4 shadow-sm">
             <div className="flex border-b border-gray-800 gap-4 text-xs font-bold pb-2">
               <button
                 onClick={() => setActiveTab("overview")}
-                className={`pb-2 transition-colors ${
+                className={`pb-2 transition-colors cursor-pointer ${
                   activeTab === "overview"
                     ? "text-indigo-400 border-b-2 border-indigo-500"
                     : "text-gray-400 hover:text-gray-200"
@@ -441,7 +494,7 @@ export default function VideoLearningRoomPage() {
               </button>
               <button
                 onClick={() => setActiveTab("notes")}
-                className={`pb-2 transition-colors ${
+                className={`pb-2 transition-colors cursor-pointer ${
                   activeTab === "notes"
                     ? "text-indigo-400 border-b-2 border-indigo-500"
                     : "text-gray-400 hover:text-gray-200"
@@ -451,7 +504,7 @@ export default function VideoLearningRoomPage() {
               </button>
               <button
                 onClick={() => setActiveTab("resources")}
-                className={`pb-2 transition-colors ${
+                className={`pb-2 transition-colors cursor-pointer ${
                   activeTab === "resources"
                     ? "text-indigo-400 border-b-2 border-indigo-500"
                     : "text-gray-400 hover:text-gray-200"
@@ -463,13 +516,13 @@ export default function VideoLearningRoomPage() {
 
             {/* Overview Tab Content */}
             {activeTab === "overview" && (
-              <div className="text-xs text-gray-300 leading-relaxed space-y-2">
+              <div className="text-xs text-gray-300 leading-relaxed space-y-3">
                 <p>
-                  በዚህ ትምህርት ውስጥ ስለ <strong className="text-indigo-300">{courseData.title}</strong> ዋና ዋና ነጥቦች፣ የቪዲዮ ትንታኔዎች እና ተግባራዊ ማብራሪያዎችን በዝርዝር እንመለከታለን።
+                  በዚህ ትምህርት ውስጥ ስለ <strong className="text-indigo-300">{activeLesson.title}</strong> ዋና ዋና ነጥቦች፣ የቪዲዮ ትንታኔዎች እና ተግባራዊ ማብራሪያዎችን በዝርዝር እንመለከታለን።
                 </p>
-                <p className="text-gray-400">
-                  ማንኛውም ጥያቄ ወይም ሊያስታውሱት የሚፈልጉትን ነጥብ በማስታወሻ ሳጥኑ ውስጥ ማስቀመጥ ይችላሉ።
-                </p>
+                <div className="p-3 bg-gray-900/60 rounded-xl border border-gray-800 text-gray-400">
+                  💡 <strong>የጥናት ምክር፡</strong> ትምህርቱን ከተመለከቱ በኋላ ሊያስታውሷቸው የሚፈልጓቸውን ነጥቦች በማስታወሻ ሳጥኑ (Notes Tab) ውስጥ ያስቀምጡ።
+                </div>
               </div>
             )}
 
@@ -487,7 +540,7 @@ export default function VideoLearningRoomPage() {
                   />
                   <button
                     onClick={handleAddNote}
-                    className="bg-indigo-600 text-white text-xs px-4 py-2 rounded-xl font-bold hover:bg-indigo-700 transition-colors"
+                    className="bg-indigo-600 text-white text-xs px-4 py-2 rounded-xl font-bold hover:bg-indigo-700 transition-colors cursor-pointer"
                   >
                     መዝግብ
                   </button>
@@ -504,7 +557,7 @@ export default function VideoLearningRoomPage() {
                         <span className="text-[10px] text-gray-500">{note.timestamp}</span>
                         <button
                           onClick={() => handleDeleteNote(note.id)}
-                          className="text-rose-400 hover:text-rose-300 text-[10px] font-bold"
+                          className="text-rose-400 hover:text-rose-300 text-[10px] font-bold cursor-pointer"
                           title="ሰርዝ"
                         >
                           ✕
@@ -526,15 +579,15 @@ export default function VideoLearningRoomPage() {
               <div className="space-y-2 text-xs">
                 <div className="p-3 bg-gray-900 rounded-xl border border-gray-800 flex justify-between items-center">
                   <span className="text-gray-300">📄 የኮርሱ ማጠቃለያ ፋይሎች (.pdf / .zip)</span>
-                  <button className="text-indigo-400 font-bold hover:underline">Download</button>
+                  <button className="text-indigo-400 font-bold hover:underline cursor-pointer">Download</button>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Right Curriculum Sidebar */}
-        <div className="bg-[#161B26] border-t lg:border-t-0 lg:border-l border-gray-800 p-4 space-y-4">
+        {/* Right Section: Collapsible Curriculum Sidebar */}
+        <div className={`bg-[#161B26] border-t lg:border-t-0 lg:border-l border-gray-800 p-4 space-y-4 ${showSidebarMobile ? "block" : "hidden lg:block"}`}>
           <h3 className="font-bold text-sm text-white border-b border-gray-800 pb-3 flex items-center justify-between">
             <span>የትምህርቱ ማውጫ (Curriculum)</span>
             <span className="text-xs text-indigo-400 font-normal">
@@ -542,45 +595,57 @@ export default function VideoLearningRoomPage() {
             </span>
           </h3>
 
-          <div className="space-y-4 max-h-[calc(100vh-140px)] overflow-y-auto pr-1">
-            {courseData.chapters.map((chapter) => (
-              <div key={chapter.id} className="space-y-1">
-                <div className="text-xs font-semibold text-indigo-400 py-1.5 px-2 bg-gray-800/40 rounded-lg">
-                  {chapter.title}
-                </div>
+          <div className="space-y-3 max-h-[calc(100vh-140px)] overflow-y-auto pr-1">
+            {courseData.chapters.map((chapter) => {
+              const isOpen = !!openChapters[chapter.id];
+              return (
+                <div key={chapter.id} className="space-y-1 bg-gray-900/40 rounded-xl p-2 border border-gray-800/60">
+                  <button
+                    onClick={() => toggleChapterAccordion(chapter.id)}
+                    className="w-full text-xs font-semibold text-indigo-300 flex items-center justify-between py-1.5 px-2 hover:bg-gray-800/50 rounded-lg transition-colors cursor-pointer"
+                  >
+                    <span className="text-left font-bold">{chapter.title}</span>
+                    <span className="text-gray-400 text-[10px] ml-2">{isOpen ? "▲" : "▼"}</span>
+                  </button>
 
-                <div className="space-y-1 pt-1">
-                  {chapter.lessons.map((lesson) => {
-                    const isActive = activeLesson.id === lesson.id;
-                    return (
-                      <button
-                        key={lesson.id}
-                        onClick={() => setActiveLesson(lesson)}
-                        className={`w-full p-3 rounded-xl text-left text-xs transition-all flex items-center justify-between gap-2 cursor-pointer ${
-                          isActive
-                            ? "bg-indigo-600/20 border border-indigo-500 text-indigo-300 font-bold shadow-sm"
-                            : "hover:bg-gray-800/40 text-gray-400 border border-transparent hover:text-gray-200"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 truncate">
-                          <span className="text-[10px]">{isActive ? "▶" : "•"}</span>
-                          <span className="truncate">{lesson.title}</span>
-                        </div>
+                  {isOpen && (
+                    <div className="space-y-1 pt-1 border-t border-gray-800/40">
+                      {chapter.lessons.map((lesson) => {
+                        const isActive = activeLesson.id === lesson.id;
+                        return (
+                          <button
+                            key={lesson.id}
+                            onClick={() => {
+                              setActiveLesson(lesson);
+                              setShowSidebarMobile(false);
+                            }}
+                            className={`w-full p-2.5 rounded-lg text-left text-xs transition-all flex items-center justify-between gap-2 cursor-pointer ${
+                              isActive
+                                ? "bg-indigo-600/20 border border-indigo-500 text-indigo-300 font-bold shadow-sm"
+                                : "hover:bg-gray-800/40 text-gray-400 border border-transparent hover:text-gray-200"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 truncate">
+                              <span className="text-[10px]">{isActive ? "▶" : "•"}</span>
+                              <span className="truncate">{lesson.title}</span>
+                            </div>
 
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          {lesson.isCompleted && (
-                            <span className="text-emerald-400 text-xs font-bold" title="ተጠናቋል">
-                              ✓
-                            </span>
-                          )}
-                          <span className="text-[10px] text-gray-500">{lesson.duration}</span>
-                        </div>
-                      </button>
-                    );
-                  })}
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {lesson.isCompleted && (
+                                <span className="text-emerald-400 text-xs font-bold" title="ተጠናቋል">
+                                  ✓
+                                </span>
+                              )}
+                              <span className="text-[10px] text-gray-500">{lesson.duration}</span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
