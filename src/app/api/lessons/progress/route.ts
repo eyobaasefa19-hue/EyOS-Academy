@@ -25,7 +25,6 @@ export async function POST(req: Request) {
     }
 
     // 2. የትምህርቱን ሂደት (Lesson Progress) መመዝገብ ወይም ማዘመን
-    // Prisma composite key mapping: 'userId_lessonId'
     const existingProgress = await prisma.lessonProgress.findUnique({
       where: {
         userId_lessonId: {
@@ -46,13 +45,11 @@ export async function POST(req: Request) {
       },
       update: {
         isCompleted: true,
-        completedAt: new Date(),
       },
       create: {
         userId: userProfile.id,
         lessonId,
         isCompleted: true,
-        completedAt: new Date(),
       },
     });
 
