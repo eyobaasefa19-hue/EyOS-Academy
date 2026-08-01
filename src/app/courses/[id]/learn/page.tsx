@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Lesson, Chapter } from "@/types/course";
+import { Lesson, Chapter } from "../../../../types/course";
 
 interface NoteItem {
   id: string;
@@ -211,7 +211,6 @@ export default function CourseLearningPage() {
   const rawId = params?.id;
   const courseId = typeof rawId === "string" ? rawId : Array.isArray(rawId) ? rawId[0] : "flutter-mobile-mastery";
 
-  // የዲሲፕሊን መረጃ መምረጫ
   const defaultCourse = useMemo(() => {
     return COURSES_LEARNING_DB[courseId] || COURSES_LEARNING_DB["flutter-mobile-mastery"];
   }, [courseId]);
@@ -234,7 +233,6 @@ export default function CourseLearningPage() {
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
   const [showSidebarMobile, setShowSidebarMobile] = useState(false);
 
-  // መረጃዎችን ከ localStorage መጫን
   useEffect(() => {
     const selectedCourse = COURSES_LEARNING_DB[courseId] || COURSES_LEARNING_DB["flutter-mobile-mastery"];
     
@@ -263,14 +261,12 @@ export default function CourseLearningPage() {
       setActiveLesson(updatedChapters[0].lessons[0]);
     }
 
-    // Chapters accordion default setup (open all)
     const initialAccordionState: Record<string, boolean> = {};
     updatedChapters.forEach((ch) => {
       initialAccordionState[ch.id] = true;
     });
     setOpenChapters(initialAccordionState);
 
-    // የተቀመጡ ማስታወሻዎችን መጫን
     const localNotes = localStorage.getItem(`notes_${courseId}`);
     if (localNotes) {
       try {
@@ -281,7 +277,6 @@ export default function CourseLearningPage() {
     }
   }, [courseId]);
 
-  // ትምህርት ማጠናቀቅን መቀያየር እና XP በ API ማደስ
   const toggleComplete = useCallback(async (lessonId: string) => {
     let wasCompletedPreviously = false;
 
@@ -312,7 +307,6 @@ export default function CourseLearningPage() {
       prev.id === lessonId ? { ...prev, isCompleted: !prev.isCompleted } : prev
     );
 
-    // አዲስ የተጠናቀቀ ከሆነ XP ለመጨመር API ጥሪ ማድረግ
     if (!wasCompletedPreviously) {
       try {
         await fetch("/api/update-xp", {
@@ -326,7 +320,6 @@ export default function CourseLearningPage() {
     }
   }, [courseId]);
 
-  // Accordion ከፍቶ መዝጊያ
   const toggleChapterAccordion = (chapterId: string) => {
     setOpenChapters((prev) => ({
       ...prev,
@@ -334,7 +327,6 @@ export default function CourseLearningPage() {
     }));
   };
 
-  // ማስታወሻ መጨመር
   const handleAddNote = () => {
     if (!userNote.trim()) return;
     const newNote: NoteItem = {
@@ -348,21 +340,18 @@ export default function CourseLearningPage() {
     setUserNote("");
   };
 
-  // ማስታወሻ መሰረዝ
   const handleDeleteNote = (id: string) => {
     const updated = savedNotes.filter((n) => n.id !== id);
     setSavedNotes(updated);
     localStorage.setItem(`notes_${courseId}`, JSON.stringify(updated));
   };
 
-  // የቀደመ/ቀጣይ ትምህርት ስሌት
   const allLessons = useMemo(() => courseData.chapters.flatMap((ch) => ch.lessons), [courseData]);
   const currentLessonIndex = allLessons.findIndex((l) => l.id === activeLesson.id);
 
   const prevLesson = currentLessonIndex > 0 ? allLessons[currentLessonIndex - 1] : null;
   const nextLesson = currentLessonIndex < allLessons.length - 1 ? allLessons[currentLessonIndex + 1] : null;
 
-  // ፐርሰንቴጅ ማስላት
   const totalLessons = allLessons.length;
   const completedLessons = allLessons.filter((l) => l.isCompleted).length;
   const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
@@ -398,7 +387,6 @@ export default function CourseLearningPage() {
             />
           </div>
 
-          {/* Mobile Drawer Toggle */}
           <button
             onClick={() => setShowSidebarMobile(!showSidebarMobile)}
             className="lg:hidden bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 px-2.5 py-1.5 rounded-lg text-xs font-bold"
@@ -479,7 +467,7 @@ export default function CourseLearningPage() {
             )}
           </div>
 
-          {/* Interactive Content Tabs (Overview / Notes / Downloads) */}
+          {/* Interactive Content Tabs */}
           <div className="bg-[#161B26] border border-gray-800 rounded-2xl p-4 flex-1 space-y-4 shadow-sm">
             <div className="flex border-b border-gray-800 gap-4 text-xs font-bold pb-2">
               <button
@@ -514,7 +502,6 @@ export default function CourseLearningPage() {
               </button>
             </div>
 
-            {/* Overview Tab Content */}
             {activeTab === "overview" && (
               <div className="text-xs text-gray-300 leading-relaxed space-y-3">
                 <p>
@@ -526,7 +513,6 @@ export default function CourseLearningPage() {
               </div>
             )}
 
-            {/* Notes Tab Content */}
             {activeTab === "notes" && (
               <div className="space-y-4">
                 <div className="flex gap-2">
@@ -574,7 +560,6 @@ export default function CourseLearningPage() {
               </div>
             )}
 
-            {/* Resources Tab Content */}
             {activeTab === "resources" && (
               <div className="space-y-2 text-xs">
                 <div className="p-3 bg-gray-900 rounded-xl border border-gray-800 flex justify-between items-center">
