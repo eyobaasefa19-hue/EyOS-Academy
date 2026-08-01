@@ -3,9 +3,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "../../lib/supabase";
 
-// Default Profile Data (እስከ Supabase መረጃ ድረስ የሚታይ)
+// Default Profile Data
 const INITIAL_PROFILE = {
   name: "Eyob Asefa",
   email: "eyob19@gmail.com",
@@ -103,7 +103,7 @@ export default function UserProfilePage() {
     setToastMessage(null);
   };
 
-  // Convert File to Base64 (Fallback if Supabase Storage bucket isn't setup)
+  // Convert File to Base64 (Fallback)
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -122,7 +122,6 @@ export default function UserProfilePage() {
     try {
       let finalAvatar = profile.avatar;
 
-      // Upload or convert image if selected
       if (selectedFile) {
         try {
           const fileExt = selectedFile.name.split(".").pop();
@@ -143,7 +142,6 @@ export default function UserProfilePage() {
                 finalAvatar = publicUrlData.publicUrl;
               }
             } else {
-              // Fallback to Base64
               finalAvatar = await fileToBase64(selectedFile);
             }
           } else {
@@ -154,7 +152,6 @@ export default function UserProfilePage() {
         }
       }
 
-      // Update Supabase Auth user metadata if logged in
       if (supabase) {
         await supabase.auth.updateUser({
           data: {
@@ -164,7 +161,6 @@ export default function UserProfilePage() {
         });
       }
 
-      // Update local UI state
       setProfile(prev => ({
         ...prev,
         name: editName,
@@ -233,7 +229,6 @@ export default function UserProfilePage() {
                 className="w-28 h-28 rounded-full border-4 border-indigo-500/40 object-cover shadow-lg transition-transform group-hover:scale-105"
               />
               
-              {/* Photo Upload Trigger Button */}
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
@@ -253,7 +248,6 @@ export default function UserProfilePage() {
               አባል የሆነበት፡ {profile.joinDate}
             </div>
 
-            {/* Toggle Edit Profile Button */}
             {!isEditing ? (
               <button
                 onClick={() => setIsEditing(true)}
@@ -313,7 +307,6 @@ export default function UserProfilePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               
-              {/* Photo Selector inside Form */}
               <div className="sm:col-span-2 bg-gray-900/60 p-4 rounded-2xl border border-gray-800 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <img 
@@ -335,7 +328,6 @@ export default function UserProfilePage() {
                 </button>
               </div>
 
-              {/* Full Name Input */}
               <div className="space-y-2 sm:col-span-2">
                 <label className="text-xs font-semibold text-gray-300">ሙሉ ስም (Full Name)</label>
                 <input
@@ -350,7 +342,6 @@ export default function UserProfilePage() {
 
             </div>
 
-            {/* Submit Actions */}
             <div className="flex items-center gap-3 pt-2">
               <button
                 type="submit"
@@ -471,7 +462,6 @@ export default function UserProfilePage() {
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-white text-gray-900 rounded-2xl max-w-3xl w-full p-2 relative animate-in zoom-in-95 duration-200 shadow-2xl">
             
-            {/* Modal Close Button */}
             <button
               onClick={() => setSelectedCert(null)}
               className="absolute -top-10 right-0 text-white hover:text-gray-300 text-sm font-bold flex items-center gap-1 bg-white/10 px-3 py-1 rounded-full cursor-pointer"
@@ -479,7 +469,6 @@ export default function UserProfilePage() {
               ✕ ዝጋ (Close)
             </button>
             
-            {/* The Certificate Document Template */}
             <div className="border-[10px] border-[#1e293b] p-6 sm:p-12 text-center relative overflow-hidden bg-slate-50 rounded-xl">
               <div className="absolute inset-0 border-[3px] border-amber-500/30 m-2 pointer-events-none" />
               
@@ -523,7 +512,6 @@ export default function UserProfilePage() {
               </div>
             </div>
             
-            {/* Action buttons inside Modal */}
             <div className="mt-3 flex flex-wrap justify-center gap-3 bg-gray-100 p-3 rounded-b-xl">
               <button 
                 onClick={() => window.print()}
