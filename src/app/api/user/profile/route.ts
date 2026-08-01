@@ -1,25 +1,17 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
+import { prisma } from "../../../../lib/prisma";
 
-export async function GET() {
+export async function POST(req: Request) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const { email } = await req.json();
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "ያልተፈቀደ አክሰስ (Unauthorized)" },
-        { status: 401 }
-      );
+    if (!email) {
+      return NextResponse.json({ error: "ኢሜይል (Email) ያስፈልጋል" }, { status: 400 });
     }
 
-    // 1. የይዘት/ፕሮፋይል መረጃን ከ Prisma ማግኘት ወይም ከሌለ በራስ-ሰር መፍጠር
-    let userProfile = await prisma.userProfile.findUnique({
-      where: { userId: user.id },
+    // 1. የተማሪውን Profile ከነ Enrollments እና Progress መፈለግ
+    let user = await prisma.userProfile.findUnique({
+      where: { email },
       include: {
         enrollments: {
           include: {
@@ -36,15 +28,18 @@ export async function GET() {
       },
     });
 
-    if (!userProfile) {
-      userProfile = await prisma.userProfile.create({
+    // 2. ተማሪው አዲስ ከሆነ በራስ-ሰር መፍጠር
+    if (!user) {
+      const defaultUsername = email.split("@")[0];
+      user = await prisma.userProfile.create({
         data: {
-          userId: user.id,
-          fullName: user.user_metadata?.full_name || "ተማሪ",
-          avatarUrl: user.user_metadata?.avatar_url || "",
+          email,
+          username: defaultUsername,
           xpPoints: 100,
           coins: 50,
-          streakDays: 1,
+          streak: 1,
+          currentLevel: 1,
+          dailyGoalPercent: 10,
         },
         include: {
           enrollments: {
@@ -61,17 +56,16 @@ export async function GET() {
       });
     }
 
-    // 2. የሁሉንም ኮርሶች Progress Percentage ማስላት
-    const enrolledCourses = userProfile.enrollments.map((enrollment) => {
+    // 3. የተማሪውን የኮርስ Progress Percentage ማስላት
+    const enrolledCourses = user.enrollments.map((enrollment) => {
       const course = enrollment.course;
       const totalLessons = course.lessons.length;
 
-      // ተማሪው በዚሁ ኮርስ ውስጥ ያጠናቀቃቸው ሌሰኖች ብዛት
-      const completedLessonsCount = userProfile.progress.filter((p) =>
+      const completedLessonsCount = user.progress.filter((p) =>
         course.lessons.some((l) => l.id === p.lessonId && p.isCompleted)
       ).length;
 
-      const progressPercentage =
+      const progressPercent =
         totalLessons > 0
           ? Math.round((completedLessonsCount / totalLessons) * 100)
           : 0;
@@ -79,43 +73,31 @@ export async function GET() {
       return {
         id: course.id,
         title: course.title,
-        description: course.description,
-        thumbnail: course.imageUrl || "/images/course-placeholder.png",
+        category: course.category || "General",
         totalLessons,
-        completedLessons: completedLessonsCount,
-        progressPercentage,
+        progressPercent,
       };
     });
 
-    // 3. አጠቃላይ ስታቲስቲክስ ስሌት
-    const totalCompletedLessons = userProfile.progress.filter(
-      (p) => p.isCompleted
-    ).length;
-
     return NextResponse.json({
       success: true,
-      profile: {
-        id: userProfile.id,
-        userId: userProfile.userId,
-        fullName: userProfile.fullName,
-        avatarUrl: userProfile.avatarUrl,
-        bio: userProfile.bio || "",
-        xpPoints: userProfile.xpPoints,
-        coins: userProfile.coins,
-        streakDays: userProfile.streakDays,
+      user: {
+        id: user.id,
         email: user.email,
-        createdAt: userProfile.createdAt,
-      },
-      stats: {
-        totalCompletedLessons,
-        totalEnrolledCourses: userProfile.enrollments.length,
+        username: user.username,
+        fullName: user.fullName,
+        xpPoints: user.xpPoints,
+        coins: user.coins,
+        streak: user.streak,
+        currentLevel: user.currentLevel,
+        dailyGoalPercent: user.dailyGoalPercent,
       },
       enrolledCourses,
     });
   } catch (error) {
-    console.error("Error fetching user profile:", error);
+    console.error("Profile API Error:", error);
     return NextResponse.json(
-      { error: "የፕሮፋይል መረጃ ሲመጣ ኤረር ተፈጥሯል" },
+      { error: "የተማሪ መረጃ ማግኘት አልተቻለም" },
       { status: 500 }
     );
   }
