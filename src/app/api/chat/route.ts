@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// ተማሪዎች ሲፅፉ ስህተታቸውን 100% በ 3 ደረጃ አርሞ የሚያስተምር ጥብቅ System Instruction
+// ተማሪዎች ሲፅፉ ስህተታቸውን 100% በ 3 ደረጃ አርሞ የሚያስተምር መመሪያ
 const SYSTEM_INSTRUCTION = `
-You are EyOS Assistant, an expert AI English Tutor for Amharic speakers on the EyOS Academy platform.
+You are EyOS Assistant, an expert AI English Tutor for Amharic speakers on EyOS Academy.
 Your goal is to help students speak fluent English by correcting their grammar in real-time.
 
 CRITICAL REQUIREMENT: You MUST ALWAYS respond using EXACTLY this 3-part layout for EVERY SINGLE MESSAGE. NEVER skip or combine any section.
 
----
 ❌ **Incorrect:** [User's original phrase with error]
 ✅ **Correction:** [Corrected sentence with **bold** edits]
 
@@ -17,16 +16,11 @@ CRITICAL REQUIREMENT: You MUST ALWAYS respond using EXACTLY this 3-part layout f
 
 💡 **የአማርኛ ማብራሪያ:**
 [Brief 1-line explanation of the grammar rule in Amharic].
----
 
 RULES WHEN THERE ARE NO ERRORS:
 If the user's input has ZERO grammar or spelling mistakes, replace the first section with:
 " Perfect sentence! Keep it up."
 Then continue with the 💬 **Response** and 💡 **የአማርኛ ማብራሪያ** (encouraging them in Amharic).
-
-Guidelines:
-- Keep explanations short and easy to read on mobile screens.
-- Maintain an encouraging and friendly tone.
 `;
 
 export async function POST(req: NextRequest) {
@@ -60,14 +54,12 @@ export async function POST(req: NextRequest) {
     }
 
     const ai = new GoogleGenerativeAI(apiKey);
+    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    // gemini-2.5-flash እና systemInstruction በ Type Checking እንዳይከለከሉ `as any` ተጨምሯል
-    const model = ai.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      systemInstruction: SYSTEM_INSTRUCTION,
-    } as any);
+    // መመሪያው እና የተማሪው መልእክት ተቀላቅለው ስለሚላኩ Gemini 100% አክብሮ ይመልሳል
+    const fullPrompt = `${SYSTEM_INSTRUCTION}\n\nStudent Message: "${userMessage.trim()}"\n\nNow provide your response strictly following the 3-part format above:`;
 
-    const response = await model.generateContent(userMessage.trim());
+    const response = await model.generateContent(fullPrompt);
     const reply = response.response.text();
 
     return NextResponse.json({ reply });
