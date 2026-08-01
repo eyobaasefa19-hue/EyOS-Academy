@@ -3,7 +3,28 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Lesson, Chapter } from "../../../../types/course";
+
+// --- Types Fallback & Definitions ---
+export interface Lesson {
+  id: string;
+  title: string;
+  duration: string;
+  videoUrl?: string;
+  isFreePreview?: boolean;
+  isCompleted?: boolean;
+}
+
+export interface Chapter {
+  id: string;
+  title: string;
+  lessons: Lesson[];
+}
+
+export interface CourseLearningData {
+  id: string;
+  title: string;
+  chapters: Chapter[];
+}
 
 interface NoteItem {
   id: string;
@@ -11,18 +32,13 @@ interface NoteItem {
   timestamp: string;
 }
 
-interface CourseLearningData {
-  id: string;
-  title: string;
-  chapters: Chapter[];
-}
-
-// --- 🌟 Helper Function: Standard YouTube URL to Embed Formatter ---
+// --- 🌟 Helper Function: Standard & Shorts YouTube URL to Embed Formatter ---
 function getYouTubeEmbedUrl(url?: string): string {
   if (!url) return "";
   if (url.includes("embed/")) return url;
   
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  // Handles standard watch?v=, Shorts, and shortened youtu.be links
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
   const match = url.match(regExp);
   
   return match && match[2].length === 11
@@ -232,6 +248,7 @@ export default function CourseLearningPage() {
   const [savedNotes, setSavedNotes] = useState<NoteItem[]>([]);
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
   const [showSidebarMobile, setShowSidebarMobile] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     const selectedCourse = COURSES_LEARNING_DB[courseId] || COURSES_LEARNING_DB["flutter-mobile-mastery"];
@@ -278,14 +295,14 @@ export default function CourseLearningPage() {
   }, [courseId]);
 
   const toggleComplete = useCallback(async (lessonId: string) => {
-    let wasCompletedPreviously = false;
+    let targetLessonStatus = false;
 
     setCourseData((prev) => {
       const updatedChapters = prev.chapters.map((ch) => ({
         ...ch,
         lessons: ch.lessons.map((l) => {
           if (l.id === lessonId) {
-            wasCompletedPreviously = !!l.isCompleted;
+            targetLessonStatus = !l.isCompleted;
             return { ...l, isCompleted: !l.isCompleted };
           }
           return l;
@@ -307,16 +324,30 @@ export default function CourseLearningPage() {
       prev.id === lessonId ? { ...prev, isCompleted: !prev.isCompleted } : prev
     );
 
-    if (!wasCompletedPreviously) {
-      try {
+    // Sync state with Backend API
+    setIsSyncing(true);
+    try {
+      await fetch("/api/lessons/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          courseId, 
+          lessonId, 
+          isCompleted: targetLessonStatus 
+        }),
+      });
+
+      if (targetLessonStatus) {
         await fetch("/api/update-xp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ xpToAdd: 15, source: "lesson_completion" }),
         });
-      } catch (err) {
-        console.log("XP update silent failover to offline mode", err);
       }
+    } catch (err) {
+      console.log("Progress/XP update offline failover active:", err);
+    } finally {
+      setIsSyncing(false);
     }
   }, [courseId]);
 
@@ -370,7 +401,7 @@ export default function CourseLearningPage() {
             ← ወደ ኮርሱ ገፅ
           </Link>
           <span className="text-gray-700 hidden sm:inline">|</span>
-          <h1 className="text-xs sm:text-sm font-bold text-white truncate max-w-[180px] sm:max-w-md">
+          <h1 className="text-xs sm:text-sm font-bold text-white truncate max-w-[170px] sm:max-w-md">
             {courseData.title}
           </h1>
         </div>
@@ -422,7 +453,10 @@ export default function CourseLearningPage() {
           {/* Video Controls & Title Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#161B26] p-4 sm:p-5 rounded-2xl border border-gray-800 shadow-sm">
             <div>
-              <span className="text-[11px] text-indigo-400 font-semibold tracking-wide">አሁን እየተመለከቱት ያለው፡</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-indigo-400 font-semibold tracking-wide">አሁን እየተመለከቱት ያለው፡</span>
+                {isSyncing && <span className="text-[10px] text-amber-400 animate-pulse">● በመመዝገብ ላይ...</span>}
+              </div>
               <h2 className="text-base sm:text-lg font-bold text-white mt-0.5">{activeLesson.title}</h2>
             </div>
 
