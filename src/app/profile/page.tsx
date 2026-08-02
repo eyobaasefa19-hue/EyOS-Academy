@@ -37,8 +37,31 @@ export default function ProfilePage() {
     async function fetchProfileData() {
       try {
         setLoading(true);
-        const res = await fetch("/api/user/profile");
-        const data = await res.json();
+        setError(null);
+
+        // LocalStorage ውስጥ የተቀመጠ ኢሜይል ካለ መውሰድ
+        const userEmail = typeof window !== "undefined" ? localStorage.getItem("userEmail") : null;
+        const emailQuery = userEmail ? `?email=${encodeURIComponent(userEmail)}` : "";
+
+        const res = await fetch(`/api/user/profile${emailQuery}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        // ምላሹ ባዶ አለመሆኑን ማረጋገጥ (Unexpected end of JSON input የሚለውን የሚከላከል)
+        const responseText = await res.text();
+        if (!responseText) {
+          throw new Error("ከሰርቨር ምንም ምላሽ አልተገኘም");
+        }
+
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch {
+          throw new Error("ከሰርቨር የመጣው ምላሽ ትክክለኛ JSON አይደለም");
+        }
 
         if (!res.ok) {
           throw new Error(data.error || "መረጃውን መጫን አልተቻለም");
@@ -73,9 +96,9 @@ export default function ProfilePage() {
     return (
       <div className="p-6 text-center text-red-600 space-y-3">
         <p className="font-semibold">{error || "የተማሪው መረጃ አልተገኘም"}</p>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="text-xs text-blue-600 underline hover:text-blue-800"
+        <button
+          onClick={() => window.location.reload()}
+          className="text-xs font-medium text-blue-600 underline hover:text-blue-800"
         >
           እንደገና ሞክር (Reload)
         </button>
@@ -83,10 +106,11 @@ export default function ProfilePage() {
     );
   }
 
-  // Fallback images
-  const avatarSrc = profile.avatarUrl && profile.avatarUrl.trim() !== "" 
-    ? profile.avatarUrl 
-    : "https://avatar.iran.liara.run/public/avatar";
+  // Fallback avatar
+  const avatarSrc =
+    profile.avatarUrl && profile.avatarUrl.trim() !== ""
+      ? profile.avatarUrl
+      : "https://avatar.iran.liara.run/public/avatar";
 
   return (
     <div className="mx-auto max-w-4xl p-4 sm:p-6 space-y-6">
@@ -172,18 +196,19 @@ export default function ProfilePage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {courses.map((course) => {
-              const thumbnailSrc = course.thumbnail && course.thumbnail.trim() !== ""
-                ? course.thumbnail
-                : "/images/course-placeholder.png";
+              const thumbnailSrc =
+                course.thumbnail && course.thumbnail.trim() !== ""
+                  ? course.thumbnail
+                  : "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&auto=format&fit=crop&q=60";
 
               return (
                 <div key={course.id} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-3">
                   <div className="flex gap-3 items-center">
                     <div className="relative h-12 w-12 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
-                      <Image 
-                        src={thumbnailSrc} 
-                        alt={course.title} 
-                        fill 
+                      <Image
+                        src={thumbnailSrc}
+                        alt={course.title}
+                        fill
                         className="object-cover"
                         unoptimized
                       />
