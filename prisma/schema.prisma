@@ -13,6 +13,8 @@ model UserProfile {
   email            String   @unique
   username         String?  // 🌟 ለ UI Dashboard የተጨመረ
   fullName         String?
+  avatarUrl        String?  // 🌟 [NEW] ለፕሮፋይል ፎቶ የተጨመረ
+  bio              String?  // 🌟 [NEW] ለፕሮፋይል ማብራሪያ የተጨመረ
   xpPoints         Int      @default(0)
   coins            Int      @default(100) // 🌟 ለተማሪዎች ሽልማት/ኮይንስ
   streak           Int      @default(0)
@@ -41,16 +43,16 @@ model Course {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  lessons       Lesson[]
-  enrollments   Enrollment[]
-  payments      Payment[]
+  lessons     Lesson[]
+  enrollments Enrollment[]
+  payments    Payment[]
 }
 
 model Lesson {
   id            String   @id @default(uuid())
   title         String
-  chapterTitle  String?  // 🌟 ትምህርቶችን በክፍል ለመለየት (ለምሳሌ "ክፍል 1: መግቢያ")
-  duration      String?  // 🌟 የቪዲዮ ርዝመት (ለምሳሌ "15:20")
+  chapterTitle  String?  // 🌟 ትምህርቶችን በክፍል ለመለየት
+  duration      String?  // 🌟 የቪዲዮ ርዝመት
   content       String?  
   videoUrl      String?  
   order         Int      
@@ -59,8 +61,8 @@ model Lesson {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  progress      LessonProgress[]
+  course   Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress LessonProgress[]
 
   @@index([courseId])
 }
@@ -73,8 +75,8 @@ model LessonProgress {
   score       Int      @default(0)
   lastPlayed  DateTime @default(now()) @updatedAt
 
-  user        UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lesson      Lesson      @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user   UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson      @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lessonId])
   @@index([userId])
@@ -82,13 +84,13 @@ model LessonProgress {
 }
 
 model Enrollment {
-  id          String   @id @default(uuid())
-  userId      String
-  courseId    String
-  enrolledAt  DateTime @default(now())
+  id         String   @id @default(uuid())
+  userId     String
+  courseId   String
+  enrolledAt DateTime @default(now())
 
-  user        UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course      Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user   UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
   @@index([userId])
@@ -96,18 +98,18 @@ model Enrollment {
 }
 
 model Payment {
-  id          String   @id @default(uuid())
-  userId      String
-  courseId    String
-  amount      Float
-  currency    String   @default("ETB")
-  status      String   @default("PENDING") // PENDING, COMPLETED, FAILED
-  txRef       String   @unique 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  amount    Float
+  currency  String   @default("ETB")
+  status    String   @default("PENDING") // PENDING, COMPLETED, FAILED
+  txRef     String   @unique 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user        UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course      Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user   UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([courseId])
