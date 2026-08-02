@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, ChangeEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Trophy, Flame, Coins, BookOpen, CheckCircle, Loader2, ArrowRight, Edit3, X, Save } from "lucide-react";
+import { supabase } from "../../lib/supabase";
+import { Trophy, Flame, Coins, BookOpen, CheckCircle, Loader2, ArrowRight, Edit3, X, Save, Upload, Camera } from "lucide-react";
 
 interface UserProfileData {
   id: string;
@@ -33,7 +34,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Modal States
+  // Profile Edit Modal States
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
   const [editFullName, setEditFullName] = useState<string>("");
   const [editEmail, setEditEmail] = useState<string>("");
@@ -50,29 +51,38 @@ export default function ProfilePage() {
       setLoading(true);
       setError(null);
 
-      const userEmail = typeof window !== "undefined" ? localStorage.getItem("userEmail") : null;
-      const emailQuery = userEmail ? `?email=${encodeURIComponent(userEmail)}` : "";
+      // 1. Supabase Session በመጀመሪያ ይፈትሻል
+      const { data: { session } } = await supabase.auth.getSession();
+      let emailToFetch = session?.user?.email;
+
+      if (!emailToFetch && typeof window !== "undefined") {
+        emailToFetch = localStorage.getItem("userEmail") || undefined;
+      }
+
+      const emailQuery = emailToFetch ? `?email=${encodeURIComponent(emailToFetch)}` : "";
 
       const res = await fetch(`/api/user/profile${emailQuery}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
 
-      const responseText = await res.text();
-      if (!responseText) throw new Error("ከሰርቨር ምንም ምላሽ አልተገኘም");
-
-      const data = JSON.parse(responseText);
+      const data = await res.json();
       if (!res.ok) throw new Error(data.error || "መረጃውን መጫን አልተቻለም");
 
-      setProfile(data.profile ?? null);
+      const userProfile = data.profile || data.user;
+
+      setProfile(userProfile ?? null);
       setStats(data.stats ?? { totalCompletedLessons: 0, totalEnrolledCourses: 0 });
       setCourses(Array.isArray(data.enrolledCourses) ? data.enrolledCourses : []);
 
-      if (data.profile) {
-        setEditFullName(data.profile.fullName || "");
-        setEditEmail(data.profile.email || "");
-        setEditBio(data.profile.bio || "");
-        setEditAvatarUrl(data.profile.avatarUrl || "");
+      if (userProfile) {
+        setEditFullName(userProfile.fullName || userProfile.username || "");
+        setEditEmail(userProfile.email || "");
+        setEditBio(userProfile.bio || "");
+        setEditAvatarUrl(userProfile.avatarUrl || "");
+        if (typeof window !== "undefined") {
+          localStorage.setItem("userEmail", userProfile.email);
+        }
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "ያልታወቀ ስህተት ተፈጥሯል");
@@ -80,6 +90,25 @@ export default function ProfilePage() {
       setLoading(false);
     }
   }
+
+  // ከስልክ/ኮምፒውተር ፎቶ መርጦ ወደ Base64 የሚቀይር አሰራር
+  const handleImageFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("የምስሉ መጠን ከ 2MB ማነስ አለበት");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === "string") {
+        setEditAvatarUrl(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   async function handleUpdateProfile(e: React.FormEvent) {
     e.preventDefault();
@@ -117,19 +146,22 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[70vh] items-center justify-center bg-[#0B0F17]">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+      <div className="flex min-h-screen items-center justify-center bg-[#050b14] text-slate-200">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+          <p className="text-xs text-slate-400">ፕሮፋይል በመጫን ላይ...</p>
+        </div>
       </div>
     );
   }
 
   if (error || !profile) {
     return (
-      <div className="min-h-[70vh] bg-[#0B0F17] p-6 text-center text-rose-400 space-y-3 flex flex-col items-center justify-center">
-        <p className="font-semibold">{error || "የተማሪው መረጃ አልተገኘም"}</p>
+      <div className="min-h-screen bg-[#050b14] p-6 text-center text-rose-400 space-y-4 flex flex-col items-center justify-center">
+        <p className="font-semibold text-sm">{error || "የተማሪው መረጃ አልተገኘም"}</p>
         <button
           onClick={() => fetchProfileData()}
-          className="px-4 py-2 text-xs font-medium bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 rounded-xl hover:bg-indigo-600/30 transition"
+          className="px-5 py-2.5 text-xs font-bold bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 rounded-xl hover:bg-indigo-600/30 transition"
         >
           እንደገና ሞክር (Reload)
         </button>
@@ -140,23 +172,23 @@ export default function ProfilePage() {
   const userInitial = profile.fullName ? profile.fullName.charAt(0).toUpperCase() : "U";
 
   return (
-    <div className="min-h-screen bg-[#0B0F17] text-slate-100 p-4 sm:p-6 space-y-6 pb-24">
+    <div className="min-h-screen bg-[#050b14] text-slate-200 p-4 sm:p-6 space-y-6 pb-28">
       {/* 1. Profile Header Card */}
-      <div className="relative rounded-2xl bg-slate-900/80 border border-slate-800 p-6 backdrop-blur-xl shadow-xl flex flex-col sm:flex-row items-center gap-6">
+      <div className="relative rounded-3xl bg-slate-900/80 border border-white/10 p-6 backdrop-blur-xl shadow-2xl flex flex-col sm:flex-row items-center gap-6">
         
-        {/* Edit Button */}
+        {/* Profile Edit Button */}
         <button
           onClick={() => setIsEditOpen(true)}
-          className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 rounded-xl hover:bg-indigo-600/40 transition"
+          className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 rounded-xl hover:bg-indigo-600/40 transition cursor-pointer"
         >
           <Edit3 className="w-3.5 h-3.5" />
           <span>ፕሮፋይል አስተካክል</span>
         </button>
 
-        {/* Avatar Circle */}
-        <div className="relative h-24 w-24 rounded-full border-2 border-indigo-500/50 bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-indigo-500/20 overflow-hidden flex-shrink-0">
-          {profile.avatarUrl && profile.avatarUrl.startsWith("http") ? (
-            <Image src={profile.avatarUrl} alt="" fill className="object-cover" unoptimized />
+        {/* Avatar Display */}
+        <div className="relative h-24 w-24 rounded-2xl border-2 border-indigo-500/50 bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-3xl font-black text-white shadow-xl shadow-indigo-500/20 overflow-hidden shrink-0">
+          {profile.avatarUrl ? (
+            <Image src={profile.avatarUrl} alt="Avatar" fill className="object-cover" unoptimized />
           ) : (
             <span>{userInitial}</span>
           )}
@@ -164,76 +196,76 @@ export default function ProfilePage() {
 
         {/* User Details */}
         <div className="flex-1 text-center sm:text-left space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-white">{profile.fullName}</h1>
-          <p className="text-sm text-slate-400">{profile.email}</p>
+          <h1 className="text-2xl font-black text-white">{profile.fullName}</h1>
+          <p className="text-xs text-slate-400">{profile.email}</p>
           {profile.bio && (
-            <p className="mt-2 text-sm text-slate-300 bg-slate-800/50 p-2.5 rounded-lg border border-slate-700/50 max-w-md">
+            <p className="mt-2 text-xs text-slate-300 bg-slate-950/50 p-3 rounded-xl border border-white/5 max-w-md">
               {profile.bio}
             </p>
           )}
         </div>
 
-        {/* Badges / Stats Bar */}
-        <div className="flex gap-4 bg-slate-950/60 p-4 rounded-xl border border-slate-800/80">
+        {/* Stats Badges */}
+        <div className="flex gap-4 bg-slate-950/80 p-4 rounded-2xl border border-white/10">
           <div className="text-center">
-            <div className="flex items-center justify-center text-amber-400 font-bold gap-1">
-              <Trophy className="w-5 h-5" />
+            <div className="flex items-center justify-center text-amber-400 font-extrabold gap-1 text-sm">
+              <Trophy className="w-4 h-4" />
               <span>{profile.xpPoints ?? 0}</span>
             </div>
-            <p className="text-xs text-slate-400 mt-1">XP</p>
+            <p className="text-[10px] text-slate-400 mt-1 font-bold">XP</p>
           </div>
 
-          <div className="text-center border-x border-slate-800 px-4">
-            <div className="flex items-center justify-center text-orange-500 font-bold gap-1">
-              <Flame className="w-5 h-5" />
+          <div className="text-center border-x border-white/10 px-4">
+            <div className="flex items-center justify-center text-orange-500 font-extrabold gap-1 text-sm">
+              <Flame className="w-4 h-4" />
               <span>{profile.streakDays ?? 0}</span>
             </div>
-            <p className="text-xs text-slate-400 mt-1">ቀናት Streak</p>
+            <p className="text-[10px] text-slate-400 mt-1 font-bold">Streak</p>
           </div>
 
           <div className="text-center">
-            <div className="flex items-center justify-center text-yellow-500 font-bold gap-1">
-              <Coins className="w-5 h-5" />
+            <div className="flex items-center justify-center text-yellow-500 font-extrabold gap-1 text-sm">
+              <Coins className="w-4 h-4" />
               <span>{profile.coins ?? 0}</span>
             </div>
-            <p className="text-xs text-slate-400 mt-1">Coins</p>
+            <p className="text-[10px] text-slate-400 mt-1 font-bold">Coins</p>
           </div>
         </div>
       </div>
 
-      {/* 2. Quick Overview Stats */}
+      {/* 2. Stats Grid */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800 flex items-center gap-3">
-          <div className="p-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
-            <BookOpen className="w-6 h-6 text-indigo-400" />
+        <div className="bg-slate-900/60 p-4 rounded-2xl border border-white/10 flex items-center gap-3">
+          <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+            <BookOpen className="w-5 h-5 text-indigo-400" />
           </div>
           <div>
-            <p className="text-xs text-slate-400">የተመዘገቡባቸው ኮርሶች</p>
-            <p className="text-xl font-bold text-white">{stats?.totalEnrolledCourses || 0}</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase">የተመዘገቡባቸው ኮርሶች</p>
+            <p className="text-lg font-black text-white">{stats?.totalEnrolledCourses || 0}</p>
           </div>
         </div>
 
-        <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800 flex items-center gap-3">
-          <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-            <CheckCircle className="w-6 h-6 text-emerald-400" />
+        <div className="bg-slate-900/60 p-4 rounded-2xl border border-white/10 flex items-center gap-3">
+          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <CheckCircle className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
-            <p className="text-xs text-slate-400">ያለቁ ትምህርቶች</p>
-            <p className="text-xl font-bold text-white">{stats?.totalCompletedLessons || 0}</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase">ያለቁ ትምህርቶች</p>
+            <p className="text-lg font-black text-white">{stats?.totalCompletedLessons || 0}</p>
           </div>
         </div>
       </div>
 
-      {/* 3. Enrolled Courses Progress */}
+      {/* 3. Enrolled Courses */}
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-white">የእኔ ኮርሶች እና ሂደት (Progress)</h2>
+        <h2 className="text-sm font-black text-white uppercase tracking-wider">የእኔ ኮርሶች እና ሂደት (Progress)</h2>
 
         {courses.length === 0 ? (
-          <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800 text-center space-y-3">
-            <p className="text-sm text-slate-400">እስካሁን በምንም ኮርስ አልተመዘገቡም።</p>
+          <div className="bg-slate-900/50 p-8 rounded-2xl border border-white/10 text-center space-y-3">
+            <p className="text-xs text-slate-400">እስካሁን በምንም ኮርስ አልተመዘገቡም።</p>
             <Link
               href="/courses"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-400 hover:text-indigo-300"
+              className="inline-flex items-center gap-2 text-xs font-bold text-indigo-400 hover:text-indigo-300"
             >
               ኮርሶችን ይመልከቱ <ArrowRight className="w-4 h-4" />
             </Link>
@@ -241,33 +273,33 @@ export default function ProfilePage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {courses.map((course) => (
-              <div key={course.id} className="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-3">
+              <div key={course.id} className="bg-slate-900/80 p-4 rounded-2xl border border-white/10 space-y-3">
                 <div className="flex gap-3 items-center">
-                  <div className="relative h-12 w-12 rounded-lg overflow-hidden bg-slate-800 border border-slate-700 flex-shrink-0">
+                  <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-slate-800 border border-white/10 shrink-0">
                     {course.thumbnail ? (
                       <Image src={course.thumbnail} alt="" fill className="object-cover" unoptimized />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-slate-500">
-                        <BookOpen className="w-6 h-6" />
+                        <BookOpen className="w-5 h-5" />
                       </div>
                     )}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-white line-clamp-1">{course.title}</h3>
-                    <p className="text-xs text-slate-400">
-                      {course.completedLessons} ከ {course.totalLessons} ትምህርቶች ተጠናቀዋል
+                    <h3 className="font-bold text-sm text-white line-clamp-1">{course.title}</h3>
+                    <p className="text-[10px] text-slate-400">
+                      {course.completedLessons} ከ {course.totalLessons} ትምህርቶች
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="flex justify-between text-xs text-slate-400 font-medium">
+                  <div className="flex justify-between text-[10px] text-slate-400 font-bold">
                     <span>ሂደት</span>
-                    <span className="text-indigo-400 font-bold">{course.progressPercentage}%</span>
+                    <span className="text-indigo-400">{course.progressPercentage}%</span>
                   </div>
-                  <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-2 w-full bg-slate-950 rounded-full overflow-hidden border border-white/5">
                     <div
-                      className="h-full bg-indigo-500 rounded-full transition-all duration-300"
+                      className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300"
                       style={{ width: `${Math.min(100, Math.max(0, course.progressPercentage))}%` }}
                     />
                   </div>
@@ -278,61 +310,81 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* 4. EDIT PROFILE MODAL */}
+      {/* 4. EDIT PROFILE MODAL (WITH PHOTO UPLOAD) */}
       {isEditOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-4 shadow-2xl">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-white">ፕሮፋይል አስተካክል</h3>
-              <button
-                onClick={() => setIsEditOpen(false)}
-                className="text-slate-400 hover:text-white"
-              >
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div className="w-full max-w-md rounded-3xl bg-[#0c1322] border border-white/10 p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center border-b border-white/10 pb-3">
+              <h3 className="text-sm font-black text-white uppercase tracking-wider">ፕሮፋይል አስተካክል</h3>
+              <button onClick={() => setIsEditOpen(false)} className="text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleUpdateProfile} className="space-y-4">
+              
+              {/* Photo Upload Section */}
+              <div className="flex flex-col items-center gap-3 py-2">
+                <div className="relative h-20 w-20 rounded-2xl border-2 border-indigo-500/50 bg-slate-800 flex items-center justify-center overflow-hidden">
+                  {editAvatarUrl ? (
+                    <Image src={editAvatarUrl} alt="Preview" fill className="object-cover" unoptimized />
+                  ) : (
+                    <Camera className="w-8 h-8 text-slate-500" />
+                  )}
+                </div>
+
+                <label className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-bold cursor-pointer hover:bg-indigo-600/30 transition">
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>ፎቶ ምረጥ (Upload Photo)</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageFileChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">ሙሉ ስም</label>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">ሙሉ ስም</label>
                 <input
                   type="text"
                   value={editFullName}
                   onChange={(e) => setEditFullName(e.target.value)}
-                  className="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">ኢሜይል</label>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">ኢሜይል</label>
                 <input
                   type="email"
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
-                  className="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">የአቫታር ምስል ሊንክ (Avatar Image URL)</label>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">ወይም የፎቶ URL (Image URL)</label>
                 <input
                   type="url"
                   placeholder="https://..."
                   value={editAvatarUrl}
                   onChange={(e) => setEditAvatarUrl(e.target.value)}
-                  className="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">ስለ እኔ (Bio)</label>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">ስለ እኔ (Bio)</label>
                 <textarea
                   rows={3}
                   value={editBio}
                   onChange={(e) => setEditBio(e.target.value)}
-                  className="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 resize-none"
+                  className="w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 resize-none"
                 />
               </div>
 
@@ -340,14 +392,14 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setIsEditOpen(false)}
-                  className="flex-1 py-2 text-xs font-medium bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 transition"
+                  className="flex-1 py-2.5 text-xs font-bold bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 transition"
                 >
                   ሰርዝ
                 </button>
                 <button
                   type="submit"
                   disabled={isUpdating}
-                  className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 transition disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 transition disabled:opacity-50 cursor-pointer"
                 >
                   {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   <span>አስቀምጥ</span>
