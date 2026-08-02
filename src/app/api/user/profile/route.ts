@@ -103,7 +103,10 @@ function formatUserResponse(user: any) {
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const email = searchParams.get("email") || "user@example.com";
+    const email = searchParams.get("email");
+    if (!email) {
+      return NextResponse.json({ error: "ኢሜይል አልተገኘም" }, { status: 400 });
+    }
     const user = await getOrCreateUser(email);
     return formatUserResponse(user);
   } catch (error) {
@@ -112,11 +115,14 @@ export async function GET(req: Request) {
   }
 }
 
-// POST Handler (ዳሽቦርዱ ከ Supabase Session በኋላ የሚጠራው)
+// POST Handler
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const email = body.email || "user@example.com";
+    const email = body.email;
+    if (!email) {
+      return NextResponse.json({ error: "ኢሜይል አልተገኘም" }, { status: 400 });
+    }
     const user = await getOrCreateUser(email);
     return formatUserResponse(user);
   } catch (error) {
