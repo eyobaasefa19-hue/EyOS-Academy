@@ -1,14 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 
-// የተማሪውን መረጃ ከ Database ማምጫ ወይም ከሌለ መፍጠሪያ
-async function getOrCreateUser(email: string) {
+// የተማሪ መረጃ ማምጫ ወይም አዲስ መፍጠሪያ Utility
+async function fetchOrCreateUser(email: string) {
   let user = await prisma.userProfile.findUnique({
     where: { email },
     include: {
       enrollments: {
         include: {
-          course: { include: { lessons: { select: { id: true } } } },
+          course: {
+            include: { lessons: { select: { id: true } } },
+          },
         },
       },
       progress: true,
@@ -16,34 +18,43 @@ async function getOrCreateUser(email: string) {
   });
 
   if (!user) {
-    const defaultUsername = email.split("@")[0];
+    const defaultName = email.split("@")[0];
     user = await prisma.userProfile.create({
       data: {
         email,
-        username: defaultUsername,
-        fullName: defaultUsername,
+        username: defaultName,
+        fullName: defaultName,
         xpPoints: 100,
-        coins: 50,
+        coins: 100,
         streak: 1,
         currentLevel: 1,
       },
       include: {
         enrollments: {
           include: {
-            course: { include: { lessons: { select: { id: true } } } },
+            course: {
+              include: { lessons: { select: { id: true } } },
+            },
           },
         },
         progress: true,
       },
     });
   }
+
   return user;
 }
 
-function formatUserResponse(user: any) {
-  const completedProgressList = user.progress ? user.progress.filter((p: any) => p.isCompleted) : [];
-  const totalCompletedLessons = completedProgressList.length;
+function buildUserResponse(user: any) {
+  const completedProgress = user.progress ? user.progress.filter((p: any) => p.isCompleted) : [];
+  const totalCompletedLessons = completedProgress.length;
   const totalEnrolledCourses = user.enrollments ? user.enrollments.length : 0;
+
+  // Level & XP Progress Calculations
+  const currentXP = user.xpPoints ?? 0;
+  const currentLevel = Math.floor(currentXP / 1000) + 1;
+  const xpInCurrentLevel = currentXP % 1000;
+  const levelProgressPercent = Math.min(100, Math.round((xpInCurrentLevel / 1000) * 100));
 
   const enrolledCourses = (user.enrollments || []).map((enrollment: any) => {
     const course = enrollment.course;
@@ -74,12 +85,12 @@ function formatUserResponse(user: any) {
       fullName: user.fullName || user.username,
       avatarUrl: user.avatarUrl || null,
       bio: user.bio || null,
-      xpPoints: user.xpPoints ?? 0,
-      coins: user.coins ?? 0,
+      xpPoints: currentXP,
+      coins: user.coins ?? 100,
       streak: user.streak ?? 0,
       streakDays: user.streak ?? 0,
-      currentLevel: user.currentLevel ?? 1,
-      dailyGoalPercent: user.dailyGoalPercent ?? 0,
+      currentLevel: user.currentLevel || currentLevel,
+      levelProgressPercent,
     },
     profile: {
       id: user.id,
@@ -87,9 +98,11 @@ function formatUserResponse(user: any) {
       fullName: user.fullName || user.username,
       avatarUrl: user.avatarUrl || null,
       bio: user.bio || null,
-      xpPoints: user.xpPoints ?? 0,
-      coins: user.coins ?? 0,
+      xpPoints: currentXP,
+      coins: user.coins ?? 100,
       streakDays: user.streak ?? 0,
+      currentLevel: user.currentLevel || currentLevel,
+      levelProgressPercent,
     },
     stats: {
       totalCompletedLessons,
@@ -99,39 +112,43 @@ function formatUserResponse(user: any) {
   });
 }
 
-// GET Handler
+// GET API
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const email = searchParams.get("email");
+
     if (!email) {
       return NextResponse.json({ error: "ኢሜይል አልተገኘም" }, { status: 400 });
     }
-    const user = await getOrCreateUser(email);
-    return formatUserResponse(user);
+
+    const user = await fetchOrCreateUser(email);
+    return buildUserResponse(user);
   } catch (error) {
     console.error("Profile GET Error:", error);
     return NextResponse.json({ error: "የተማሪ መረጃ ማግኘት አልተቻለም" }, { status: 500 });
   }
 }
 
-// POST Handler
+// POST API
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const email = body.email;
+
     if (!email) {
       return NextResponse.json({ error: "ኢሜይል አልተገኘም" }, { status: 400 });
     }
-    const user = await getOrCreateUser(email);
-    return formatUserResponse(user);
+
+    const user = await fetchOrCreateUser(email);
+    return buildUserResponse(user);
   } catch (error) {
     console.error("Profile POST Error:", error);
     return NextResponse.json({ error: "የተማሪ መረጃ ማግኘት አልተቻለም" }, { status: 500 });
   }
 }
 
-// PUT Handler (ፕሮፋይል ማስተካከያ)
+// PUT API (የፕሮፋይል ማስተካከያ)
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
@@ -142,8 +159,10 @@ export async function PUT(req: Request) {
     }
 
     const updatePayload: Record<string, any> = {};
-    if (fullName !== undefined) updatePayload.fullName = fullName;
-    if (fullName !== undefined) updatePayload.username = fullName;
+    if (fullName !== undefined) {
+      updatePayload.fullName = fullName;
+      updatePayload.username = fullName;
+    }
     if (newEmail !== undefined) updatePayload.email = newEmail;
     if (bio !== undefined) updatePayload.bio = bio;
     if (avatarUrl !== undefined) updatePayload.avatarUrl = avatarUrl;
@@ -160,6 +179,6 @@ export async function PUT(req: Request) {
     });
   } catch (error) {
     console.error("Profile PUT Error:", error);
-    return NextResponse.json({ error: "ፕሮፋይሉን ማዘመን አልተቻለም" }, { status: 500 });
+    return NextResponse.json({ error: "ፕሮፋይሉን ማዘመን አልተቻለም፤ እባክዎ እንደገና ይሞክሩ" }, { status: 500 });
   }
 }
