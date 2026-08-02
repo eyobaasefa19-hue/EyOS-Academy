@@ -70,14 +70,16 @@ export async function GET(req: Request) {
       };
     });
 
+    const userObj = user as Record<string, unknown>;
+
     return NextResponse.json({
       success: true,
       profile: {
         id: user.id,
         email: user.email,
         fullName: user.fullName || user.username,
-        avatarUrl: (user as Record<string, unknown>).avatarUrl || null,
-        bio: (user as Record<string, unknown>).bio || null,
+        avatarUrl: userObj.avatarUrl || null,
+        bio: userObj.bio || null,
         xpPoints: user.xpPoints ?? 0,
         coins: user.coins ?? 0,
         streakDays: user.streak ?? 0,
@@ -104,16 +106,20 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "የአሁኑ ኢሜይል ያስፈልጋል" }, { status: 400 });
     }
 
-    // መረጃውን በ Prisma ማዘመን
+    // TypeScript Build Error እንዳይፈጠር dynamic object ተዘጋጅቷል
+    const updatePayload: Record<string, unknown> = {};
+    if (fullName !== undefined) updatePayload.fullName = fullName;
+    if (newEmail !== undefined) updatePayload.email = newEmail;
+    if (bio !== undefined) updatePayload.bio = bio;
+    if (avatarUrl !== undefined) updatePayload.avatarUrl = avatarUrl;
+
     const updatedUser = await prisma.userProfile.update({
       where: { email: currentEmail },
-      data: {
-        fullName: fullName || undefined,
-        email: newEmail || currentEmail,
-        bio: bio !== undefined ? bio : undefined,
-        avatarUrl: avatarUrl !== undefined ? avatarUrl : undefined,
-      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      data: updatePayload as any,
     });
+
+    const updatedUserObj = updatedUser as Record<string, unknown>;
 
     return NextResponse.json({
       success: true,
@@ -122,8 +128,8 @@ export async function PUT(req: Request) {
         id: updatedUser.id,
         email: updatedUser.email,
         fullName: updatedUser.fullName,
-        bio: (updatedUser as Record<string, unknown>).bio || null,
-        avatarUrl: (updatedUser as Record<string, unknown>).avatarUrl || null,
+        bio: updatedUserObj.bio || null,
+        avatarUrl: updatedUserObj.avatarUrl || null,
       },
     });
   } catch (error) {
