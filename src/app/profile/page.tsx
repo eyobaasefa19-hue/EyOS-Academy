@@ -3,8 +3,12 @@
 import { useEffect, useState, ChangeEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
-import { Trophy, Flame, Coins, BookOpen, CheckCircle, Loader2, ArrowRight, Edit3, X, Save, Upload, Camera } from "lucide-react";
+import { 
+  Trophy, Flame, Coins, BookOpen, CheckCircle, Loader2, ArrowRight, 
+  Edit3, X, Save, Upload, Camera, LogOut, Award, ShieldCheck, Sparkles 
+} from "lucide-react";
 
 interface UserProfileData {
   id: string;
@@ -28,6 +32,7 @@ interface EnrolledCourse {
 }
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [profile, setProfile] = useState<UserProfileData | null>(null);
   const [stats, setStats] = useState<{ totalCompletedLessons: number; totalEnrolledCourses: number } | null>(null);
   const [courses, setCourses] = useState<EnrolledCourse[]>([]);
@@ -51,7 +56,6 @@ export default function ProfilePage() {
       setLoading(true);
       setError(null);
 
-      // 1. Supabase Session በመጀመሪያ ይፈትሻል
       const { data: { session } } = await supabase.auth.getSession();
       let emailToFetch = session?.user?.email;
 
@@ -59,9 +63,12 @@ export default function ProfilePage() {
         emailToFetch = localStorage.getItem("userEmail") || undefined;
       }
 
-      const emailQuery = emailToFetch ? `?email=${encodeURIComponent(emailToFetch)}` : "";
+      if (!emailToFetch) {
+        router.push("/login");
+        return;
+      }
 
-      const res = await fetch(`/api/user/profile${emailQuery}`, {
+      const res = await fetch(`/api/user/profile?email=${encodeURIComponent(emailToFetch)}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -91,23 +98,54 @@ export default function ProfilePage() {
     }
   }
 
-  // ከስልክ/ኮምፒውተር ፎቶ መርጦ ወደ Base64 የሚቀይር አሰራር
-  const handleImageFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  // ፎቶውን ሳይበላሽ መጠን አነስ አድርጎ መቀየሪያ (Canvas Compression)
+  const compressAndConvertImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new window.Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 300;
+          const MAX_HEIGHT = 300;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", 0.7)); // 70% quality JPG Base64
+        };
+        img.onerror = (err) => reject(err);
+      };
+      reader.onerror = (err) => reject(err);
+    });
+  };
+
+  const handleImageFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      alert("የምስሉ መጠን ከ 2MB ማነስ አለበት");
-      return;
+    try {
+      const compressedBase64 = await compressAndConvertImage(file);
+      setEditAvatarUrl(compressedBase64);
+    } catch (err) {
+      alert("ምስሉን ማዘጋጀት አልተቻለም፣ እባክዎ ሌላ ምስል ይሞክሩ።");
     }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === "string") {
-        setEditAvatarUrl(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
   };
 
   async function handleUpdateProfile(e: React.FormEvent) {
@@ -144,6 +182,16 @@ export default function ProfilePage() {
     }
   }
 
+  const handleSignOut = async () => {
+    if (confirm("እርግጠኛ ነዎት መውጣት (Log Out) ይፈልጋሉ?")) {
+      await supabase.auth.signOut();
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("userEmail");
+      }
+      router.push("/login");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#050b14] text-slate-200">
@@ -161,7 +209,7 @@ export default function ProfilePage() {
         <p className="font-semibold text-sm">{error || "የተማሪው መረጃ አልተገኘም"}</p>
         <button
           onClick={() => fetchProfileData()}
-          className="px-5 py-2.5 text-xs font-bold bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 rounded-xl hover:bg-indigo-600/30 transition"
+          className="px-5 py-2.5 text-xs font-bold bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 rounded-xl hover:bg-indigo-600/30 transition cursor-pointer"
         >
           እንደገና ሞክር (Reload)
         </button>
@@ -173,7 +221,25 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#050b14] text-slate-200 p-4 sm:p-6 space-y-6 pb-28">
-      {/* 1. Profile Header Card */}
+      
+      {/* 1. Header Navigation Bar */}
+      <div className="flex justify-between items-center bg-slate-900/50 border border-white/10 p-3 rounded-2xl backdrop-blur-md">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-indigo-400" />
+          <span className="text-xs font-black text-white">EyOS Academy Profile</span>
+        </div>
+
+        {/* LOG OUT BUTTON */}
+        <button
+          onClick={handleSignOut}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl text-xs font-bold transition cursor-pointer"
+        >
+          <LogOut className="w-4 h-4" />
+          <span>ይውጡ (Log Out)</span>
+        </button>
+      </div>
+
+      {/* 2. Profile Header Card */}
       <div className="relative rounded-3xl bg-slate-900/80 border border-white/10 p-6 backdrop-blur-xl shadow-2xl flex flex-col sm:flex-row items-center gap-6">
         
         {/* Profile Edit Button */}
@@ -233,7 +299,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* 2. Stats Grid */}
+      {/* 3. Stats Grid */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-slate-900/60 p-4 rounded-2xl border border-white/10 flex items-center gap-3">
           <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
@@ -256,7 +322,32 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* 3. Enrolled Courses */}
+      {/* 4. SENIOR FEATURE: ACHIEVEMENTS & BADGES */}
+      <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-4 space-y-3">
+        <h3 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
+          <Award className="w-4 h-4 text-amber-400" />
+          የክብር ባጆችና ሽልማቶች (Achievements)
+        </h3>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-slate-950/60 border border-white/5 p-3 rounded-xl flex flex-col items-center text-center">
+            <ShieldCheck className="w-6 h-6 text-indigo-400 mb-1" />
+            <span className="text-[11px] font-bold text-slate-200">Level 1 Scholar</span>
+            <span className="text-[9px] text-slate-500">ተከፍቷል</span>
+          </div>
+          <div className="bg-slate-950/60 border border-white/5 p-3 rounded-xl flex flex-col items-center text-center opacity-70">
+            <Flame className="w-6 h-6 text-orange-400 mb-1" />
+            <span className="text-[11px] font-bold text-slate-200">Streak Master</span>
+            <span className="text-[9px] text-amber-400">{profile.streakDays}/7 Days</span>
+          </div>
+          <div className="bg-slate-950/60 border border-white/5 p-3 rounded-xl flex flex-col items-center text-center opacity-70">
+            <Trophy className="w-6 h-6 text-yellow-400 mb-1" />
+            <span className="text-[11px] font-bold text-slate-200">10K XP Club</span>
+            <span className="text-[9px] text-emerald-400">ተሳክቷል</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 5. Enrolled Courses */}
       <div className="space-y-4">
         <h2 className="text-sm font-black text-white uppercase tracking-wider">የእኔ ኮርሶች እና ሂደት (Progress)</h2>
 
@@ -310,7 +401,7 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* 4. EDIT PROFILE MODAL (WITH PHOTO UPLOAD) */}
+      {/* 6. EDIT PROFILE MODAL */}
       {isEditOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
           <div className="w-full max-w-md rounded-3xl bg-[#0c1322] border border-white/10 p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
@@ -323,7 +414,7 @@ export default function ProfilePage() {
 
             <form onSubmit={handleUpdateProfile} className="space-y-4">
               
-              {/* Photo Upload Section */}
+              {/* Photo Upload Section with Compression */}
               <div className="flex flex-col items-center gap-3 py-2">
                 <div className="relative h-20 w-20 rounded-2xl border-2 border-indigo-500/50 bg-slate-800 flex items-center justify-center overflow-hidden">
                   {editAvatarUrl ? (
@@ -335,7 +426,7 @@ export default function ProfilePage() {
 
                 <label className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-bold cursor-pointer hover:bg-indigo-600/30 transition">
                   <Upload className="w-3.5 h-3.5" />
-                  <span>ፎቶ ምረጥ (Upload Photo)</span>
+                  <span>ፎቶ ምረጥ (Auto Compressed)</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -372,7 +463,7 @@ export default function ProfilePage() {
                 <input
                   type="url"
                   placeholder="https://..."
-                  value={editAvatarUrl}
+                  value={editAvatarUrl.startsWith("data:") ? "" : editAvatarUrl}
                   onChange={(e) => setEditAvatarUrl(e.target.value)}
                   className="w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                 />
