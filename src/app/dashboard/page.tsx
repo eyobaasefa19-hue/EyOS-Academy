@@ -86,6 +86,7 @@ export default function ProDashboard() {
     };
     setCurrentDate(new Date().toLocaleDateString('en-US', options));
 
+    // Progress Fetching Simulation
     setInProgressCourses((prevCourses) =>
       prevCourses.map((course) => {
         const localData = localStorage.getItem(`progress_${course.id}`);
@@ -204,7 +205,7 @@ export default function ProDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050b14] text-slate-200 font-sans pb-28 pt-4 selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-[#050b14] text-slate-200 font-sans pb-24 pt-4 selection:bg-indigo-500/30 relative">
       
       {/* 1. TOP STATS BAR */}
       <header className="sticky top-0 z-40 bg-[#050b14]/90 backdrop-blur-2xl border-b border-white/10 px-4 py-3 mb-6">
@@ -233,45 +234,32 @@ export default function ProDashboard() {
               <Zap className="w-4 h-4 fill-indigo-400 text-indigo-400" />
               <span>{stats.xp} <span className="text-[10px] font-normal text-indigo-300 hidden sm:inline">XP</span></span>
             </div>
-            <div className="hidden sm:flex items-center gap-1.5 bg-yellow-500/10 border border-yellow-500/30 px-3 py-1.5 rounded-xl text-yellow-400 font-extrabold text-xs">
-              <Coins className="w-4 h-4 text-yellow-400" />
-              <span>{stats.coins}</span>
-            </div>
 
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-slate-300 focus:outline-none cursor-pointer active:scale-95"
+              className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-slate-300 focus:outline-none cursor-pointer active:scale-95 md:hidden"
             >
               {isMenuOpen ? <X className="w-5 h-5 text-rose-400" /> : <Menu className="w-5 h-5" />}
+            </button>
+
+            {/* Desktop Logout - Hidden on mobile */}
+            <button 
+              onClick={handleSignOut}
+              className="hidden md:flex items-center gap-2 bg-rose-500/10 border border-rose-500/30 px-3 py-1.5 rounded-xl text-rose-400 font-extrabold text-xs hover:bg-rose-500/20 transition-all"
+            >
+              <LogOut className="w-4 h-4" />
+              Exit
             </button>
           </div>
         </div>
 
-        {/* Dropdown Menu */}
+        {/* Mobile Dropdown Menu */}
         {isMenuOpen && (
-          <div className="absolute top-full right-4 left-4 sm:left-auto sm:w-80 bg-[#0c1322]/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl p-3 mt-2 z-50 animate-in slide-in-from-top-3 duration-200">
+          <div className="absolute top-full right-4 left-4 bg-[#0c1322]/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl p-3 mt-2 z-50 animate-in slide-in-from-top-3 duration-200 md:hidden">
             <div className="flex flex-col gap-1.5">
-              <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 font-bold text-sm">
-                <LayoutDashboard className="w-5 h-5 text-indigo-400" />
-                Dashboard
-              </Link>
-              <Link href="/courses" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-300 font-medium text-sm transition-colors">
-                <PlayCircle className="w-5 h-5 text-slate-400" />
-                My Courses
-              </Link>
-              <Link href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-300 font-medium text-sm transition-colors">
-                <User className="w-5 h-5 text-slate-400" />
-                Profile & Certs
-              </Link>
-              <div className="h-px w-full bg-white/10 my-1"></div>
-              <Link href="/admin" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-rose-500/10 text-rose-300 font-medium text-sm transition-colors">
-                <ShieldAlert className="w-5 h-5 text-rose-400" />
-                Admin Panel
-              </Link>
-
               <button 
                 onClick={handleSignOut}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-rose-500/20 text-rose-400 font-semibold text-sm transition-all w-full text-left mt-1 cursor-pointer"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-semibold text-sm transition-all w-full text-left cursor-pointer"
               >
                 <LogOut className="w-5 h-5" />
                 ይውጡ (Log Out)
@@ -282,7 +270,6 @@ export default function ProDashboard() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 space-y-10">
-
         {/* 2. WELCOME HERO BANNER */}
         <section className="bg-gradient-to-br from-[#0f172a] via-[#0b1326] to-[#080d1a] border border-white/10 rounded-3xl p-6 sm:p-9 shadow-2xl relative overflow-hidden backdrop-blur-xl">
           <div className="absolute -top-24 -right-24 w-80 h-80 bg-indigo-500/15 rounded-full blur-[90px] pointer-events-none" />
@@ -415,6 +402,29 @@ export default function ProDashboard() {
         </section>
 
       </main>
+
+      {/* 5. MOBILE BOTTOM NAVIGATION (As seen in 1000133227.jpg) */}
+      <nav className="fixed bottom-0 w-full md:hidden bg-[#0c1322]/95 backdrop-blur-2xl border-t border-white/10 z-50 px-2 py-3 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+        <div className="flex justify-around items-center max-w-md mx-auto">
+          <Link href="/dashboard" className="flex flex-col items-center gap-1.5 text-indigo-400">
+            <LayoutDashboard className="w-5 h-5" />
+            <span className="text-[10px] font-bold">Dashboard</span>
+          </Link>
+          <Link href="/courses" className="flex flex-col items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors">
+            <BookOpen className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Courses</span>
+          </Link>
+          <Link href="/profile" className="flex flex-col items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors">
+            <User className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Profile</span>
+          </Link>
+          <Link href="/admin" className="flex flex-col items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors">
+            <ShieldAlert className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Admin</span>
+          </Link>
+        </div>
+      </nav>
+
     </div>
   );
 }
