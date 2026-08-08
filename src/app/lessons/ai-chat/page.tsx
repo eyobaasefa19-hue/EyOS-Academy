@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
-import { supabase } from "../../../lib/supabase"; // መንገድህን (path) እንዳለ ተውኩት
+import { supabase } from "../../../lib/supabase"; 
 import { Send, Bot, User, ArrowLeft, Loader2 } from "lucide-react";
 
 export default function AIChatLesson() {
@@ -35,7 +35,6 @@ export default function AIChatLesson() {
     getUser();
   }, []);
 
-  // ሜሴጅ ሲጨመር ወይም ሲፃፍ ወደ ታች እንዲወርድ
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping]);
@@ -71,7 +70,6 @@ export default function AIChatLesson() {
       };
       setMessages((prev) => [...prev, aiMessage]);
 
-      // 🌟 የ XP መጨመሪያ ሎጂክ 🌟
       if (user) {
         const xpResponse = await fetch('/api/update-xp', {
           method: 'POST',
@@ -97,10 +95,9 @@ export default function AIChatLesson() {
   };
 
   return (
-    // 🌟 h-[100dvh] የሞባይል ኪቦርድን እና ብሮውዘርን ስክሪን ሳይዛባ እንዲያስተናግድ ይረዳል 🌟
-    <div className="h-[100dvh] bg-[#0B1120] flex flex-col font-sans relative text-white overflow-hidden">
+    // 🌟 ዋናው መፍትሄ እዚህ ጋር ነው፡ pb-[80px] ተጨምሯል ከስር ላለው ማውጫ ቦታ እንዲተው 🌟
+    <div className="h-[100dvh] pb-[80px] bg-[#0B1120] flex flex-col font-sans relative text-white overflow-hidden">
       
-      {/* 🌟 የ XP አኒሜሽን (z-index ከፍ ብሏል) 🌟 */}
       {showXpAlert && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-bold px-6 py-2.5 rounded-full animate-bounce shadow-[0_0_20px_rgba(245,158,11,0.4)] flex items-center gap-2 border border-amber-400/50">
           <span>+10 XP አግኝተዋል!</span>
@@ -126,7 +123,7 @@ export default function AIChatLesson() {
         </div>
       </header>
 
-      {/* የቻት መድረክ - flex-1 ቦታውን ሞልቶ እንዲይዝ ያደርገዋል */}
+      {/* የቻት መድረክ */}
       <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 max-w-3xl mx-auto w-full scroll-smooth">
         {messages.map((msg) => (
           <div 
@@ -140,8 +137,8 @@ export default function AIChatLesson() {
             )}
             <div className={`px-4 py-3 rounded-2xl max-w-[85%] sm:max-w-[75%] text-[15px] leading-relaxed shadow-sm ${
               msg.sender === 'user' 
-                ? 'bg-blue-600 text-white rounded-br-sm' // የተጠቃሚ ሜሴጅ
-                : 'bg-slate-800/60 border border-slate-700/50 text-slate-200 rounded-bl-sm backdrop-blur-sm' // የ AI ሜሴጅ
+                ? 'bg-blue-600 text-white rounded-br-sm' 
+                : 'bg-slate-800/60 border border-slate-700/50 text-slate-200 rounded-bl-sm backdrop-blur-sm'
             }`}>
               <ReactMarkdown 
                 className="space-y-3 break-words"
@@ -160,7 +157,6 @@ export default function AIChatLesson() {
           </div>
         ))}
         
-        {/* የ AI መፃፊያ (Typing Indicator) */}
         {isTyping && (
           <div className="flex gap-3 justify-start animate-in fade-in duration-300">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500/20 to-teal-500/10 flex items-center justify-center border border-emerald-500/30 shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
@@ -176,8 +172,8 @@ export default function AIChatLesson() {
         <div ref={messagesEndRef} className="h-2" />
       </main>
 
-      {/* 🌟 የፅሁፍ መፃፊያ ፎርም - Fixed መሆኑ ቀርቶ በ flex ስር ገብቷል 🌟 */}
-      <div className="w-full bg-slate-900/95 backdrop-blur-xl border-t border-slate-800/80 pb-[env(safe-area-inset-bottom)] shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.3)]">
+      {/* የፅሁፍ መፃፊያ ፎርም */}
+      <div className="w-full bg-slate-900/95 backdrop-blur-xl border-t border-slate-800/80 shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] z-10">
         <div className="p-3 md:p-4 max-w-3xl mx-auto">
           <form onSubmit={handleSendMessage} className="relative flex items-end gap-2 bg-slate-950/50 p-1.5 rounded-3xl border border-slate-800 focus-within:border-slate-600 focus-within:ring-2 focus-within:ring-slate-800/50 transition-all duration-300">
             <input 
