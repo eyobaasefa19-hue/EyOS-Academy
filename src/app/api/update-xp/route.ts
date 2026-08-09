@@ -1,35 +1,34 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-// የ Database ኮኔክሽን እንዳይጨናነቅ የሚጠብቅ ሎጂክ (Global Singleton)
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
-const prisma = globalForPrisma.prisma || new PrismaClient();
-
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
-}
+import { prisma } from '@/lib/prisma'; // ወይም የ Supabase client ማዋቀሪያህ
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { userId } = body;
+    const { userId, xp } = await req.json();
 
-    if (!userId) {
-      return NextResponse.json({ error: 'የተጠቃሚ መለያ (User ID) ያስፈልጋል' }, { status: 400 });
+    // የቀረበው መረጃ ትክክለኛ መሆኑን ማረጋገጫ (Validation)
+    if (!userId || typeof xp !== 'number') {
+      return NextResponse.json(
+        { error: 'UserId እና ትክክለኛ የ XP መጠን ያስፈልጋል' },
+        { status: 400 }
+      );
     }
 
-    // 10 XP ደህንነቱ በተጠበቀ መልኩ በ Server በኩል መጨመር
-    const updatedUser = await prisma.userProfile.update({
+    // በ ዴታቤዝ ውስጥ የነበረውን XP ላይ አዲሱን መጨመር (Increment)
+    const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: { 
-        xpPoints: { increment: 10 } 
+      data: {
+        xp: {
+          increment: xp,
+        },
       },
     });
 
-    return NextResponse.json({ success: true, newXp: updatedUser.xpPoints });
-    
+    return NextResponse.json({ success: true, user: updatedUser });
   } catch (error) {
-    console.error('XP Update Error:', error);
-    return NextResponse.json({ error: 'XP መጨመር አልተቻለም' }, { status: 500 });
+    console.error('Error updating XP:', error);
+    return NextResponse.json(
+      { error: 'XP ማስተካከል አልተቻለም' },
+      { status: 500 }
+    );
   }
 }
