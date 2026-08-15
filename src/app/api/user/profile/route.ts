@@ -1,5 +1,43 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+
+// የ Supabase Server Client ለማዘጋጀት
+async function getAuthenticatedUserEmail(req: Request) {
+  const cookieStore = cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch {
+            // The `setAll` method was called from a Server Component.
+          }
+        },
+      },
+    }
+  );
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user || !user.email) {
+    return null;
+  }
+
+  return user.email;
+}
 
 // የተማሪ መረጃ ማምጫ ወይም አዲስ መፍጠሪያ Utility
 async function fetchOrCreateUser(email: string) {
@@ -50,7 +88,6 @@ function buildUserResponse(user: any) {
   const totalCompletedLessons = completedProgress.length;
   const totalEnrolledCourses = user.enrollments ? user.enrollments.length : 0;
 
-  // Level & XP Progress Calculations
   const currentXP = user.xpPoints ?? 0;
   const currentLevel = Math.floor(currentXP / 1000) + 1;
   const xpInCurrentLevel = currentXP % 1000;
@@ -115,14 +152,13 @@ function buildUserResponse(user: any) {
 // GET API
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const email = searchParams.get("email");
+    const authenticatedEmail = await getAuthenticatedUserEmail(req);
 
-    if (!email) {
-      return NextResponse.json({ error: "ኢሜይል አልተገኘም" }, { status: 400 });
+    if (!authenticatedEmail) {
+      return NextResponse.json({ error: "እባክዎ መጀመሪያ ይግቡ (Unauthorized)" }, { status: 401 });
     }
 
-    const user = await fetchOrCreateUser(email);
+    const user = await fetchOrCreateUser(authenticatedEmail);
     return buildUserResponse(user);
   } catch (error) {
     console.error("Profile GET Error:", error);
@@ -133,14 +169,13 @@ export async function GET(req: Request) {
 // POST API
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const email = body.email;
+    const authenticatedEmail = await getAuthenticatedUserEmail(req);
 
-    if (!email) {
-      return NextResponse.json({ error: "ኢሜይል አልተገኘም" }, { status: 400 });
+    if (!authenticatedEmail) {
+      return NextResponse.json({ error: "እባክዎ መጀመሪያ ይግቡ (Unauthorized)" }, { status: 401 });
     }
 
-    const user = await fetchOrCreateUser(email);
+    const user = await fetchOrCreateUser(authenticatedEmail);
     return buildUserResponse(user);
   } catch (error) {
     console.error("Profile POST Error:", error);
@@ -151,24 +186,25 @@ export async function POST(req: Request) {
 // PUT API (የፕሮፋይል ማስተካከያ)
 export async function PUT(req: Request) {
   try {
-    const body = await req.json();
-    const { currentEmail, fullName, newEmail, bio, avatarUrl } = body;
+    const authenticatedEmail = await getAuthenticatedUserEmail(req);
 
-    if (!currentEmail) {
-      return NextResponse.json({ error: "የአሁኑ ኢሜይል ያስፈልጋል" }, { status: 400 });
+    if (!authenticatedEmail) {
+      return NextResponse.json({ error: "እባክዎ መጀመሪያ ይግቡ (Unauthorized)" }, { status: 401 });
     }
+
+    const body = await req.json();
+    const { fullName, bio, avatarUrl } = body;
 
     const updatePayload: Record<string, any> = {};
     if (fullName !== undefined) {
       updatePayload.fullName = fullName;
       updatePayload.username = fullName;
     }
-    if (newEmail !== undefined) updatePayload.email = newEmail;
     if (bio !== undefined) updatePayload.bio = bio;
     if (avatarUrl !== undefined) updatePayload.avatarUrl = avatarUrl;
 
     const updatedUser = await prisma.userProfile.update({
-      where: { email: currentEmail },
+      where: { email: authenticatedEmail },
       data: updatePayload,
     });
 
