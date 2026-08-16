@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "../../lib/supabase";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function Login() {
@@ -12,6 +13,14 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  
+  const router = useRouter();
+
+  // የ Supabase Browser Client (ቶከኑን በ Cookie ውስጥ ሴቭ እንዲያደርግልን)
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +35,7 @@ export default function Login() {
       });
 
       if (error) {
-        // የ Supabase ስህተቶችን ወደ አማርኛ መቀየር (User-friendly errors)
+        // የ Supabase ስህተቶችን ወደ አማርኛ መቀየር
         if (error.message.includes("Invalid login credentials")) {
           setErrorMsg("የተሳሳተ ኢሜይል ወይም የይለፍ ቃል አስገብተዋል!");
         } else {
@@ -35,9 +44,12 @@ export default function Login() {
         setLoading(false);
       } else {
         setSuccessMsg("በተሳካ ሁኔታ ገብተዋል! ወደ ዳሽቦርድ በመጓዝ ላይ...");
+        
+        // አዲሱን Cookie Server እንዲያነበው ሪፍሬሽ እናደርጋለን
+        router.refresh();
+        
         setTimeout(() => {
-          // window.location.href ሴሽኑን አድሶ በሙሉ ገጽ ወደ ዳሽቦርድ ያሸጋግራል
-          window.location.href = "/dashboard";
+          router.push("/dashboard");
         }, 1000);
       }
     } catch (err) {
