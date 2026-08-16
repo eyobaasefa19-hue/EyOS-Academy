@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 
@@ -13,8 +12,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-  
-  const router = useRouter();
 
   // የ Supabase Browser Client (ቶከኑን በ Cookie ውስጥ ሴቭ እንዲያደርግልን)
   const supabase = createBrowserClient(
@@ -45,12 +42,10 @@ export default function Login() {
       } else {
         setSuccessMsg("በተሳካ ሁኔታ ገብተዋል! ወደ ዳሽቦርድ በመጓዝ ላይ...");
         
-        // አዲሱን Cookie Server እንዲያነበው ሪፍሬሽ እናደርጋለን
-        router.refresh();
-        
+        // ራውተር ከመጠቀም ይልቅ አድሶ በሙሉ ገጽ እንልከዋለን (Cookie በትክክል እንዲነበብ)
         setTimeout(() => {
-          router.push("/dashboard");
-        }, 1000);
+          window.location.href = "/dashboard";
+        }, 800);
       }
     } catch (err) {
       setErrorMsg("ያልተጠበቀ ስህተት አጋጥሟል። እባክዎ እንደገና ይሞክሩ።");
