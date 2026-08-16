@@ -110,28 +110,26 @@ export default function ProDashboard() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (!session) {
-          router.push("/login");
-          return;
-        }
+        // ማስተካከያ: router.push('/login') አጥፍተነዋል ምክንያቱም middleware እየጠበቀው ስለሆነ።
+        if (session) {
+          const res = await fetch("/api/user/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: session.user.email }),
+          });
 
-        const res = await fetch("/api/user/profile", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: session.user.email }),
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data.user) {
-            setStats({
-              username: data.user.username || session.user.email?.split("@")[0] || "Scholar",
-              xp: data.user.xpPoints || 0,
-              coins: data.user.coins || 0,
-              streakDays: data.user.streak || 0,
-              currentLevel: data.user.currentLevel || 1,
-              dailyGoalPercent: data.user.dailyGoalPercent || 0,
-            });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.user) {
+              setStats({
+                username: data.user.username || session.user.email?.split("@")[0] || "Scholar",
+                xp: data.user.xpPoints || 0,
+                coins: data.user.coins || 0,
+                streakDays: data.user.streak || 0,
+                currentLevel: data.user.currentLevel || 1,
+                dailyGoalPercent: data.user.dailyGoalPercent || 0,
+              });
+            }
           }
         }
       } catch (err) {
@@ -142,11 +140,12 @@ export default function ProDashboard() {
     };
 
     checkAuthAndFetchProfile();
-  }, [router]);
+  }, []);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push("/login");
+    // ራውተር ከመጠቀም ይልቅ ፔጁን ሪፍሬሽ በማድረግ እናስወጣዋለን
+    window.location.href = "/login";
   };
 
   const CORE_HUB_MODULES: CoreModule[] = [
@@ -403,7 +402,7 @@ export default function ProDashboard() {
 
       </main>
 
-      {/* 5. MOBILE BOTTOM NAVIGATION (As seen in 1000133227.jpg) */}
+      {/* 5. MOBILE BOTTOM NAVIGATION */}
       <nav className="fixed bottom-0 w-full md:hidden bg-[#0c1322]/95 backdrop-blur-2xl border-t border-white/10 z-50 px-2 py-3 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
         <div className="flex justify-around items-center max-w-md mx-auto">
           <Link href="/dashboard" className="flex flex-col items-center gap-1.5 text-indigo-400">
